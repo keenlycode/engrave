@@ -101,7 +101,7 @@ class Pillari:
             proc = await asyncio.create_subprocess_shell(
                 f"npx parcel build {path} --dist-dir {self.dest_dir}")
             await proc.communicate()
-        elif re.match('.*.(jpg|png|svg)$', path.name):
+        elif re.match('.*.(jpg|png|svg|ttf|otf|woff)$', path.name):
             shutil.copy(path, self.dest_dir)
 
     async def _file_change_handler(self, change, path: Path):
