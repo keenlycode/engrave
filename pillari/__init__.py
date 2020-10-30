@@ -45,8 +45,8 @@ class Template:
     def _to_html(self, path: Path):
         path = path.relative_to(self.src_dir)
         html = self.get(str(path)).render()
-        self.dest_dir.mkdir(parents=True, exist_ok=True)
-        dest = self.dest_dir.joinpath(str(path))
+        dest = self.dest_dir.joinpath(str(path)).resolve()
+        dest.parent.mkdir(parents=True, exist_ok=True)
         dest = open(dest, 'w')
         dest.write(html)
 
@@ -102,7 +102,12 @@ class Pillari:
                 f"npx parcel build {path} --dist-dir {self.dest_dir}")
             await proc.communicate()
         elif re.match('.*.(jpg|png|svg|ttf|otf|woff)$', path.name):
-            shutil.copy(path, self.dest_dir)
+            # print(path)
+            dest = path.relative_to(self.src_dir).with_suffix(path.suffix)
+            dest = self.dest_dir.joinpath(dest)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(path, dest)
+            print(f"copy {path} -> {dest}")
 
     async def _file_change_handler(self, change, path: Path):
         if change == Change.deleted:
