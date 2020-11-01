@@ -66,6 +66,8 @@ class Pillari:
         for path in self.src_dir.glob('**/*'):
             if re.match('^_.*.html$', path.name):
                 continue
+            if re.match('.*.md$', path.name):
+                continue
             path = Path(path)
             await self._file_handler(path)
 
@@ -102,12 +104,15 @@ class Pillari:
                 f"npx parcel build {path} --dist-dir {self.dest_dir}")
             await proc.communicate()
         elif re.match('.*.(jpg|png|svg|ttf|otf|woff)$', path.name):
-            # print(path)
             dest = path.relative_to(self.src_dir).with_suffix(path.suffix)
             dest = self.dest_dir.joinpath(dest)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(path, dest)
             print(f"copy {path} -> {dest}")
+        elif re.match('.*.md$', path.name):
+            html_file_name = re.match('.*.html', path.name)[0]
+            for p in path.parent.glob(html_file_name):
+                self.template.build(p)
 
     async def _file_change_handler(self, change, path: Path):
         if change == Change.deleted:
