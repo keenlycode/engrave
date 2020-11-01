@@ -61,6 +61,7 @@ class Pillari:
         self.src_dir = src_dir
         self.dest_dir = dest_dir
         self.template = Template(src_dir=src_dir, dest_dir=dest_dir)
+        self.http_server = None
 
     async def build(self):
         for path in self.src_dir.glob('**/*'):
@@ -75,12 +76,14 @@ class Pillari:
         await self.build()
         await asyncio.gather(
             self._file_watch(),
-            self._http_server(addr, port))
+            self._run_http_server(addr, port))
 
-    async def _http_server(self, addr="0.0.0.0", port=8000):
-        proc = f"python -m http.server {port} --bind {addr} " +\
+    async def _run_http_server(self, addr="0.0.0.0", port=8000):
+        proc = await asyncio.create_subprocess_shell(
+            f"python -m http.server {port} --bind {addr} "
             f"--directory {self.dest_dir}"
-        proc = await asyncio.create_subprocess_shell(proc)
+        )
+        self.http_server = proc
         await proc.communicate()
 
     async def _file_watch(self):
@@ -155,7 +158,12 @@ async def main():
     if args.dev is False:
         await pillari.build()
     elif args.dev is True:
-        await pillari.dev()
+        try:
+            await pillari.dev()
+        except Exception:
+            if pillari.http_server:
+                pillari.http_server.terminate()
+            raise
 
 
 def run():
