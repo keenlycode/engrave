@@ -51,7 +51,7 @@ class Template:
         dest.write(html)
 
 
-class Pillari:
+class HTMLBuilder:
     def __init__(self, src_dir: Path, dest_dir: Path):
         src_dir = Path(src_dir)
         dest_dir = Path(dest_dir)
@@ -131,38 +131,65 @@ class Pillari:
             await self._file_handler(path)
 
 
+class CommandParser:
+    def __init__(self):
+        self.parser = argparse.ArgumentParser(
+            prog="pillari",
+            description='Static HTML Generator')
+
+        self.sub_parser = self.parser.add_subparsers(dest='cmd')
+        self.make_setup_parser()
+        self.make_build_parser()
+        self.make_dev_parser()
+
+    def make_build_parser(self):
+        parser = self.sub_parser.add_parser('build', help='Build html')
+        parser.add_argument('src', help='Source directory')
+        parser.add_argument('dest', help='Destination directory')
+
+    def make_dev_parser(self):
+        parser = self.sub_parser.add_parser(
+            'dev',
+            help='Build html and run http server, also watch for changes')
+        parser.add_argument(
+            '--listen',
+            nargs='?',
+            default='0.0.0.0:8000',
+            metavar='addr:port',
+            help=(
+                "set development server address and port, "
+                "default to 0.0.0.0:8000"
+            )
+        )
+        parser.add_argument('src', help='Source directory')
+        parser.add_argument('dest', help='Destination directory')
+
+    def make_setup_parser(self):
+        self.sub_parser.add_parser('setup')
+
+    def parse_args(self):
+        self.args = self.parser.parse_args()
+
+
 async def main():
-    proc = await asyncio.create_subprocess_shell(
-        'npx --version',
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
-    if stderr:
-        error = f"{stderr.decode('utf-8')}"
-        error += "Please install NodeJS -> https://nodejs.org"
-        raise Exception(error)
-
-    parser = argparse.ArgumentParser(
-        prog="pillari",
-        description='Static HTML Generator')
-    parser.add_argument(
-        '--dev', default=False, action="store_true",
-        help='Use develepment mode')
-    parser.add_argument(
-        'src', help='Source directory')
-    parser.add_argument(
-        'dest', help='Destination directory')
-    args = parser.parse_args()
-    pillari = Pillari(args.src, args.dest)
-
-    if args.dev is False:
-        await pillari.build()
-    elif args.dev is True:
+    command = CommandParser()
+    command.parse_args()
+    if command.args.cmd == 'setup':
+        proc = await asyncio.create_subprocess_shell(
+            'npm install parcel@next sass packet-ui')
+        await proc.communicate()
+    if command.args.cmd == 'build':
+        builder = HTMLBuilder(command.args.src, command.args.dest)
+        builder.build()
+    elif command.args.cmd == 'dev':
+        addr, port = command.args.listen.split(':')
+        port = int(port)
+        builder = HTMLBuilder(command.args.src, command.args.dest)
         try:
-            await pillari.dev()
+            await builder.dev(addr, port)
         except Exception:
-            if pillari.http_server:
-                pillari.http_server.terminate()
+            if builder.http_server:
+                builder.http_server.terminate()
             raise
 
 

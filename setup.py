@@ -1,7 +1,9 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+
+with open('README.md') as fh:
     long_description = fh.read()
+
 
 setuptools.setup(
     name="pillari",
@@ -11,7 +13,7 @@ setuptools.setup(
     description="Static website generator",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
+    url="https://github.com/nitipit/pillari",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
