@@ -1,4 +1,5 @@
-from pillari import run
+import asyncio
+from pillari import main
 
 
-run()
+asyncio.run(main())

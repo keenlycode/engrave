@@ -7,7 +7,7 @@ with open('README.md') as fh:
 
 setuptools.setup(
     name="pillari",
-    version="0.0.1",
+    version="0.0.2",
     author="Nitipit Nontasuwan",
     author_email="nitipit@gmail.com",
     description="Static website generator",
@@ -23,7 +23,7 @@ setuptools.setup(
     python_requires='>=3.6',
     entry_points={
         'console_scripts': [
-            'pillari=pillari:run'
+            'pillari=pillari:main'
         ]
     },
     install_requires=[

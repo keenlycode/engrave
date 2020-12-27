@@ -171,7 +171,7 @@ class CommandParser:
         self.args = self.parser.parse_args()
 
 
-async def main():
+async def run():
     command = CommandParser()
     command.parse_args()
     if command.args.cmd == 'setup':
@@ -180,7 +180,7 @@ async def main():
         await proc.communicate()
     if command.args.cmd == 'build':
         builder = HTMLBuilder(command.args.src, command.args.dest)
-        builder.build()
+        await builder.build()
     elif command.args.cmd == 'dev':
         addr, port = command.args.listen.split(':')
         port = int(port)
@@ -193,5 +193,5 @@ async def main():
             raise
 
 
-def run():
-    asyncio.run(main())
+def main():
+    asyncio.run(run())
