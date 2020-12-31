@@ -7,7 +7,7 @@ with open('README.md') as fh:
 
 setuptools.setup(
     name="pillari",
-    version="0.0.2",
+    version="1.0.0",
     author="Nitipit Nontasuwan",
     author_email="nitipit@gmail.com",
     description="Static website generator",
