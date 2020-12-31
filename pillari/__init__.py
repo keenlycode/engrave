@@ -112,7 +112,7 @@ class HTMLBuilder:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(path, dest)
             print(f"copy {path} -> {dest}")
-        elif re.match('.*.md$', path.name):
+        elif re.match('.*.html.md$', path.name):
             html_file_name = re.match('.*.html', path.name)[0]
             for p in path.parent.glob(html_file_name):
                 self.template.build(p)
