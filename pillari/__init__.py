@@ -72,13 +72,11 @@ class HTMLBuilder:
             path = Path(path)
             await self._file_handler(path)
 
-    async def dev(self, addr="0.0.0.0", port=8000):
+    async def dev(self):
         await self.build()
-        await asyncio.gather(
-            self._file_watch(),
-            self._run_http_server(addr, port))
+        await self._file_watch()
 
-    async def _run_http_server(self, addr="0.0.0.0", port=8000):
+    async def run_server(self, addr="0.0.0.0", port=8000):
         proc = await asyncio.create_subprocess_shell(
             f"python -m http.server {port} --bind {addr} "
             f"--directory {self.dest_dir}"
@@ -152,12 +150,13 @@ class CommandParser:
             'dev',
             help='Build html and run http server, also watch for changes')
         parser.add_argument(
-            '--listen',
+            '--server',
             nargs='?',
-            default='0.0.0.0:8000',
+            const='0.0.0.0:8000',
+            default=None,
             metavar='addr:port',
             help=(
-                "set development server address and port, "
+                "set development http server address and port, "
                 "default to 0.0.0.0:8000"
             )
         )
@@ -171,7 +170,7 @@ class CommandParser:
         self.args = self.parser.parse_args()
 
 
-async def run():
+async def main():
     command = CommandParser()
     command.parse_args()
     if command.args.cmd == 'setup':
@@ -182,16 +181,11 @@ async def run():
         builder = HTMLBuilder(command.args.src, command.args.dest)
         await builder.build()
     elif command.args.cmd == 'dev':
-        addr, port = command.args.listen.split(':')
-        port = int(port)
         builder = HTMLBuilder(command.args.src, command.args.dest)
-        try:
-            await builder.dev(addr, port)
-        except Exception:
-            if builder.http_server:
-                builder.http_server.terminate()
-            raise
-
-
-def main():
-    asyncio.run(run())
+        dev_task = asyncio.create_task(builder.dev())
+        if command.args.server:
+            addr, port = command.args.server.split(':')
+            port = int(port)
+            server_task = asyncio.create_task(builder.run_server(addr, port))
+            await server_task
+        await dev_task
