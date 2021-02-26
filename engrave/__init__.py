@@ -132,7 +132,7 @@ class HTMLBuilder:
 class CommandParser:
     def __init__(self):
         self.parser = argparse.ArgumentParser(
-            prog="pillari",
+            prog="engrave",
             description='Static HTML Generator')
 
         self.sub_parser = self.parser.add_subparsers(dest='cmd')

@@ -6,14 +6,14 @@ with open('README.md') as fh:
 
 
 setuptools.setup(
-    name="pillari",
-    version="1.1.0",
+    name="engrave",
+    version="1.0.0",
     author="Nitipit Nontasuwan",
     author_email="nitipit@gmail.com",
     description="Static website generator",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/nitipit/pillari",
+    url="https://github.com/nitipit/engrave",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -23,7 +23,7 @@ setuptools.setup(
     python_requires='>=3.6',
     entry_points={
         'console_scripts': [
-            'pillari=pillari:app'
+            'engrave=engrave:app'
         ]
     },
     install_requires=[
