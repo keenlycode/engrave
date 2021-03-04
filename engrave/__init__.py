@@ -189,6 +189,8 @@ async def main():
             server_task = asyncio.create_task(builder.run_server(addr, port))
             await server_task
         await dev_task
+    else:
+        print(command.parser.print_help())
 
 
 def app():
