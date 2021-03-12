@@ -101,8 +101,10 @@ class HTMLBuilder:
             await proc.communicate()
             print(f"sass {path.relative_to(self.src_dir)}")
         elif re.match('(?!_).*.(js)$', path.name):
+            dest_dir = path.relative_to(self.src_dir).parent
+            dest_dir = self.dest_dir.joinpath(dest_dir)
             proc = await asyncio.create_subprocess_shell(
-                f"npx parcel build {path} --dist-dir {self.dest_dir}")
+                f"npx parcel build {path} --dist-dir {dest_dir}")
             await proc.communicate()
         elif re.match('.*.(jpg|png|svg|ttf|otf|woff)$', path.name):
             dest = path.relative_to(self.src_dir).with_suffix(path.suffix)
