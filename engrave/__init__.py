@@ -106,16 +106,18 @@ class HTMLBuilder:
             proc = await asyncio.create_subprocess_shell(
                 f"npx parcel build {path} --dist-dir {dest_dir}")
             await proc.communicate()
-        elif re.match('.*.(jpg|png|svg|ttf|otf|woff)$', path.name):
-            dest = path.relative_to(self.src_dir).with_suffix(path.suffix)
-            dest = self.dest_dir.joinpath(dest)
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy(path, dest)
-            print(f"copy {path} -> {dest}")
         elif re.match('.*.html.md$', path.name):
             html_file_name = re.match('.*.html', path.name)[0]
             for p in path.parent.glob(html_file_name):
                 self.template.build(p)
+        elif path.is_dir():
+            return
+        else:
+            dest = path.relative_to(self.src_dir)
+            dest = self.dest_dir.joinpath(dest)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            print(f"copy {path} -> {dest}")
+            shutil.copy(path, dest)
 
     async def _file_change_handler(self, change, path: Path):
         if change == Change.deleted:
