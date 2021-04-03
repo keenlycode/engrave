@@ -37,7 +37,7 @@ class Template:
             self._to_html(path)
             print(f"template: {path.relative_to(self.src_dir)}")
         elif re.match('^_.*.html$', path.name):
-            print(f"template {path.relative_to(self.src_dir)}")
+            print(f"template: {path.relative_to(self.src_dir)}")
             for p in path.parent.glob('**/[!_]*.html'):
                 self._to_html(p)
                 print(f"template: {p.relative_to(self.src_dir)}")
@@ -65,10 +65,6 @@ class HTMLBuilder:
 
     async def build(self):
         for path in self.src_dir.glob('**/*'):
-            if re.match('^_.*.html$', path.name):
-                continue
-            if re.match('.*.md$', path.name):
-                continue
             path = Path(path)
             await self._file_handler(path)
 
@@ -91,8 +87,18 @@ class HTMLBuilder:
                 await self._file_change_handler(change, path)
 
     async def _file_handler(self, path: Path):
+        # Handle HTML files
         if re.match('.*.html$', path.name):
             self.template.build(path)
+        elif re.match('.*.html.md$', path.name):
+            html_file_name = re.match('.*.html', path.name)[0]
+            for p in path.parent.glob(html_file_name):
+                self.template.build(p)
+        elif re.match('^_.*.html$', path.name):
+            return
+        elif re.match('.*.md$', path.name):
+            return
+        # Handle SASS
         elif re.match('(?!_).*.(scss|sass)$', path.name):
             dest = path.relative_to(self.src_dir).with_suffix('.css')
             dest = self.dest_dir.joinpath(dest)
@@ -100,16 +106,15 @@ class HTMLBuilder:
                 f"npx sass {path} {dest}")
             await proc.communicate()
             print(f"sass {path.relative_to(self.src_dir)}")
-        elif re.match('(?!_).*.(js)$', path.name):
+        elif re.match('^_.*.(scss|sass)$', path.name):
+            return
+        # Handle Javascript
+        elif re.match('.*.js$', path.name):
             dest_dir = path.relative_to(self.src_dir).parent
             dest_dir = self.dest_dir.joinpath(dest_dir)
             proc = await asyncio.create_subprocess_shell(
                 f"npx parcel build {path} --dist-dir {dest_dir}")
             await proc.communicate()
-        elif re.match('.*.html.md$', path.name):
-            html_file_name = re.match('.*.html', path.name)[0]
-            for p in path.parent.glob(html_file_name):
-                self.template.build(p)
         elif path.is_dir():
             return
         else:
