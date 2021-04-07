@@ -30,28 +30,10 @@ class Template:
         template.globals.update(markdown=markdown)
         self.src_dir = src_dir
         self.dest_dir = dest_dir
-        self.get = template.get_template
-
-    def build(self, path: Path):
-        if re.match('(?!_).*.html$', path.name):
-            self._to_html(path)
-            print(f"template: {path.relative_to(self.src_dir)}")
-        elif re.match('^_.*.html$', path.name):
-            print(f"template: {path.relative_to(self.src_dir)}")
-            for p in path.parent.glob('**/[!_]*.html'):
-                self._to_html(p)
-                print(f"template: {p.relative_to(self.src_dir)}")
-
-    def _to_html(self, path: Path):
-        path = path.relative_to(self.src_dir)
-        html = self.get(str(path)).render()
-        dest = self.dest_dir.joinpath(str(path)).resolve()
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest = open(dest, 'w')
-        dest.write(html)
+        self.template = template.get_template
 
 
-class HTMLBuilder:
+class Engrave:
     def __init__(self, src_dir: Path, dest_dir: Path):
         src_dir = Path(src_dir)
         dest_dir = Path(dest_dir)
@@ -60,12 +42,13 @@ class HTMLBuilder:
 
         self.src_dir = src_dir
         self.dest_dir = dest_dir
-        self.template = Template(src_dir=src_dir, dest_dir=dest_dir)
-        self.http_server = None
+        self.template = Template(src_dir=src_dir, dest_dir=dest_dir).template
 
     async def build(self):
         for path in self.src_dir.glob('**/*'):
             path = Path(path)
+            if re.match('^_.*.html$', path.name):
+                continue
             await self._file_handler(path)
 
     async def dev(self):
@@ -77,8 +60,16 @@ class HTMLBuilder:
             f"python -m http.server {port} --bind {addr} "
             f"--directory {self.dest_dir}"
         )
-        self.http_server = proc
         await proc.communicate()
+
+    def _build_html(self, path: Path):
+        path = path.relative_to(self.src_dir)
+        html = self.template(str(path)).render()
+        dest = self.dest_dir.joinpath(str(path)).resolve()
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest = open(dest, 'w')
+        dest.write(html)
+
 
     async def _file_watch(self):
         async for changes in awatch(self.src_dir):
@@ -88,16 +79,20 @@ class HTMLBuilder:
 
     async def _file_handler(self, path: Path):
         # Handle HTML files
-        if re.match('.*.html$', path.name):
-            self.template.build(path)
+        if re.match('^_.*.html$', path.name):
+            print(f"template: {path.relative_to(self.src_dir)}")
+            for p in path.parent.glob('**/[!_]*.html'):
+                self._build_html(p)
+                print(f"template: {p.relative_to(self.src_dir)}")
+        elif re.match('.*.html$', path.name):
+            self._build_html(path)
+            print(f"template: {path.relative_to(self.src_dir)}")
         elif re.match('.*.html.md$', path.name):
             html_file_name = re.match('.*.html', path.name)[0]
             for p in path.parent.glob(html_file_name):
-                self.template.build(p)
-        elif re.match('^_.*.html$', path.name):
-            return
-        elif re.match('.*.md$', path.name):
-            return
+                self._build_html(p)
+                print(f"template: {path.relative_to(self.src_dir)}")
+
         # Handle SASS
         elif re.match('(?!_).*.(scss|sass)$', path.name):
             dest = path.relative_to(self.src_dir).with_suffix('.css')
@@ -106,8 +101,7 @@ class HTMLBuilder:
                 f"npx sass {path} {dest}")
             await proc.communicate()
             print(f"sass {path.relative_to(self.src_dir)}")
-        elif re.match('^_.*.(scss|sass)$', path.name):
-            return
+
         # Handle Javascript
         elif re.match('.*.js$', path.name):
             dest_dir = path.relative_to(self.src_dir).parent
@@ -117,6 +111,8 @@ class HTMLBuilder:
             await proc.communicate()
         elif path.is_dir():
             return
+
+        # Handle static files
         else:
             dest = path.relative_to(self.src_dir)
             dest = self.dest_dir.joinpath(dest)
@@ -187,10 +183,10 @@ async def main():
             'npm install parcel@next sass packet-ui')
         await proc.communicate()
     if command.args.cmd == 'build':
-        builder = HTMLBuilder(command.args.src, command.args.dest)
+        builder = Engrave(command.args.src, command.args.dest)
         await builder.build()
     elif command.args.cmd == 'dev':
-        builder = HTMLBuilder(command.args.src, command.args.dest)
+        builder = Engrave(command.args.src, command.args.dest)
         dev_task = asyncio.create_task(builder.dev())
         if command.args.server:
             addr, port = command.args.server.split(':')
