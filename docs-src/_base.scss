@@ -1,0 +1,23 @@
+@use '../node_modules/packet-ui/dist/normalize.css';
+@use '../node_modules/packet-ui/dist/packet-ui.css';
+
+@font-face {
+    font-family: 'packet-ui';
+    src: url('./_asset/fonts/Cantarell-Regular.ttf') format('woff2');
+}
+
+@font-face {
+    font-family: 'fira-sans';
+    src: url('./_asset/fonts/FiraSans-Regular.ttf') format('woff2');
+}
+
+body {
+    font-family: fira-sans;
+}
+
+.container {
+    max-width: 1000px;
+    min-width: 280px;
+    width: 90%;
+    margin: auto;
+}
