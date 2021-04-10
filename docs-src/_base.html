@@ -1,0 +1,32 @@
+<!doctype html>
+<html class="no-js" lang="">
+{% set _v = 1 %}
+<head>
+    <meta charset="utf-8">
+    {% block title %}
+    <title>Engrave static website</title>
+    {% endblock %}
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- <meta property="og:title" content="Engrave | Static website generator">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:image" content=""> -->
+
+    <!-- <link rel="manifest" href="site.webmanifest">
+    <link rel="apple-touch-icon" href="icon.png"> -->
+    <!-- Place favicon.ico in the root directory -->
+
+    <meta name="theme-color" content="#fafafa">
+
+    <link rel="stylesheet" href="{{to_root}}base.css?v={{_v}}">
+    <script defer type="module" src="{{to_root}}base.js?v={{_v}}"></script>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+{% block sidebar %}{% endblock %}
+{% block body %}{% endblock %}
+</body>
+</html>

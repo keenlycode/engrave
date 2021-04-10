@@ -138,7 +138,7 @@ class CommandParser:
     def __init__(self):
         self.parser = argparse.ArgumentParser(
             prog="engrave",
-            description='Static HTML Generator')
+            description='Static website generator')
 
         self.sub_parser = self.parser.add_subparsers(dest='cmd')
         self.make_setup_parser()
@@ -169,7 +169,10 @@ class CommandParser:
         parser.add_argument('dest', help='Destination directory')
 
     def make_setup_parser(self):
-        self.sub_parser.add_parser('setup')
+        self.sub_parser.add_parser(
+            'setup',
+            help='Install required libraries from npm: parcel, sass, packet-ui',
+        )
 
     def parse_args(self):
         self.args = self.parser.parse_args()
