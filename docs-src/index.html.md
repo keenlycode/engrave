@@ -8,6 +8,7 @@ $ pip install engrave
 
 ## Usage
 ```
+$ engrave -h
 usage: engrave [-h] {setup,build,dev} ...
 
 Static website generator
@@ -23,10 +24,14 @@ optional arguments:
 ```
 
 ## Example
-This documents is a good example about generating static website.
-Documents source code is at 
+This document is made by **Engrave** and it's a good example how engrave works.
+See document's source code at
+[](https://github.com/nitipit/engrave/tree/main/docs-src)
+
+To build this document, use command below
+
 ```bash
-# Install required libraries from npm.
-$ engrave setup
-$
+$ git clone https://github.com/nitipit/engrave.git
+$ cd engrave
+$ engrave dev docs-src docs --server
 ```
