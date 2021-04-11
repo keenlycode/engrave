@@ -153,7 +153,7 @@ class CommandParser:
     def make_dev_parser(self):
         parser = self.sub_parser.add_parser(
             'dev',
-            help='Build html and run http server, also watch for changes')
+            help='Build html and watch for changes')
         parser.add_argument(
             '--server',
             nargs='?',
