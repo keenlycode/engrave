@@ -5,6 +5,10 @@ Engrave is a tool to generate static website.
 - Style sheet (CSS) with SASS
 - HTML template with Jinja
 
+## Requirement
+
+[NodeJS](https://nodejs.org/en/) v14.16 or later
+
 ## Installation
 ```bash
 $ pip install engrave
@@ -34,5 +38,6 @@ To build this document and run development server, use command below
 ```bash
 $ git clone https://github.com/nitipit/engrave.git
 $ cd engrave
+$ npm install # Install Node Libraries
 $ engrave dev docs-src docs --server
 ```

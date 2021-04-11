@@ -95,12 +95,15 @@ class Engrave:
 
         # Handle SASS
         elif re.match('(?!_).*.(scss|sass)$', path.name):
+            print(path.name)
             dest = path.relative_to(self.src_dir).with_suffix('.css')
             dest = self.dest_dir.joinpath(dest)
             proc = await asyncio.create_subprocess_shell(
                 f"npx sass {path} {dest}")
             await proc.communicate()
             print(f"sass {path.relative_to(self.src_dir)}")
+        elif re.match('^_.*.(scss|sass)$', path.name):
+            return
 
         # Handle Javascript
         elif re.match('.*.js$', path.name):
