@@ -1,4 +1,4 @@
 import asyncio
-from engrave import main
+from __init__ import main
 
 asyncio.run(main())

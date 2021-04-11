@@ -171,7 +171,7 @@ class CommandParser:
     def make_setup_parser(self):
         self.sub_parser.add_parser(
             'setup',
-            help='Install required libraries from npm: parcel, sass, packet-ui',
+            help='Install required libraries from npm: parcel, sass',
         )
 
     def parse_args(self):
@@ -183,7 +183,7 @@ async def main():
     command.parse_args()
     if command.args.cmd == 'setup':
         proc = await asyncio.create_subprocess_shell(
-            'npm install parcel@next sass packet-ui')
+            'npm install parcel@next sass')
         await proc.communicate()
     if command.args.cmd == 'build':
         builder = Engrave(command.args.src, command.args.dest)

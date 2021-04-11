@@ -19,8 +19,7 @@ Static website generator
 
 positional arguments:
   {setup,build,dev}
-    setup            Install required libraries from npm: parcel, sass,
-                     packet-ui
+    setup            Install required libraries from npm: parcel, sass
     build            Build html
     dev              Build html and watch for changes
 ```
