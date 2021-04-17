@@ -87,7 +87,7 @@ class Engrave:
         elif re.match('.*.html$', path.name):
             self._build_html(path)
             print(f"template: {path.relative_to(self.src_dir)}")
-        elif re.match('.*.html.md$', path.name):
+        elif re.match('.*.html.*.md$', path.name):
             html_file_name = re.match('.*.html', path.name)[0]
             for p in path.parent.glob(html_file_name):
                 self._build_html(p)
