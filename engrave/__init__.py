@@ -50,6 +50,7 @@ class Engrave:
             if re.match('^_.*.html$', path.name):
                 continue
             await self._file_handler(path)
+        print("\n✔ Build finished\n")
 
     async def dev(self):
         await self.build()
@@ -72,6 +73,7 @@ class Engrave:
 
 
     async def _file_watch(self):
+        print('Watching files ...')
         async for changes in awatch(self.src_dir):
             for change, path in changes:
                 path = Path(path)
@@ -174,7 +176,7 @@ class CommandParser:
     def make_setup_parser(self):
         self.sub_parser.add_parser(
             'setup',
-            help='Install required libraries from npm: parcel, sass',
+            help='Install required libraries from npm',
         )
 
     def parse_args(self):
@@ -186,7 +188,7 @@ async def main():
     command.parse_args()
     if command.args.cmd == 'setup':
         proc = await asyncio.create_subprocess_shell(
-            'npm install parcel@next sass')
+            'npm install parcel@next sass packet-ui')
         await proc.communicate()
     if command.args.cmd == 'build':
         builder = Engrave(command.args.src, command.args.dest)

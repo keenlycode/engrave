@@ -1,57 +1,124 @@
 /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
+/* Document
+   ========================================================================== */
+/**
+ * 1. Correct the line height in all browsers.
+ * 2. Prevent adjustments of font size after orientation changes in iOS.
+ */
 html {
   line-height: 1.15;
+  /* 1 */
   -webkit-text-size-adjust: 100%;
+  /* 2 */
 }
 
+/* Sections
+   ========================================================================== */
+/**
+ * Remove the margin in all browsers.
+ */
 body {
   margin: 0;
 }
 
+/**
+ * Render the `main` element consistently in IE.
+ */
 main {
   display: block;
 }
 
+/**
+ * Correct the font size and margin on `h1` elements within `section` and
+ * `article` contexts in Chrome, Firefox, and Safari.
+ */
 h1 {
   font-size: 2em;
   margin: 0.67em 0;
 }
 
+/* Grouping content
+   ========================================================================== */
+/**
+ * 1. Add the correct box sizing in Firefox.
+ * 2. Show the overflow in Edge and IE.
+ */
 hr {
   box-sizing: content-box;
+  /* 1 */
   height: 0;
+  /* 1 */
   overflow: visible;
+  /* 2 */
 }
 
+/**
+ * 1. Correct the inheritance and scaling of font size in all browsers.
+ * 2. Correct the odd `em` font sizing in all browsers.
+ */
 pre {
   font-family: monospace, monospace;
+  /* 1 */
   font-size: 1em;
+  /* 2 */
 }
 
+/* Text-level semantics
+   ========================================================================== */
+/**
+ * Remove the gray background on active links in IE 10.
+ */
 a {
   background-color: transparent;
 }
 
+/**
+ * 1. Remove the bottom border in Chrome 57-
+ * 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.
+ */
 abbr[title] {
   border-bottom: none;
+  /* 1 */
   text-decoration: underline;
+  /* 2 */
   text-decoration: underline dotted;
+  /* 2 */
 }
 
-b, strong {
+/**
+ * Add the correct font weight in Chrome, Edge, and Safari.
+ */
+b,
+strong {
   font-weight: bolder;
 }
 
-code, kbd, samp {
+/**
+ * 1. Correct the inheritance and scaling of font size in all browsers.
+ * 2. Correct the odd `em` font sizing in all browsers.
+ */
+code,
+kbd,
+samp {
   font-family: monospace, monospace;
+  /* 1 */
   font-size: 1em;
+  /* 2 */
 }
 
+/**
+ * Add the correct font size in all browsers.
+ */
 small {
   font-size: 80%;
 }
 
-sub, sup {
+/**
+ * Prevent `sub` and `sup` elements from affecting the line height in
+ * all browsers.
+ */
+sub,
+sup {
   font-size: 75%;
   line-height: 0;
   position: relative;
@@ -66,95 +133,1078 @@ sup {
   top: -0.5em;
 }
 
+/* Embedded content
+   ========================================================================== */
+/**
+ * Remove the border on images inside links in IE 10.
+ */
 img {
   border-style: none;
 }
 
-button, input, optgroup, select, textarea {
+/* Forms
+   ========================================================================== */
+/**
+ * 1. Change the font styles in all browsers.
+ * 2. Remove the margin in Firefox and Safari.
+ */
+button,
+input,
+optgroup,
+select,
+textarea {
   font-family: inherit;
+  /* 1 */
   font-size: 100%;
+  /* 1 */
   line-height: 1.15;
+  /* 1 */
   margin: 0;
+  /* 2 */
 }
 
-button, input {
+/**
+ * Show the overflow in IE.
+ * 1. Show the overflow in Edge.
+ */
+button,
+input {
+  /* 1 */
   overflow: visible;
 }
 
-button, select {
+/**
+ * Remove the inheritance of text transform in Edge, Firefox, and IE.
+ * 1. Remove the inheritance of text transform in Firefox.
+ */
+button,
+select {
+  /* 1 */
   text-transform: none;
 }
 
-[type=button], [type=reset], [type=submit], button {
+/**
+ * Correct the inability to style clickable types in iOS and Safari.
+ */
+button,
+[type=button],
+[type=reset],
+[type=submit] {
   -webkit-appearance: button;
 }
 
-[type=button]::-moz-focus-inner, [type=reset]::-moz-focus-inner, [type=submit]::-moz-focus-inner, button::-moz-focus-inner {
+/**
+ * Remove the inner border and padding in Firefox.
+ */
+button::-moz-focus-inner,
+[type=button]::-moz-focus-inner,
+[type=reset]::-moz-focus-inner,
+[type=submit]::-moz-focus-inner {
   border-style: none;
   padding: 0;
 }
 
-[type=button]:-moz-focusring, [type=reset]:-moz-focusring, [type=submit]:-moz-focusring, button:-moz-focusring {
+/**
+ * Restore the focus styles unset by the previous rule.
+ */
+button:-moz-focusring,
+[type=button]:-moz-focusring,
+[type=reset]:-moz-focusring,
+[type=submit]:-moz-focusring {
   outline: 1px dotted ButtonText;
 }
 
+/**
+ * Correct the padding in Firefox.
+ */
 fieldset {
   padding: 0.35em 0.75em 0.625em;
 }
 
+/**
+ * 1. Correct the text wrapping in Edge and IE.
+ * 2. Correct the color inheritance from `fieldset` elements in IE.
+ * 3. Remove the padding so developers are not caught out when they zero out
+ *    `fieldset` elements in all browsers.
+ */
 legend {
   box-sizing: border-box;
+  /* 1 */
   color: inherit;
+  /* 2 */
   display: table;
+  /* 1 */
   max-width: 100%;
+  /* 1 */
   padding: 0;
+  /* 3 */
   white-space: normal;
+  /* 1 */
 }
 
+/**
+ * Add the correct vertical alignment in Chrome, Firefox, and Opera.
+ */
 progress {
   vertical-align: baseline;
 }
 
+/**
+ * Remove the default vertical scrollbar in IE 10+.
+ */
 textarea {
   overflow: auto;
 }
 
-[type=checkbox], [type=radio] {
+/**
+ * 1. Add the correct box sizing in IE 10.
+ * 2. Remove the padding in IE 10.
+ */
+[type=checkbox],
+[type=radio] {
   box-sizing: border-box;
+  /* 1 */
   padding: 0;
+  /* 2 */
 }
 
-[type=number]::-webkit-inner-spin-button, [type=number]::-webkit-outer-spin-button {
+/**
+ * Correct the cursor style of increment and decrement buttons in Chrome.
+ */
+[type=number]::-webkit-inner-spin-button,
+[type=number]::-webkit-outer-spin-button {
   height: auto;
 }
 
+/**
+ * 1. Correct the odd appearance in Chrome and Safari.
+ * 2. Correct the outline style in Safari.
+ */
 [type=search] {
   -webkit-appearance: textfield;
+  /* 1 */
   outline-offset: -2px;
+  /* 2 */
 }
 
+/**
+ * Remove the inner padding in Chrome and Safari on macOS.
+ */
 [type=search]::-webkit-search-decoration {
   -webkit-appearance: none;
 }
 
+/**
+ * 1. Correct the inability to style clickable types in iOS and Safari.
+ * 2. Change font properties to `inherit` in Safari.
+ */
 ::-webkit-file-upload-button {
   -webkit-appearance: button;
+  /* 1 */
   font: inherit;
+  /* 2 */
 }
 
+/* Interactive
+   ========================================================================== */
+/*
+ * Add the correct display in Edge, IE 10+, and Firefox.
+ */
 details {
   display: block;
 }
 
+/*
+ * Add the correct display in all browsers.
+ */
 summary {
   display: list-item;
 }
 
-[hidden], template {
+/* Misc
+   ========================================================================== */
+/**
+ * Add the correct display in IE 10+.
+ */
+template {
   display: none;
 }
 
-/*# sourceMappingURL=normalize.css.map */
+/**
+ * Add the correct display in IE 10.
+ */
+[hidden] {
+  display: none;
+}
+
+.red {
+  color: #f44336;
+}
+
+.bg-red {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.bg-int-red {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.bg-int-red:hover {
+  background-color: #ff695e;
+}
+
+.bg-int-red:active {
+  background-color: #de2719;
+}
+
+.pink {
+  color: #e91e63;
+}
+
+.bg-pink {
+  background-color: #e91e63;
+  color: #fff;
+}
+
+.bg-int-pink {
+  background-color: #e91e63;
+  color: #fff;
+}
+
+.bg-int-pink:hover {
+  background-color: #f74380;
+}
+
+.bg-int-pink:active {
+  background-color: #b71d51;
+}
+
+.purple {
+  color: #9c27b0;
+}
+
+.bg-purple {
+  background-color: #9c27b0;
+  color: #fff;
+}
+
+.bg-int-purple {
+  background-color: #9c27b0;
+  color: #fff;
+}
+
+.bg-int-purple:hover {
+  background-color: #c52bdf;
+}
+
+.bg-int-purple:active {
+  background-color: #71267e;
+}
+
+.deep-purple {
+  color: #673ab7;
+}
+
+.bg-deep-purple {
+  background-color: #673ab7;
+  color: #fff;
+}
+
+.bg-int-deep-purple {
+  background-color: #673ab7;
+  color: #fff;
+}
+
+.bg-int-deep-purple:hover {
+  background-color: #7f4fd5;
+}
+
+.bg-int-deep-purple:active {
+  background-color: #543787;
+}
+
+.indigo {
+  color: #3f51b5;
+}
+
+.bg-indigo {
+  background-color: #3f51b5;
+  color: #fff;
+}
+
+.bg-int-indigo {
+  background-color: #3f51b5;
+  color: #fff;
+}
+
+.bg-int-indigo:hover {
+  background-color: #5568d2;
+}
+
+.bg-int-indigo:active {
+  background-color: #3b4786;
+}
+
+.blue {
+  color: #2196f3;
+}
+
+.bg-blue {
+  background-color: #2196f3;
+  color: #000;
+}
+
+.bg-int-blue {
+  background-color: #2196f3;
+  color: #000;
+}
+
+.bg-int-blue:hover {
+  background-color: #48aeff;
+}
+
+.bg-int-blue:active {
+  background-color: #177bca;
+}
+
+.light-blue {
+  color: #03a9f4;
+}
+
+.bg-light-blue {
+  background-color: #03a9f4;
+  color: #000;
+}
+
+.bg-int-light-blue {
+  background-color: #03a9f4;
+  color: #000;
+}
+
+.bg-int-light-blue:hover {
+  background-color: #2bbdff;
+}
+
+.bg-int-light-blue:active {
+  background-color: #0c82b8;
+}
+
+.cyan {
+  color: #00bcd4;
+}
+
+.bg-cyan {
+  background-color: #00bcd4;
+  color: #000;
+}
+
+.bg-int-cyan {
+  background-color: #00bcd4;
+  color: #000;
+}
+
+.bg-int-cyan:hover {
+  background-color: #08e3ff;
+}
+
+.bg-int-cyan:active {
+  background-color: #088999;
+}
+
+.teal {
+  color: #009688;
+}
+
+.bg-teal {
+  background-color: #009688;
+  color: #fff;
+}
+
+.bg-int-teal {
+  background-color: #009688;
+  color: #fff;
+}
+
+.bg-int-teal:hover {
+  background-color: #00c9b6;
+}
+
+.bg-int-teal:active {
+  background-color: #055e56;
+}
+
+.green {
+  color: #4caf50;
+}
+
+.bg-green {
+  background-color: #4caf50;
+  color: #000;
+}
+
+.bg-int-green {
+  background-color: #4caf50;
+  color: #000;
+}
+
+.bg-int-green:hover {
+  background-color: #64ca68;
+}
+
+.bg-int-green:active {
+  background-color: #478149;
+}
+
+.light-green {
+  color: #8bc34a;
+}
+
+.bg-light-green {
+  background-color: #8bc34a;
+  color: #000;
+}
+
+.bg-int-light-green {
+  background-color: #8bc34a;
+  color: #000;
+}
+
+.bg-int-light-green:hover {
+  background-color: #a4d967;
+}
+
+.bg-int-light-green:active {
+  background-color: #709941;
+}
+
+.lime {
+  color: #cddc39;
+}
+
+.bg-lime {
+  background-color: #cddc39;
+  color: #000;
+}
+
+.bg-int-lime {
+  background-color: #cddc39;
+  color: #000;
+}
+
+.bg-int-lime:hover {
+  background-color: #dfed5b;
+}
+
+.bg-int-lime:active {
+  background-color: #a8b52d;
+}
+
+.yellow {
+  color: #ffeb3b;
+}
+
+.bg-yellow {
+  background-color: #ffeb3b;
+  color: #000;
+}
+
+.bg-int-yellow {
+  background-color: #ffeb3b;
+  color: #000;
+}
+
+.bg-int-yellow:hover {
+  background-color: #fff06e;
+}
+
+.bg-int-yellow:active {
+  background-color: #f3dc14;
+}
+
+.amber {
+  color: #ffc107;
+}
+
+.bg-amber {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.bg-int-amber {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.bg-int-amber:hover {
+  background-color: #ffce3a;
+}
+
+.bg-int-amber:active {
+  background-color: #c8990b;
+}
+
+.orange {
+  color: #ff9800;
+}
+
+.bg-orange {
+  background-color: #ff9800;
+  color: #000;
+}
+
+.bg-int-orange {
+  background-color: #ff9800;
+  color: #000;
+}
+
+.bg-int-orange:hover {
+  background-color: #ffad33;
+}
+
+.bg-int-orange:active {
+  background-color: #c2780a;
+}
+
+.deep-orange {
+  color: #ff5722;
+}
+
+.bg-deep-orange {
+  background-color: #ff5722;
+  color: #000;
+}
+
+.bg-int-deep-orange {
+  background-color: #ff5722;
+  color: #000;
+}
+
+.bg-int-deep-orange:hover {
+  background-color: #ff7e55;
+}
+
+.bg-int-deep-orange:active {
+  background-color: #e23f0c;
+}
+
+.brown {
+  color: #795548;
+}
+
+.bg-brown {
+  background-color: #795548;
+  color: #fff;
+}
+
+.bg-int-brown {
+  background-color: #795548;
+  color: #fff;
+}
+
+.bg-int-brown:hover {
+  background-color: #a5664f;
+}
+
+.bg-int-brown:active {
+  background-color: #52423c;
+}
+
+.grey {
+  color: #9e9e9e;
+}
+
+.bg-grey {
+  background-color: #9e9e9e;
+  color: #000;
+}
+
+.bg-int-grey {
+  background-color: #9e9e9e;
+  color: #000;
+}
+
+.bg-int-grey:hover {
+  background-color: #bfb0b0;
+}
+
+.bg-int-grey:active {
+  background-color: #858585;
+}
+
+.blue-grey {
+  color: #607d8b;
+}
+
+.bg-blue-grey {
+  background-color: #607d8b;
+  color: #fff;
+}
+
+.bg-int-blue-grey {
+  background-color: #607d8b;
+  color: #fff;
+}
+
+.bg-int-blue-grey:hover {
+  background-color: #6f9aaf;
+}
+
+.bg-int-blue-grey:active {
+  background-color: #545f64;
+}
+
+.blue-gray {
+  color: #607d8b;
+}
+
+.bg-blue-gray {
+  background-color: #607d8b;
+  color: #fff;
+}
+
+.bg-int-blue-gray {
+  background-color: #607d8b;
+  color: #fff;
+}
+
+.bg-int-blue-gray:hover {
+  background-color: #6f9aaf;
+}
+
+.bg-int-blue-gray:active {
+  background-color: #545f64;
+}
+
+.white {
+  color: #fff;
+}
+
+.bg-white {
+  background-color: #fff;
+  color: #000;
+}
+
+.bg-int-white {
+  background-color: #fff;
+  color: #000;
+}
+
+.bg-int-white:hover {
+  background-color: #fff;
+}
+
+.bg-int-white:active {
+  background-color: #e6e6e6;
+}
+
+.black {
+  color: #000;
+}
+
+.bg-black {
+  background-color: #000;
+  color: #fff;
+}
+
+.bg-int-black {
+  background-color: #000;
+  color: #fff;
+}
+
+.bg-int-black:hover {
+  background-color: #1c1717;
+}
+
+.bg-int-black:active {
+  background-color: #000;
+}
+
+.color-primary, .color-p {
+  color: #ffc107;
+}
+
+.color-primary.l1, .color-p.l1 {
+  color: #ffce3a;
+}
+
+.color-primary.d1, .color-p.d1 {
+  color: #d39e00;
+}
+
+.color-primary.l2, .color-p.l2 {
+  color: #ffdb6d;
+}
+
+.color-primary.d2, .color-p.d2 {
+  color: #a07800;
+}
+
+.color-primary.l3, .color-p.l3 {
+  color: #ffe7a0;
+}
+
+.color-primary.d3, .color-p.d3 {
+  color: #6d5200;
+}
+
+.color-primary.l4, .color-p.l4 {
+  color: #fff4d3;
+}
+
+.color-primary.d4, .color-p.d4 {
+  color: #3a2c00;
+}
+
+.bg-primary, .bg-p {
+  color: #ffc107;
+}
+
+.bg-primary.l1, .bg-p.l1 {
+  background-color: #ffce3a;
+  color: #000;
+}
+
+.bg-primary.d1, .bg-p.d1 {
+  background-color: #ffce3a;
+  color: #000;
+}
+
+.bg-primary.l2, .bg-p.l2 {
+  background-color: #ffdb6d;
+  color: #000;
+}
+
+.bg-primary.d2, .bg-p.d2 {
+  background-color: #ffdb6d;
+  color: #000;
+}
+
+.bg-primary.l3, .bg-p.l3 {
+  background-color: #ffe7a0;
+  color: #000;
+}
+
+.bg-primary.d3, .bg-p.d3 {
+  background-color: #ffe7a0;
+  color: #000;
+}
+
+.bg-primary.l4, .bg-p.l4 {
+  background-color: #fff4d3;
+  color: #000;
+}
+
+.bg-primary.d4, .bg-p.d4 {
+  background-color: #fff4d3;
+  color: #000;
+}
+
+.color-primary {
+  color: #ffc107;
+}
+
+.bg-primary {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.bg-int-primary {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.bg-int-primary:hover {
+  background-color: #ffce3a;
+}
+
+.bg-int-primary:active {
+  background-color: #c8990b;
+}
+
+.color-primary-1 {
+  color: #ff4507;
+}
+
+.bg-primary-1 {
+  background-color: #ff4507;
+  color: #fff;
+}
+
+.bg-int-primary-1 {
+  background-color: #ff4507;
+  color: #fff;
+}
+
+.bg-int-primary-1:hover {
+  background-color: #ff6b3a;
+}
+
+.bg-int-primary-1:active {
+  background-color: #c83a0b;
+}
+
+.color-primary-2 {
+  color: #c1ff07;
+}
+
+.bg-primary-2 {
+  background-color: #c1ff07;
+  color: #000;
+}
+
+.bg-int-primary-2 {
+  background-color: #c1ff07;
+  color: #000;
+}
+
+.bg-int-primary-2:hover {
+  background-color: #ceff3a;
+}
+
+.bg-int-primary-2:active {
+  background-color: #99c80b;
+}
+
+.color-complement {
+  color: #0745ff;
+}
+
+.bg-complement {
+  background-color: #0745ff;
+  color: #fff;
+}
+
+.bg-int-complement {
+  background-color: #0745ff;
+  color: #fff;
+}
+
+.bg-int-complement:hover {
+  background-color: #3a6bff;
+}
+
+.bg-int-complement:active {
+  background-color: #0b3ac8;
+}
+
+.color-complement-1 {
+  color: #07c1ff;
+}
+
+.bg-complement-1 {
+  background-color: #07c1ff;
+  color: #000;
+}
+
+.bg-int-complement-1 {
+  background-color: #07c1ff;
+  color: #000;
+}
+
+.bg-int-complement-1:hover {
+  background-color: #3aceff;
+}
+
+.bg-int-complement-1:active {
+  background-color: #0b99c8;
+}
+
+.color-complement-2 {
+  color: #4507ff;
+}
+
+.bg-complement-2 {
+  background-color: #4507ff;
+  color: #fff;
+}
+
+.bg-int-complement-2 {
+  background-color: #4507ff;
+  color: #fff;
+}
+
+.bg-int-complement-2:hover {
+  background-color: #6b3aff;
+}
+
+.bg-int-complement-2:active {
+  background-color: #3a0bc8;
+}
+
+.color-p {
+  color: #ffc107;
+}
+
+.bg-p {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.bg-int-p {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.bg-int-p:hover {
+  background-color: #ffce3a;
+}
+
+.bg-int-p:active {
+  background-color: #c8990b;
+}
+
+.color-p1 {
+  color: #ff4507;
+}
+
+.bg-p1 {
+  background-color: #ff4507;
+  color: #fff;
+}
+
+.bg-int-p1 {
+  background-color: #ff4507;
+  color: #fff;
+}
+
+.bg-int-p1:hover {
+  background-color: #ff6b3a;
+}
+
+.bg-int-p1:active {
+  background-color: #c83a0b;
+}
+
+.color-p2 {
+  color: #c1ff07;
+}
+
+.bg-p2 {
+  background-color: #c1ff07;
+  color: #000;
+}
+
+.bg-int-p2 {
+  background-color: #c1ff07;
+  color: #000;
+}
+
+.bg-int-p2:hover {
+  background-color: #ceff3a;
+}
+
+.bg-int-p2:active {
+  background-color: #99c80b;
+}
+
+.color-c {
+  color: #0745ff;
+}
+
+.bg-c {
+  background-color: #0745ff;
+  color: #fff;
+}
+
+.bg-int-c {
+  background-color: #0745ff;
+  color: #fff;
+}
+
+.bg-int-c:hover {
+  background-color: #3a6bff;
+}
+
+.bg-int-c:active {
+  background-color: #0b3ac8;
+}
+
+.color-c1 {
+  color: #07c1ff;
+}
+
+.bg-c1 {
+  background-color: #07c1ff;
+  color: #000;
+}
+
+.bg-int-c1 {
+  background-color: #07c1ff;
+  color: #000;
+}
+
+.bg-int-c1:hover {
+  background-color: #3aceff;
+}
+
+.bg-int-c1:active {
+  background-color: #0b99c8;
+}
+
+.color-c2 {
+  color: #4507ff;
+}
+
+.bg-c2 {
+  background-color: #4507ff;
+  color: #fff;
+}
+
+.bg-int-c2 {
+  background-color: #4507ff;
+  color: #fff;
+}
+
+.bg-int-c2:hover {
+  background-color: #6b3aff;
+}
+
+.bg-int-c2:active {
+  background-color: #3a0bc8;
+}
+
+.border-top-radius {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.border-right-radius {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.border-bottom-radius {
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.border-left-radius {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.lift-1 {
+  box-shadow: 0 1px 3px 0 #404040;
+}
+
+.lift-2 {
+  box-shadow: 0 2px 5px 0 #404040;
+}
+
+.lift-3 {
+  box-shadow: 0 4px 9px 0 #404040;
+}
+
+.lift-4 {
+  box-shadow: 0 8px 17px 0 #404040;
+}
+
+.lift-5 {
+  box-shadow: 0 16px 33px 0 #404040;
+}
+
 html {
   font-size: 16px;
   line-height: 1.7;
@@ -179,23 +1229,27 @@ h2 {
 }
 
 h3 {
-  font-size: 1.25rem;
+  font-size: 1.17rem;
 }
 
 h4 {
-  font-size: 1.1rem;
-}
-
-h5 {
   font-size: 1rem;
 }
 
+h5 {
+  font-size: 0.83rem;
+}
+
 h6 {
-  font-size: 0.9rem;
+  font-size: 0.67rem;
 }
 
 p {
   font-size: 1rem;
+}
+
+p + ol, p + ul {
+  margin-top: 0;
 }
 
 blockquote {
@@ -205,7 +1259,7 @@ blockquote {
   box-sizing: border-box;
   padding-left: 1rem;
   padding-right: 1rem;
-  border-left: 4px solid orange;
+  border-left: 4px solid #ffc107;
 }
 
 code {
@@ -246,10 +1300,9 @@ hr {
   }
 }
 pkt-badge, .pkt-badge {
-  font-family: packet-ui;
-  font-size: 1em;
   background-color: #ffc107;
   color: #000;
+  font-family: Cantarell;
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -390,22 +1443,22 @@ pkt-box-arrow-left:before, .pkt-box-arrow-left:before {
 }
 
 button, .button, input[type=button] {
-  font-family: packet-ui;
-  font-size: 1em;
   box-shadow: 0 1px 3px 0 #404040;
   background-color: #ffc107;
   color: #000;
+  border-radius: 4px;
+  font-family: Cantarell;
+  border: 0;
+  font-size: 1em;
+  font-weight: bold;
+  text-decoration: none;
   outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 4px;
+  height: 2em;
   padding-left: 0.4em;
   padding-right: 0.4em;
-  height: 2em;
-  font-weight: bold;
-  text-decoration: none;
   cursor: pointer;
   transition: 0.2s;
   box-sizing: border-box;
@@ -437,22 +1490,22 @@ button a, .button a, input[type=button] a {
 }
 
 pkt-button-pin, .pkt-button-pin {
-  font-family: packet-ui;
-  font-size: 1em;
   box-shadow: 0 1px 3px 0 #404040;
   background-color: #ffc107;
   color: #000;
+  border-radius: 4px;
+  font-family: Cantarell;
+  border: 0;
+  font-size: 1em;
+  font-weight: bold;
+  text-decoration: none;
   outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 4px;
+  height: 2em;
   padding-left: 0.4em;
   padding-right: 0.4em;
-  height: 2em;
-  font-weight: bold;
-  text-decoration: none;
   cursor: pointer;
   transition: 0.2s;
   box-sizing: border-box;
@@ -501,22 +1554,22 @@ pkt-button-pin a, .pkt-button-pin a {
 }
 
 pkt-button-square, .pkt-button-square {
-  font-family: packet-ui;
-  font-size: 1em;
   box-shadow: 0 1px 3px 0 #404040;
   background-color: #ffc107;
   color: #000;
+  border-radius: 4px;
+  font-family: Cantarell;
+  border: 0;
+  font-size: 1em;
+  font-weight: bold;
+  text-decoration: none;
   outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 4px;
+  height: 2em;
   padding-left: 0.4em;
   padding-right: 0.4em;
-  height: 2em;
-  font-weight: bold;
-  text-decoration: none;
   cursor: pointer;
   transition: 0.2s;
   box-sizing: border-box;
@@ -647,7 +1700,7 @@ pkt-card > pkt-button-group > button:last-of-type, pkt-card > pkt-button-group >
 }
 
 pkt-checkbox {
-  font-family: packet-ui;
+  font-family: Cantarell;
   font-size: 1em;
   position: relative;
   width: 1em;
@@ -706,7 +1759,7 @@ pkt-checkbox span:after {
 }
 
 input {
-  font-family: packet-ui;
+  font-family: Cantarell;
   font-size: 1em;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -719,7 +1772,7 @@ input:focus {
 }
 
 input[type=text], input[type=password], input[type=email] {
-  font-family: packet-ui;
+  font-family: Cantarell;
   font-size: 1em;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -799,6 +1852,7 @@ pkt-input-number input[type=number]::-webkit-inner-spin-button {
 
 pkt-input-number pkt-button-group, pkt-input-number .pkt-button-group {
   width: 4em;
+  user-select: none;
 }
 
 pkt-input-number pkt-button-group pkt-button-square, pkt-input-number pkt-button-group .pkt-button-square, pkt-input-number .pkt-button-group pkt-button-square, pkt-input-number .pkt-button-group .pkt-button-square {
@@ -897,22 +1951,22 @@ pkt-input-radio-btn input[type=radio], .pkt-input-radio-btn input[type=radio] {
 }
 
 pkt-input-radio-btn button, .pkt-input-radio-btn button {
-  font-family: packet-ui;
-  font-size: 1em;
   box-shadow: 0 1px 3px 0 #404040;
   background-color: #e6e6e6;
   color: #000;
+  border-radius: 4px;
+  font-family: Cantarell;
+  border: 0;
+  font-size: 1em;
+  font-weight: bold;
+  text-decoration: none;
   outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 4px;
+  height: 2em;
   padding-left: 0.4em;
   padding-right: 0.4em;
-  height: 2em;
-  font-weight: bold;
-  text-decoration: none;
   cursor: pointer;
   transition: 0.2s;
   box-sizing: border-box;
@@ -982,7 +2036,7 @@ pkt-input-tag input:focus {
 }
 
 label {
-  font-family: packet-ui;
+  font-family: Cantarell;
   font-size: 1em;
 }
 
@@ -997,7 +2051,7 @@ pkt-menu > ul i.caret {
   float: right;
   border-left: 0.25em solid transparent;
   border-right: 0.25em solid transparent;
-  border-bottom: 0.25em solid #ffc107;
+  border-bottom: 0.25em solid #ff4507;
   margin-bottom: 0.25em;
   transform: rotateZ(90deg);
   will-change: transform;
@@ -1216,6 +2270,7 @@ pkt-spinner circle {
 pkt-sidebar {
   position: absolute;
   top: 0;
+  left: 0;
 }
 
 pkt-sidebar [el=sidebar] {
@@ -1240,6 +2295,7 @@ pkt-sidebar [el=sidebar].show {
 pkt-sidebar [el=overlay] {
   position: fixed;
   top: 0;
+  left: 0;
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 100;
   display: none;
@@ -1252,7 +2308,7 @@ pkt-sidebar [el=overlay].show {
 }
 
 pkt-switch {
-  font-family: packet-ui;
+  font-family: Cantarell;
   font-size: 1em;
   display: inline-flex;
   font-weight: bold;
@@ -1342,22 +2398,22 @@ pkt-tab input[type=radio], .pkt-tab input[type=radio] {
 }
 
 pkt-tab button, .pkt-tab button {
-  font-family: packet-ui;
-  font-size: 1em;
   box-shadow: 0 1px 3px 0 #404040;
   background-color: #e6e6e6;
   color: #000;
+  border-radius: 4px;
+  font-family: Cantarell;
+  border: 0;
+  font-size: 1em;
+  font-weight: bold;
+  text-decoration: none;
   outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 4px;
+  height: 2em;
   padding-left: 0.4em;
   padding-right: 0.4em;
-  height: 2em;
-  font-weight: bold;
-  text-decoration: none;
   cursor: pointer;
   transition: 0.2s;
   box-sizing: border-box;
@@ -1442,10 +2498,10 @@ table tbody tr:hover {
 }
 
 pkt-tag, .pkt-tag {
-  font-family: packet-ui;
-  font-size: 1em;
   background-color: #ffc107;
   color: #000;
+  font-family: Cantarell;
+  font-size: 1em;
   display: inline-flex;
   align-items: center;
   border-radius: 4px;
@@ -1458,10 +2514,10 @@ pkt-tag pkt-icon, .pkt-tag pkt-icon {
 }
 
 pkt-tag-x {
-  font-family: packet-ui;
-  font-size: 1em;
   background-color: #ffc107;
   color: #000;
+  font-family: Cantarell;
+  font-size: 1em;
   display: inline-flex;
   align-items: center;
   border-radius: 4px;
@@ -1476,694 +2532,6 @@ pkt-tag-x pkt-icon {
 
 pkt-tag-x pkt-icon {
   cursor: pointer;
-}
-
-.red {
-  color: #f44336;
-}
-
-.pink {
-  color: #e91e63;
-}
-
-.purple {
-  color: #9c27b0;
-}
-
-.deep-purple {
-  color: #673ab7;
-}
-
-.indigo {
-  color: #3f51b5;
-}
-
-.blue {
-  color: #2196f3;
-}
-
-.light-blue {
-  color: #03a9f4;
-}
-
-.cyan {
-  color: #00bcd4;
-}
-
-.teal {
-  color: #009688;
-}
-
-.green {
-  color: #4caf50;
-}
-
-.light-green {
-  color: #8bc34a;
-}
-
-.lime {
-  color: #cddc39;
-}
-
-.yellow {
-  color: #ffeb3b;
-}
-
-.amber {
-  color: #ffc107;
-}
-
-.orange {
-  color: #ff9800;
-}
-
-.deep-orange {
-  color: #ff5722;
-}
-
-.brown {
-  color: #795548;
-}
-
-.grey, .gray {
-  color: #9e9e9e;
-}
-
-.blue-grey, .blue-gray {
-  color: #607d8b;
-}
-
-.bg-red {
-  background-color: #f44336;
-  color: #fff;
-}
-
-.bg-pink {
-  background-color: #e91e63;
-  color: #fff;
-}
-
-.bg-purple {
-  background-color: #9c27b0;
-  color: #fff;
-}
-
-.bg-deep-purple {
-  background-color: #673ab7;
-  color: #fff;
-}
-
-.bg-indigo {
-  background-color: #3f51b5;
-  color: #fff;
-}
-
-.bg-blue {
-  background-color: #2196f3;
-  color: #fff;
-}
-
-.bg-light-blue {
-  background-color: #03a9f4;
-  color: #fff;
-}
-
-.bg-cyan {
-  background-color: #00bcd4;
-  color: #fff;
-}
-
-.bg-teal {
-  background-color: #009688;
-  color: #fff;
-}
-
-.bg-green {
-  background-color: #4caf50;
-  color: #fff;
-}
-
-.bg-light-green {
-  background-color: #8bc34a;
-  color: #000;
-}
-
-.bg-lime {
-  background-color: #cddc39;
-  color: #000;
-}
-
-.bg-yellow {
-  background-color: #ffeb3b;
-  color: #000;
-}
-
-.bg-amber {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.bg-orange {
-  background-color: #ff9800;
-  color: #000;
-}
-
-.bg-deep-orange {
-  background-color: #ff5722;
-  color: #fff;
-}
-
-.bg-brown {
-  background-color: #795548;
-  color: #fff;
-}
-
-.bg-grey, .bg-gray {
-  background-color: #9e9e9e;
-  color: #fff;
-}
-
-.bg-blue-grey, .bg-blue-gray {
-  background-color: #607d8b;
-  color: #fff;
-}
-
-.bg-int-red {
-  background-color: #f44336;
-  color: #fff;
-}
-
-.bg-int-red:hover {
-  background-color: #ff695e;
-}
-
-.bg-int-red:active {
-  background-color: #de2719;
-}
-
-.bg-int-pink {
-  background-color: #e91e63;
-  color: #fff;
-}
-
-.bg-int-pink:hover {
-  background-color: #f74380;
-}
-
-.bg-int-pink:active {
-  background-color: #b71d51;
-}
-
-.bg-int-purple {
-  background-color: #9c27b0;
-  color: #fff;
-}
-
-.bg-int-purple:hover {
-  background-color: #c52bdf;
-}
-
-.bg-int-purple:active {
-  background-color: #71267e;
-}
-
-.bg-int-deep-purple {
-  background-color: #673ab7;
-  color: #fff;
-}
-
-.bg-int-deep-purple:hover {
-  background-color: #7f4fd5;
-}
-
-.bg-int-deep-purple:active {
-  background-color: #543787;
-}
-
-.bg-int-indigo {
-  background-color: #3f51b5;
-  color: #fff;
-}
-
-.bg-int-indigo:hover {
-  background-color: #5568d2;
-}
-
-.bg-int-indigo:active {
-  background-color: #3b4786;
-}
-
-.bg-int-blue {
-  background-color: #2196f3;
-  color: #fff;
-}
-
-.bg-int-blue:hover {
-  background-color: #48aeff;
-}
-
-.bg-int-blue:active {
-  background-color: #177bca;
-}
-
-.bg-int-light-blue {
-  background-color: #03a9f4;
-  color: #fff;
-}
-
-.bg-int-light-blue:hover {
-  background-color: #2bbdff;
-}
-
-.bg-int-light-blue:active {
-  background-color: #0c82b8;
-}
-
-.bg-int-cyan {
-  background-color: #00bcd4;
-  color: #fff;
-}
-
-.bg-int-cyan:hover {
-  background-color: #08e3ff;
-}
-
-.bg-int-cyan:active {
-  background-color: #088999;
-}
-
-.bg-int-teal {
-  background-color: #009688;
-  color: #fff;
-}
-
-.bg-int-teal:hover {
-  background-color: #00c9b6;
-}
-
-.bg-int-teal:active {
-  background-color: #055e56;
-}
-
-.bg-int-green {
-  background-color: #4caf50;
-  color: #fff;
-}
-
-.bg-int-green:hover {
-  background-color: #64ca68;
-}
-
-.bg-int-green:active {
-  background-color: #478149;
-}
-
-.bg-int-light-green {
-  background-color: #8bc34a;
-  color: #000;
-}
-
-.bg-int-light-green:hover {
-  background-color: #a4d967;
-}
-
-.bg-int-light-green:active {
-  background-color: #709941;
-}
-
-.bg-int-lime {
-  background-color: #cddc39;
-  color: #000;
-}
-
-.bg-int-lime:hover {
-  background-color: #dfed5b;
-}
-
-.bg-int-lime:active {
-  background-color: #a8b52d;
-}
-
-.bg-int-yellow {
-  background-color: #ffeb3b;
-  color: #000;
-}
-
-.bg-int-yellow:hover {
-  background-color: #fff06e;
-}
-
-.bg-int-yellow:active {
-  background-color: #f3dc14;
-}
-
-.bg-int-amber {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.bg-int-amber:hover {
-  background-color: #ffce3a;
-}
-
-.bg-int-amber:active {
-  background-color: #c8990b;
-}
-
-.bg-int-orange {
-  background-color: #ff9800;
-  color: #000;
-}
-
-.bg-int-orange:hover {
-  background-color: #ffad33;
-}
-
-.bg-int-orange:active {
-  background-color: #c2780a;
-}
-
-.bg-int-deep-orange {
-  background-color: #ff5722;
-  color: #fff;
-}
-
-.bg-int-deep-orange:hover {
-  background-color: #ff7e55;
-}
-
-.bg-int-deep-orange:active {
-  background-color: #e23f0c;
-}
-
-.bg-int-brown {
-  background-color: #795548;
-  color: #fff;
-}
-
-.bg-int-brown:hover {
-  background-color: #a5664f;
-}
-
-.bg-int-brown:active {
-  background-color: #52423c;
-}
-
-.bg-int-grey, .bg-int-gray {
-  background-color: #9e9e9e;
-  color: #fff;
-}
-
-.bg-int-grey:hover, .bg-int-gray:hover {
-  background-color: #bfb0b0;
-}
-
-.bg-int-grey:active, .bg-int-gray:active {
-  background-color: #858585;
-}
-
-.bg-int-blue-grey, .bg-int-blue-gray {
-  background-color: #607d8b;
-  color: #fff;
-}
-
-.bg-int-blue-grey:hover, .bg-int-blue-gray:hover {
-  background-color: #6f9aaf;
-}
-
-.bg-int-blue-grey:active, .bg-int-blue-gray:active {
-  background-color: #545f64;
-}
-
-.bg-int-white {
-  background-color: #fff;
-  color: #000;
-}
-
-.bg-int-white:hover {
-  background-color: #fff;
-}
-
-.bg-int-white:active {
-  background-color: #e6e6e6;
-}
-
-.bg-int-black {
-  background-color: #000;
-  color: #fff;
-}
-
-.bg-int-black:hover {
-  background-color: #1c1717;
-}
-
-.bg-int-black:active {
-  background-color: #000;
-}
-
-.color-primary, .color-p {
-  color: #ffc107;
-}
-
-.color-primary.l1, .color-p.l1 {
-  color: #ffce3a;
-}
-
-.color-primary.l2, .color-p.l2 {
-  color: #ffdb6d;
-}
-
-.color-primary.l3, .color-p.l3 {
-  color: #ffe7a0;
-}
-
-.color-primary.l4, .color-p.l4 {
-  color: #fff4d3;
-}
-
-.color-primary.d1, .color-p.d1 {
-  color: #d39e00;
-}
-
-.color-primary.d2, .color-p.d2 {
-  color: #a07800;
-}
-
-.color-primary.d3, .color-p.d3 {
-  color: #6d5200;
-}
-
-.color-primary.d4, .color-p.d4 {
-  color: #3a2c00;
-}
-
-.bg-primary, .bg-p {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.bg-primary.l1, .bg-p.l1 {
-  background-color: #ffce3a;
-  color: #000;
-}
-
-.bg-primary.l2, .bg-p.l2 {
-  background-color: #ffdb6d;
-  color: #000;
-}
-
-.bg-primary.l3, .bg-p.l3 {
-  background-color: #ffe7a0;
-  color: #000;
-}
-
-.bg-primary.l4, .bg-p.l4 {
-  background-color: #fff4d3;
-  color: #000;
-}
-
-.bg-primary.d1, .bg-p.d1 {
-  background-color: #d39e00;
-  color: #fff;
-}
-
-.bg-primary.d2, .bg-p.d2 {
-  background-color: #a07800;
-  color: #fff;
-}
-
-.bg-primary.d3, .bg-p.d3 {
-  background-color: #6d5200;
-  color: #fff;
-}
-
-.bg-primary.d4, .bg-p.d4 {
-  background-color: #3a2c00;
-  color: #fff;
-}
-
-.color-complement, .color-c {
-  color: #0745ff;
-}
-
-.color-analog-left, .color-a1 {
-  color: #ff4507;
-}
-
-.color-analog-right, .color-a2 {
-  color: #c1ff07;
-}
-
-.color-triadic-left, .color-t1 {
-  color: #07c1ff;
-}
-
-.color-triadic-right, .color-t2 {
-  color: #4507ff;
-}
-
-.bg-complement, .bg-c {
-  background-color: #0745ff;
-  color: #fff;
-}
-
-.bg-analog-left, .bg-a1 {
-  background-color: #ff4507;
-  color: #fff;
-}
-
-.bg-analog-right, .bg-a2 {
-  background-color: #c1ff07;
-  color: #000;
-}
-
-.bg-triadic-left, .bg-t1 {
-  background-color: #07c1ff;
-  color: #000;
-}
-
-.bg-triadic-right, .bg-t2 {
-  background-color: #4507ff;
-  color: #fff;
-}
-
-.bg-int-primary, .bg-int-p {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.bg-int-primary:hover, .bg-int-p:hover {
-  background-color: #ffce3a;
-}
-
-.bg-int-primary:active, .bg-int-p:active {
-  background-color: #c8990b;
-}
-
-.bg-int-complement, .bg-int-c {
-  background-color: #0745ff;
-  color: #fff;
-}
-
-.bg-int-complement:hover, .bg-int-c:hover {
-  background-color: #3a6bff;
-}
-
-.bg-int-complement:active, .bg-int-c:active {
-  background-color: #0b3ac8;
-}
-
-.bg-int-analog-left, .bg-int-a1 {
-  background-color: #ff4507;
-  color: #fff;
-}
-
-.bg-int-analog-left:hover, .bg-int-a1:hover {
-  background-color: #ff6b3a;
-}
-
-.bg-int-analog-left:active, .bg-int-a1:active {
-  background-color: #c83a0b;
-}
-
-.bg-int-analog-right, .bg-int-a2 {
-  background-color: #c1ff07;
-  color: #000;
-}
-
-.bg-int-analog-right:hover, .bg-int-a2:hover {
-  background-color: #ceff3a;
-}
-
-.bg-int-analog-right:active, .bg-int-a2:active {
-  background-color: #99c80b;
-}
-
-.bg-int-triadic-left, .bg-int-t1 {
-  background-color: #07c1ff;
-  color: #000;
-}
-
-.bg-int-triadic-left:hover, .bg-int-t1:hover {
-  background-color: #3aceff;
-}
-
-.bg-int-triadic-left:active, .bg-int-t1:active {
-  background-color: #0b99c8;
-}
-
-.bg-int-triadic-right, .bg-int-t2 {
-  background-color: #4507ff;
-  color: #fff;
-}
-
-.bg-int-triadic-right:hover, .bg-int-t2:hover {
-  background-color: #6b3aff;
-}
-
-.bg-int-triadic-right:active, .bg-int-t2:active {
-  background-color: #3a0bc8;
-}
-
-.border-top-radius {
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.border-right-radius {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.border-bottom-radius {
-  border-bottom-right-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-
-.border-left-radius {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-
-.lift-1 {
-  box-shadow: 0 1px 3px 0 #404040;
-}
-
-.lift-2 {
-  box-shadow: 0 2px 5px 0 #404040;
-}
-
-.lift-3 {
-  box-shadow: 0 4px 9px 0 #404040;
-}
-
-.lift-4 {
-  box-shadow: 0 8px 17px 0 #404040;
-}
-
-.lift-5 {
-  box-shadow: 0 16px 33px 0 #404040;
 }
 
 /*# sourceMappingURL=packet-ui.css.map */
@@ -2238,10 +2606,6 @@ Monokai style - ported by Luigi Maselli - http://grigio.org
   font-weight: bold;
 }
 
-@font-face {
-  font-family: "packet-ui";
-  src: url("./asset/fonts/Cantarell-Regular.ttf") format("woff2");
-}
 @font-face {
   font-family: "fira-sans";
   src: url("./asset/fonts/FiraSans-Regular.ttf") format("woff2");
