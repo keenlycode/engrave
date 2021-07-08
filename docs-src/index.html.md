@@ -1,4 +1,4 @@
-# Engrave
+<h1>Engrave</h1> <pkt-tag>v 1.0.9</pkt-tag>
 
 Engrave is a tool to generate static website.
 
@@ -25,7 +25,7 @@ Static website generator
 
 positional arguments:
   {setup,build,dev}
-    setup            Install required libraries from npm: parcel, sass
+    setup            Install required libraries from npm
     build            Build html
     dev              Build html and watch for changes
 ```
