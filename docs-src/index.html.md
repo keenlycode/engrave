@@ -1,11 +1,13 @@
-<h1>Engrave</h1> <pkt-tag>v 1.0.9</pkt-tag>
+<h1>Engrave</h1> <pkt-tag>v 1.1.0</pkt-tag>
 
 Engrave is a tool to generate static website.
 
 ## Features
 - Write contents in HTML and Markdown.
-- Style sheet (CSS) with SASS
 - HTML template with Jinja
+- Style sheet (CSS) with SASS
+- Auto Javascript bundle
+- Typescript <pkt-tag>new in version 1.1.0</pkt-tag>
 
 ## Requirement
 

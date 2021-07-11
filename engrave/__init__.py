@@ -80,8 +80,11 @@ class Engrave:
                 await self._file_change_handler(change, path)
 
     async def _file_handler(self, path: Path):
+        if path.is_dir():
+            return
+            
         # Handle HTML files
-        if re.match('^_.*.html$', path.name):
+        elif re.match('^_.*.html$', path.name):
             print(f"template: {path.relative_to(self.src_dir)}")
             for p in path.parent.glob('**/[!_]*.html'):
                 self._build_html(p)
@@ -107,15 +110,14 @@ class Engrave:
         elif re.match('^_.*.(scss|sass)$', path.name):
             return
 
-        # Handle Javascript
-        elif re.match('.*.js$', path.name):
+        # Handle Javascript ES5 and Typescript
+        elif re.match('.*.(js|ts)$', path.name):
+            print(path.name)
             dest_dir = path.relative_to(self.src_dir).parent
             dest_dir = self.dest_dir.joinpath(dest_dir)
             proc = await asyncio.create_subprocess_shell(
                 f"npx parcel build {path} --dist-dir {dest_dir}")
             await proc.communicate()
-        elif path.is_dir():
-            return
 
         # Handle static files
         else:
