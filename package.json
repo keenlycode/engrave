@@ -1,5 +1,5 @@
 {
-  "dependencies": {
+  "devDependencies": {
     "highlight.js": "^10.7.2",
     "packet-ui": "^2.0.5",
     "parcel": "^2.0.0-beta.3.1",
