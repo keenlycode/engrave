@@ -116,7 +116,7 @@ class Engrave:
             dest_dir = path.relative_to(self.src_dir).parent
             dest_dir = self.dest_dir.joinpath(dest_dir)
             proc = await asyncio.create_subprocess_shell(
-                f"npx parcel build {path} --dist-dir {dest_dir}")
+                f"npx parcel build --no-cache {path} --dist-dir {dest_dir}")
             await proc.communicate()
 
         # Handle static files
