@@ -190,7 +190,7 @@ async def main():
     command.parse_args()
     if command.args.cmd == 'setup':
         proc = await asyncio.create_subprocess_shell(
-            'npm install parcel sass packet-ui')
+            'npm install parcel@2.0.0-rc.0 sass@1.42.1 packet-ui@2.0.5')
         await proc.communicate()
     if command.args.cmd == 'build':
         builder = Engrave(command.args.src, command.args.dest)
