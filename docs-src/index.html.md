@@ -1,4 +1,4 @@
-<h1>Engrave</h1> <pkt-tag>v 1.1.0</pkt-tag>
+<h1>Engrave</h1> <pkt-tag>v 1.1.2</pkt-tag>
 
 Engrave is a tool to generate static website.
 
