@@ -1,0 +1,64 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<base href="http://127.0.0.1:8000">
+<head>
+    <meta charset="utf-8">
+    
+    <title>Engrave static website</title>
+    
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fafafa">
+
+    <link rel="stylesheet" href="base.css?v=2">
+    <script defer type="module" src="base.js?v=2"></script>
+    
+</head>
+
+<body>
+
+
+<div class="container">
+<h1>Engrave</h1> <pkt-tag>v 1.1.2</pkt-tag>
+<p>Engrave is a tool to generate static website.</p>
+<h2>Features</h2>
+<ul>
+<li>Write contents in HTML and Markdown.</li>
+<li>HTML template with Jinja</li>
+<li>Style sheet (CSS) with SASS</li>
+<li>Auto Javascript bundle</li>
+<li>Typescript <pkt-tag>new in version 1.1.0</pkt-tag></li>
+</ul>
+<h2>Requirement</h2>
+<p><a href="https://nodejs.org/en/">NodeJS</a> v14.16 or later</p>
+<h2>Installation</h2>
+<pre><code class="language-bash">$ pip install engrave
+</code></pre>
+<h2>Usage</h2>
+<pre><code>$ engrave -h
+usage: engrave [-h] {setup,build,dev} ...
+
+Static website generator
+
+positional arguments:
+  {setup,build,dev}
+    setup            Install required libraries from npm
+    build            Build html
+    dev              Build html and watch for changes
+</code></pre>
+<h2>Example</h2>
+<p>This document is made by <strong>Engrave</strong> and it's a good example how engrave works.
+See document's source code at
+<a href="https://github.com/nitipit/engrave/tree/main/docs-src">https://github.com/nitipit/engrave/tree/main/docs-src</a></p>
+<p>To build this document and run development server, use command below</p>
+<pre><code class="language-bash">$ git clone https://github.com/nitipit/engrave.git
+$ cd engrave
+$ npm install # Install Node Libraries
+$ engrave dev docs-src docs --server
+</code></pre>
+
+</div>
+
+</body>
+</html>
