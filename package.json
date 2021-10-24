@@ -1,8 +1,8 @@
 {
-  "devDependencies": {
-    "highlight.js": "^10.7.2",
-    "packet-ui": "^2.0.5",
-    "parcel": "^2.0.0-rc.0",
-    "sass": "^1.42.1"
+  "dependencies": {
+    "highlight.js": "^11.3.1",
+    "parcel": "^2.0.0",
+    "packet-ui": "^2.1.0",
+    "sass": "^1.43.3"
   }
 }
