@@ -1,19 +1,20 @@
-@use '../node_modules/packet-ui/dist/normalize.css';
-@use '../node_modules/packet-ui/dist/packet-ui.css';
-@use '../node_modules/highlight.js/styles/monokai.css';
+@use '../node_modules/highlight.js/styles/atom-one-dark-reasonable.css';
 
 @font-face {
     font-family: 'fira-sans';
     src: url('./asset/fonts/FiraSans-Regular.ttf') format('woff2');
 }
 
-body {
+html {
     font-family: fira-sans;
     padding-bottom: 20vh;
 }
 
 code {
     border-radius: 4px;
+    background-color: #444;
+    color: white;
+    padding: 0.25rem;
 }
 
 .container {
