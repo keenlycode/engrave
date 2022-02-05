@@ -98,35 +98,6 @@ class Engrave:
                 self._build_html(p)
                 print(f"template: {path.relative_to(self.src_dir)}")
 
-        # Handle SASS
-        elif re.match('(?!_).*.(scss|sass)$', path.name):
-            print(path.name)
-            dest = path.relative_to(self.src_dir).with_suffix('.css')
-            dest = self.dest_dir.joinpath(dest)
-            proc = await asyncio.create_subprocess_shell(
-                f"npx sass {path} {dest}")
-            await proc.communicate()
-            print(f"sass {path.relative_to(self.src_dir)}")
-        elif re.match('^_.*.(scss|sass)$', path.name):
-            return
-
-        # Handle Javascript ES5 and Typescript
-        elif re.match('.*.(js|ts)$', path.name):
-            print(path.name)
-            dest_dir = path.relative_to(self.src_dir).parent
-            dest_dir = self.dest_dir.joinpath(dest_dir)
-            proc = await asyncio.create_subprocess_shell(
-                f"npx parcel build {path} --dist-dir={dest_dir}")
-            await proc.communicate()
-
-        # Handle static files
-        else:
-            dest = path.relative_to(self.src_dir)
-            dest = self.dest_dir.joinpath(dest)
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            print(f"copy {path} -> {dest}")
-            shutil.copy(path, dest)
-
     async def _file_change_handler(self, change, path: Path):
         if change == Change.deleted:
             path = path.relative_to(self.src_dir)
@@ -148,7 +119,6 @@ class CommandParser:
             description='Static website generator')
 
         self.sub_parser = self.parser.add_subparsers(dest='cmd')
-        self.make_setup_parser()
         self.make_build_parser()
         self.make_dev_parser()
 
@@ -175,12 +145,6 @@ class CommandParser:
         parser.add_argument('src', help='Source directory')
         parser.add_argument('dest', help='Destination directory')
 
-    def make_setup_parser(self):
-        self.sub_parser.add_parser(
-            'setup',
-            help='Install required libraries from npm',
-        )
-
     def parse_args(self):
         self.args = self.parser.parse_args()
 
@@ -188,10 +152,6 @@ class CommandParser:
 async def main():
     command = CommandParser()
     command.parse_args()
-    if command.args.cmd == 'setup':
-        proc = await asyncio.create_subprocess_shell(
-            'npm install parcel@2.0.0-rc.0 sass@1.42.1 packet-ui@2.0.5')
-        await proc.communicate()
     if command.args.cmd == 'build':
         builder = Engrave(command.args.src, command.args.dest)
         await builder.build()

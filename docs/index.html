@@ -20,30 +20,29 @@
 
 
 <div class="container">
-<h1>Engrave</h1> <pkt-tag>v 1.1.2</pkt-tag>
+<h1>Engrave</h1> <el-badge>Ver. 2.0.0</el-badge>
 <p>Engrave is a tool to generate static website.</p>
 <h2>Features</h2>
 <ul>
 <li>Write contents in HTML and Markdown.</li>
-<li>HTML template with Jinja</li>
-<li>Style sheet (CSS) with SASS</li>
-<li>Auto Javascript bundle</li>
-<li>Typescript <pkt-tag>new in version 1.1.0</pkt-tag></li>
+<li>HTML template with Jinja2</li>
 </ul>
-<h2>Requirement</h2>
-<p><a href="https://nodejs.org/en/">NodeJS</a> v14.16 or later</p>
+<h2>Changes from Ver. 1.x.x</h2>
+<ul>
+<li>Now <code>engrave</code> only handle html files. Due to the release of
+<code>parcel v2.0</code> which cover many features for other files.</li>
+</ul>
 <h2>Installation</h2>
 <pre><code class="language-bash">$ pip install engrave
 </code></pre>
 <h2>Usage</h2>
 <pre><code>$ engrave -h
-usage: engrave [-h] {setup,build,dev} ...
+usage: engrave [-h] {build,dev} ...
 
 Static website generator
 
 positional arguments:
-  {setup,build,dev}
-    setup            Install required libraries from npm
+  {build,dev}
     build            Build html
     dev              Build html and watch for changes
 </code></pre>

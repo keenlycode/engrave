@@ -1,13 +1,14 @@
+<h1>Engrave</h1> <el-badge>Ver. 2.0.0</el-badge>
+
 Engrave is a tool to generate static website.
 
 ## Features
 - Write contents in HTML and Markdown.
-- Style sheet (CSS) with SASS
-- HTML template with Jinja
+- HTML template with Jinja2
 
-## Requirement
-
-[NodeJS](https://nodejs.org/en/) v14.16 or later
+## Changes from Ver. 1.x.x
+- Now `engrave` only handle html files. Due to the release of
+  `parcel v2.0` which cover many features for other files.
 
 ## Installation
 ```bash
@@ -17,13 +18,12 @@ $ pip install engrave
 ## Usage
 ```
 $ engrave -h
-usage: engrave [-h] {setup,build,dev} ...
+usage: engrave [-h] {build,dev} ...
 
 Static website generator
 
 positional arguments:
-  {setup,build,dev}
-    setup            Install required libraries from npm: parcel, sass
+  {build,dev}
     build            Build html
     dev              Build html and watch for changes
 ```

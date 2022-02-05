@@ -1,8 +1,8 @@
 {
-  "dependencies": {
-    "highlight.js": "^11.3.1",
-    "parcel": "^2.0.0",
-    "packet-ui": "^2.1.0",
-    "sass": "^1.43.3"
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.2.1",
+    "gadjet": "^0.1.2",
+    "highlight.js": "^11.4.0",
+    "parcel": "^2.2.1"
   }
 }
