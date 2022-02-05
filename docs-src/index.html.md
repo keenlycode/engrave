@@ -5,13 +5,6 @@ Engrave is a tool to generate static website.
 ## Features
 - Write contents in HTML and Markdown.
 - HTML template with Jinja
-- Style sheet (CSS) with SASS
-- Auto Javascript bundle
-- Typescript <pkt-tag>new in version 1.1.0</pkt-tag>
-
-## Requirement
-
-[NodeJS](https://nodejs.org/en/) v14.16 or later
 
 ## Installation
 ```bash
@@ -21,7 +14,7 @@ $ pip install engrave
 ## Usage
 ```
 $ engrave -h
-usage: engrave [-h] {setup,build,dev} ...
+usage: engrave [-h] {build,dev} ...
 
 Static website generator
 
