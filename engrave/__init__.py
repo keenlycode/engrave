@@ -162,13 +162,13 @@ async def main():
     elif command.args.cmd == 'dev':
         builder = Engrave(command.args.src, command.args.dest)
         dev_task = asyncio.create_task(builder.dev())
-        tasks = [dev_task]
         if command.args.server:
             addr, port = command.args.server.split(':')
             port = int(port)
             server_task = asyncio.create_task(builder.run_server(addr, port))
-            tasks.append(server_task)
-        await asyncio.gather(*tasks)
+        await dev_task
+        await server_task
+
     else:
         print(command.parser.print_help())
 
