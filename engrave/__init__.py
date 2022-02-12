@@ -1,9 +1,11 @@
-from ast import expr_context
 from pathlib import Path
 import asyncio
 import re
 import shutil
 import argparse
+import sys
+import traceback
+
 from jinja2 import (
     Environment,
     FileSystemLoader,
@@ -69,7 +71,12 @@ class Engrave:
 
     def _build_html(self, path: Path):
         path = path.relative_to(self.src_dir)
-        html = self.template(str(path)).render()
+        try:
+            html = self.template(str(path)).render()
+        except Exception as e:
+            print(e)
+            traceback.print_tb(sys.exc_info()[2], limit=1)
+            return
         dest = self.dest_dir.joinpath(str(path)).resolve()
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest = open(dest, 'w')
@@ -157,18 +164,16 @@ async def main():
     command = CommandParser()
     command.parse_args()
     if command.args.cmd == 'build':
-        builder = Engrave(command.args.src, command.args.dest)
-        asyncio.run(builder.build())
+        engrave = Engrave(command.args.src, command.args.dest)
+        await engrave.build()
     elif command.args.cmd == 'dev':
-        builder = Engrave(command.args.src, command.args.dest)
-        dev_task = asyncio.create_task(builder.dev())
+        engrave = Engrave(command.args.src, command.args.dest)
+        await asyncio.create_task(engrave.dev())
         if command.args.server:
             addr, port = command.args.server.split(':')
             port = int(port)
-            server_task = asyncio.create_task(builder.run_server(addr, port))
-        await dev_task
-        await server_task
-
+            server_task = asyncio.create_task(engrave.run_server(addr, port))
+            await server_task
     else:
         print(command.parser.print_help())
 
