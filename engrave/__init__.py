@@ -1,3 +1,4 @@
+from ast import expr_context
 from pathlib import Path
 import asyncio
 import re
@@ -61,7 +62,10 @@ class Engrave:
             f"python -m http.server {port} --bind {addr} "
             f"--directory {self.dest_dir}"
         )
-        await proc.communicate()
+        try:
+            await proc.communicate()
+        except asyncio.CancelledError:
+            proc.terminate()
 
     def _build_html(self, path: Path):
         path = path.relative_to(self.src_dir)
@@ -154,16 +158,17 @@ async def main():
     command.parse_args()
     if command.args.cmd == 'build':
         builder = Engrave(command.args.src, command.args.dest)
-        await builder.build()
+        asyncio.run(builder.build())
     elif command.args.cmd == 'dev':
         builder = Engrave(command.args.src, command.args.dest)
         dev_task = asyncio.create_task(builder.dev())
+        tasks = [dev_task]
         if command.args.server:
             addr, port = command.args.server.split(':')
             port = int(port)
             server_task = asyncio.create_task(builder.run_server(addr, port))
-            await server_task
-        await dev_task
+            tasks.append(server_task)
+        await asyncio.gather(*tasks)
     else:
         print(command.parser.print_help())
 
