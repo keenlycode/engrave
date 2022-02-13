@@ -69,7 +69,7 @@ class Engrave:
         except asyncio.CancelledError:
             proc.terminate()
 
-    def _build_html(self, path: Path):
+    def _build_html(self, src: Path, dest: Path = 'docs'):
         path = path.relative_to(self.src_dir)
         try:
             html = self.template(str(path)).render()
