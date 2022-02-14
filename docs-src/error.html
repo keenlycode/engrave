@@ -13,10 +13,10 @@
 <h2>{{type}}</h2>
 <el-tag>Value</el-tag>
 <p>{{value}}</p>
-<el-tag>Traceback</el-tag>
-<pre><code class="language-bash">
-{{tb}}
-</code></pre>
+<el-tag>@</el-tag>
 {{exception.filename}}:{{exception.lineno}}
+<el-code>
+var test = 'a';
+</el-code>
 </div>
 {% endblock %}
