@@ -14,7 +14,7 @@ async def main():
     engrave = Engrave(
         src_dir=_dir.joinpath('docs-src'),
         dest_dir=_dir.joinpath('docs'))
-    addr = '127.0.0.1'
+    addr = '0.0.0.0'
     port = 8000
 
     await asyncio.gather(

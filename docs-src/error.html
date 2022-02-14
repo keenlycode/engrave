@@ -1,0 +1,22 @@
+{% extends '_base.html' %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="error.css?v={{_v}}">
+<script src="error.js?v={{_v}}"></script>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+<h1 style="text-align: center;"><el-tag class="error">Exception</el-tag></h1>
+<el-tag>Type</el-tag>
+<h2>{{type}}</h2>
+<el-tag>Value</el-tag>
+<p>{{value}}</p>
+<el-tag>Traceback</el-tag>
+<pre><code class="language-bash">
+{{tb}}
+</code></pre>
+{{exception.filename}}:{{exception.lineno}}
+</div>
+{% endblock %}

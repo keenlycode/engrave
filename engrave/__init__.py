@@ -1,3 +1,4 @@
+from inspect import trace
 from pathlib import Path
 import asyncio
 import re
@@ -11,7 +12,10 @@ from jinja2 import (
     FileSystemLoader,
     select_autoescape,
     contextfunction,
-    Markup)
+    Markup,
+    TemplateSyntaxError,
+    UndefinedError,
+)
 import mistune
 from watchgod import awatch, Change
 
@@ -27,7 +31,10 @@ class Template:
 
         template = Environment(
             loader=FileSystemLoader(src_dir),
-            autoescape=select_autoescape(['html', 'xml'])
+            autoescape=select_autoescape(['html', 'xml']),
+            enable_async=True,
+            cache_size=0,
+            optimized=False,
         )
 
         template.globals.update(markdown=markdown)
@@ -69,18 +76,29 @@ class Engrave:
         except asyncio.CancelledError:
             proc.terminate()
 
-    def _build_html(self, src: Path, dest: Path = 'docs'):
-        path = path.relative_to(self.src_dir)
+    async def _render_html(self, src: Path, render_exception=False):
+        src = src.relative_to(self.src_dir)
+        html = ''
         try:
-            html = self.template(str(path)).render()
-        except Exception as e:
-            print(e)
-            traceback.print_tb(sys.exc_info()[2], limit=1)
+            html = await self.template(str(src)).render_async()
+        except TemplateSyntaxError as exception:
+            type_, value = sys.exc_info()[0:2]
+            print(type_)
+            print(value)
+            html = await self.template('error.html').render_async(
+                type=type_,
+                value=value,
+                tb=traceback.format_exc(limit=5),
+                exception=exception,
+            )
+        except UndefinedError as exception:
             return
-        dest = self.dest_dir.joinpath(str(path)).resolve()
+
+        dest = self.dest_dir.joinpath(str(src)).resolve()
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest = open(dest, 'w')
         dest.write(html)
+        dest.close()
 
 
     async def _file_watch(self):
@@ -98,15 +116,15 @@ class Engrave:
         elif re.match('^_.*.html$', path.name):
             print(f"template: {path.relative_to(self.src_dir)}")
             for p in path.parent.glob('**/[!_]*.html'):
-                self._build_html(p)
+                await self._render_html(p)
                 print(f"template: {p.relative_to(self.src_dir)}")
         elif re.match('.*.html$', path.name):
-            self._build_html(path)
+            await self._render_html(path)
             print(f"template: {path.relative_to(self.src_dir)}")
         elif re.match('.*.html.*.md$', path.name):
             html_file_name = re.match('.*.html', path.name)[0]
             for p in path.parent.glob(html_file_name):
-                self._build_html(p)
+                await self._render_html(p)
                 print(f"template: {path.relative_to(self.src_dir)}")
 
     async def _file_change_handler(self, change, path: Path):
