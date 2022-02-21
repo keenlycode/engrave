@@ -1,6 +1,6 @@
 import { define } from 'gadjet/src/ui/ui';
 import { Badge } from 'gadjet/src/ui/badge/badge';
-
+import { Tag } from 'gadjet/src/ui/tag/tag';
 import Prism from 'prismjs';
 Prism;
 import 'prismjs/components/prism-markup-templating';
@@ -10,6 +10,11 @@ import 'prismjs/plugins/line-highlight/prism-line-highlight';
 import { addStyle } from 'gadjet/src/style';
 
 define('el-badge', Badge);
+define('el-tag', Tag);
+
+Tag.classStyle('error', {
+    color: 'red'
+})
 
 addStyle`
 pre[class*="language-"] {

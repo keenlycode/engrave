@@ -42,7 +42,7 @@ class Template:
 
 
 class Engrave:
-    def __init__(self, src_dir: Path, dest_dir: Path):
+    def __init__(self, src_dir: Path, dest_dir: Path, mode: str = 'dev'):
         src_dir = Path(src_dir)
         dest_dir = Path(dest_dir)
         if not src_dir.exists():
@@ -50,6 +50,7 @@ class Engrave:
 
         self.src_dir = src_dir
         self.dest_dir = dest_dir
+        self.mode = mode
         self.template = Template(src_dir=src_dir, dest_dir=dest_dir).template
 
     async def build(self):
@@ -80,6 +81,8 @@ class Engrave:
         try:
             html = await self.template(str(src)).render_async()
         except TemplateSyntaxError as exception:
+            if self.mode == 'build':
+                raise Exception
             file = open(exception.filename, 'r')
             code = ''
             line_start = None
@@ -186,10 +189,10 @@ async def main():
     command = CommandParser()
     command.parse_args()
     if command.args.cmd == 'build':
-        engrave = Engrave(command.args.src, command.args.dest)
+        engrave = Engrave(command.args.src, command.args.dest, mode='build')
         await engrave.build()
     elif command.args.cmd == 'dev':
-        engrave = Engrave(command.args.src, command.args.dest)
+        engrave = Engrave(command.args.src, command.args.dest, mode='dev')
         await asyncio.create_task(engrave.dev())
         if command.args.server:
             addr, port = command.args.server.split(':')
