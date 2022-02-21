@@ -82,16 +82,16 @@ class Engrave:
             html = await self.template(str(src)).render_async()
         except TemplateSyntaxError as exception:
             if self.mode == 'build':
-                raise Exception
+                raise exception
             file = open(exception.filename, 'r')
             code = ''
             line_start = None
             for i, line in enumerate(file):
-                if (exception.lineno - i) <= 7 or (i - exception.lineno) >= 5:
+                if (exception.lineno - i+1) <= 10 or (i+1 - exception.lineno) >= 7:
                     if line_start is None:
                         line_start = i+1
                     code += line
-            tb = traceback.format_exc(limit=5)
+            tb = traceback.format_exc(limit=10)
             html = await self.template('error.html').render_async(
                 exception=exception,
                 code=code,
