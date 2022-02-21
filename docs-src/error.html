@@ -10,13 +10,14 @@
 <div class="container">
 <h1 style="text-align: center;"><el-tag class="error">Exception</el-tag></h1>
 <el-tag>Type</el-tag>
-<h2>{{type}}</h2>
-<el-tag>Value</el-tag>
-<p>{{value}}</p>
+<h2>{{exception.__class__}}</h2>
+<el-tag>Message</el-tag><br>
+{{exception.message}}<br>
 <el-tag>@</el-tag>
 {{exception.filename}}:{{exception.lineno}}
-<el-code>
-var test = 'a';
+{{line_start}}
+<el-code pre lang="">
+{{code}}
 </el-code>
 </div>
 {% endblock %}

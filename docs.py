@@ -6,7 +6,7 @@ from engrave import Engrave
 _dir = Path(__file__).parent
 
 async def parcel():
-    cmd = f"npx parcel watch 'docs-src/**/*.(scss|js|ts|png|jpg|svg)' --dist-dir='docs'"
+    cmd = f"npx parcel watch --no-cache 'docs-src/**/*.(scss|js|ts|png|jpg|svg)' --dist-dir='docs'"
     proc = await asyncio.create_subprocess_shell(cmd)
     await proc.communicate()
 
