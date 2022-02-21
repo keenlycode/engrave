@@ -34,3 +34,25 @@ pre code {
 .row {
     width: 100%;
 }
+
+blockquote {
+    margin: 0;
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-left: 4px solid blue;
+    background-color: #ddd;
+    border-radius: 5px;
+    border-top-left-radius: 0;
+}
+
+el-tag.title-block {
+    box-shadow: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+el-tag > code {
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+}

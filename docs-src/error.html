@@ -8,18 +8,29 @@
 
 {% block body %}
 <div class="container">
-<h1 style="text-align: center;"><el-tag class="error">Exception</el-tag></h1>
-<el-tag>Type</el-tag>
-<h2>{{exception.__class__}}</h2>
-<el-tag>Message</el-tag><br>
-{{exception.message}}<br>
-<el-tag>File</el-tag>
-{{exception.filename}}:{{exception.lineno}}
+<h1 style="text-align: center;"><el-tag class="error">Error</el-tag></h1>
+<div class="row">
+    <el-tag class="title-block">Type</el-tag>
+    <pre><code class="language-bash">{{exception.__class__}}</code></pre>
+</div>
+<div class="row">
+    <el-tag class="title-block">Message</el-tag>
+    <blockquote>
+    {{exception.message}}
+    </blockquote>
+</div>
+<div class="row">
+    <el-tag class="title-block">Traceback</el-tag>
+    <pre><code class="language-bash">{{tb}}</code></pre>
+</div>
+<div class="row">
+    <el-tag class="title-block">File
+        <code>{{exception.filename}}:{{exception.lineno}}</code>
+    </el-tag>
+</div>
 <pre class="line-numbers"
     data-start="{{line_start}}"
     data-line="{{exception.lineno}}"
-><code class="language-jinja2">
-{{code}}
-</code></pre>
+><code class="language-jinja2">{{code}}</code></pre>
 </div>
 {% endblock %}
