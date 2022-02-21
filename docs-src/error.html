@@ -13,11 +13,13 @@
 <h2>{{exception.__class__}}</h2>
 <el-tag>Message</el-tag><br>
 {{exception.message}}<br>
-<el-tag>@</el-tag>
+<el-tag>File</el-tag>
 {{exception.filename}}:{{exception.lineno}}
-{{line_start}}
-<el-code pre lang="">
+<pre class="line-numbers"
+    data-start="{{line_start}}"
+    data-line="{{exception.lineno}}"
+><code class="language-jinja2">
 {{code}}
-</el-code>
+</code></pre>
 </div>
 {% endblock %}

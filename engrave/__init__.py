@@ -1,11 +1,8 @@
-from inspect import trace
 from pathlib import Path
 import asyncio
 import re
 import shutil
 import argparse
-import sys
-import traceback
 
 from jinja2 import (
     Environment,
