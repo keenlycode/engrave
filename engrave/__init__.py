@@ -193,12 +193,14 @@ async def main():
         await engrave.build()
     elif command.args.cmd == 'dev':
         engrave = Engrave(command.args.src, command.args.dest, mode='dev')
-        await asyncio.create_task(engrave.dev())
+        dev_task = asyncio.create_task(engrave.dev())
         if command.args.server:
+            print('server')
             addr, port = command.args.server.split(':')
             port = int(port)
             server_task = asyncio.create_task(engrave.run_server(addr, port))
-            await server_task
+        await dev_task
+        await server_task
     else:
         print(command.parser.print_help())
 
