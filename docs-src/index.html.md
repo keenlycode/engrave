@@ -1,4 +1,4 @@
-<h1>Engrave</h1> <el-badge>Ver. 2.0.5</el-badge>
+<h1>Engrave</h1> <el-badge>Ver. 2.0.6</el-badge>
 
 Engrave is a tool to generate static website.
 
@@ -9,6 +9,7 @@ Engrave is a tool to generate static website.
 ## Changes from Ver. 1.x.x
 - Now `engrave` only handle html files. Due to the release of
   `parcel v2.0` which cover many features for other files.
+- Render error for debugging.
 
 ## Installation
 ```bash
@@ -16,7 +17,7 @@ $ pip install engrave
 ```
 
 ## Usage
-```
+```bash
 $ engrave -h
 usage: engrave [-h] {build,dev} ...
 

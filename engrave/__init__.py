@@ -3,11 +3,17 @@ import asyncio
 import re
 import shutil
 import argparse
+import traceback
+
 from jinja2 import (
     Environment,
     FileSystemLoader,
     select_autoescape,
-    pass_context)
+    pass_context,
+    TemplateSyntaxError,
+    UndefinedError,
+)
+
 import mistune
 from watchgod import awatch, Change
 from markupsafe import Markup
@@ -24,7 +30,10 @@ class Template:
 
         template = Environment(
             loader=FileSystemLoader(src_dir),
-            autoescape=select_autoescape(['html', 'xml'])
+            autoescape=select_autoescape(['html', 'xml']),
+            enable_async=True,
+            cache_size=0,
+            optimized=False,
         )
 
         template.globals.update(markdown=markdown)
@@ -34,7 +43,7 @@ class Template:
 
 
 class Engrave:
-    def __init__(self, src_dir: Path, dest_dir: Path):
+    def __init__(self, src_dir: Path, dest_dir: Path, mode: str = 'dev'):
         src_dir = Path(src_dir)
         dest_dir = Path(dest_dir)
         if not src_dir.exists():
@@ -42,6 +51,7 @@ class Engrave:
 
         self.src_dir = src_dir
         self.dest_dir = dest_dir
+        self.mode = mode
         self.template = Template(src_dir=src_dir, dest_dir=dest_dir).template
 
     async def build(self):
@@ -61,15 +71,42 @@ class Engrave:
             f"python -m http.server {port} --bind {addr} "
             f"--directory {self.dest_dir}"
         )
-        await proc.communicate()
+        try:
+            await proc.communicate()
+        except asyncio.CancelledError:
+            proc.terminate()
 
-    def _build_html(self, path: Path):
-        path = path.relative_to(self.src_dir)
-        html = self.template(str(path)).render()
-        dest = self.dest_dir.joinpath(str(path)).resolve()
+    async def _render_html(self, src: Path, render_exception=False):
+        src = src.relative_to(self.src_dir)
+        html = ''
+        try:
+            html = await self.template(str(src)).render_async()
+        except TemplateSyntaxError as exception:
+            if self.mode == 'build':
+                raise exception
+            file = open(exception.filename, 'r')
+            code = ''
+            line_start = None
+            for i, line in enumerate(file):
+                if (exception.lineno - i+1) <= 10 or (i+1 - exception.lineno) >= 7:
+                    if line_start is None:
+                        line_start = i+1
+                    code += line
+            tb = traceback.format_exc(limit=10)
+            html = await self.template('error.html').render_async(
+                exception=exception,
+                code=code,
+                line_start=line_start,
+                tb=tb,
+            )
+        except UndefinedError as exception:
+            return
+
+        dest = self.dest_dir.joinpath(str(src)).resolve()
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest = open(dest, 'w')
         dest.write(html)
+        dest.close()
 
     async def _file_watch(self):
         print('Watching files ...')
@@ -86,15 +123,15 @@ class Engrave:
         elif re.match('^_.*.html$', path.name):
             print(f"template: {path.relative_to(self.src_dir)}")
             for p in path.parent.glob('**/[!_]*.html'):
-                self._build_html(p)
+                await self._render_html(p)
                 print(f"template: {p.relative_to(self.src_dir)}")
         elif re.match('.*.html$', path.name):
-            self._build_html(path)
+            await self._render_html(path)
             print(f"template: {path.relative_to(self.src_dir)}")
         elif re.match('.*.html.*.md$', path.name):
             html_file_name = re.match('.*.html', path.name)[0]
             for p in path.parent.glob(html_file_name):
-                self._build_html(p)
+                await self._render_html(p)
                 print(f"template: {path.relative_to(self.src_dir)}")
 
     async def _file_change_handler(self, change, path: Path):
@@ -152,17 +189,16 @@ async def main():
     command = CommandParser()
     command.parse_args()
     if command.args.cmd == 'build':
-        builder = Engrave(command.args.src, command.args.dest)
-        await builder.build()
+        engrave = Engrave(command.args.src, command.args.dest, mode='build')
+        await engrave.build()
     elif command.args.cmd == 'dev':
-        builder = Engrave(command.args.src, command.args.dest)
-        dev_task = asyncio.create_task(builder.dev())
+        engrave = Engrave(command.args.src, command.args.dest, mode='dev')
+        await asyncio.create_task(engrave.dev())
         if command.args.server:
             addr, port = command.args.server.split(':')
             port = int(port)
-            server_task = asyncio.create_task(builder.run_server(addr, port))
+            server_task = asyncio.create_task(engrave.run_server(addr, port))
             await server_task
-        await dev_task
     else:
         print(command.parser.print_help())
 

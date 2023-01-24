@@ -2,8 +2,13 @@
 
 {% set to_root = './' %}
 
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="index.css?v={{_v}}">
+{% endblock %}
+
 {% block body %}
 <div class="container">
-{{markdown('index.html.md')}}
+{{markdown('index.html.md')a}}
 </div>
 {% endblock %}

@@ -16,10 +16,10 @@ async def asset():
     )
     print('Copy assets... Finished')
 
-
 async def docs():
-    cmd = f"npx parcel watch 'docs-src/**/*.(scss|js|ts|png|jpg|svg)' --dist-dir='docs'"
-    proc = await asyncio.create_subprocess_shell(cmd)
+    proc = f"npx parcel watch 'docs-src/**/*.(scss|js|ts|png|jpg|svg)' --dist-dir='docs'"
+    print(proc)
+    proc = await asyncio.create_subprocess_shell(proc)
     await proc.communicate()
 
 async def main():

@@ -10,7 +10,7 @@ hljs.highlightAll();
 
 Badge.define('el-badge');
 
-let _baseURL = new URL('./', document.currentScript.src);
+let _baseURL = new URL('./', document.currentScript!.src);
 let url = new URL('asset/fonts/FiraSans-Regular.ttf', _baseURL);
 
 addStyle`
