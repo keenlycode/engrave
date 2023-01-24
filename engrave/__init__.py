@@ -9,19 +9,20 @@ from jinja2 import (
     Environment,
     FileSystemLoader,
     select_autoescape,
-    contextfunction,
-    Markup,
+    pass_context,
     TemplateSyntaxError,
     UndefinedError,
 )
+
 import mistune
 from watchgod import awatch, Change
+from markupsafe import Markup
 
 
 class Template:
     def __init__(self, src_dir: Path, dest_dir: Path):
 
-        @contextfunction
+        @pass_context
         def markdown(ctx, path: str):
             html = src_dir.joinpath(ctx.name).parent.joinpath(path)
             html = mistune.html(open(html, 'r').read())
@@ -106,7 +107,6 @@ class Engrave:
         dest = open(dest, 'w')
         dest.write(html)
         dest.close()
-
 
     async def _file_watch(self):
         print('Watching files ...')

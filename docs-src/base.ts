@@ -1,25 +1,41 @@
-import { define } from 'gadjet/src/ui/ui';
-import { Badge } from 'gadjet/src/ui/badge/badge';
-import { Tag } from 'gadjet/src/ui/tag/tag';
-import Prism from 'prismjs';
-Prism;
-import 'prismjs/components/prism-markup-templating';
-import 'prismjs/components/prism-django';
-import 'prismjs/plugins/line-numbers/prism-line-numbers';
-import 'prismjs/plugins/line-highlight/prism-line-highlight';
-import { addStyle } from 'gadjet/src/style';
+import hljs from 'highlight.js/lib/core';
+import bash from 'highlight.js/lib/languages/bash';
+import {
+    addStyle,
+    Badge
+} from 'gadjet/src/gadjet';
 
-define('el-badge', Badge);
-define('el-tag', Tag);
+hljs.registerLanguage('bash', bash);
+hljs.highlightAll();
 
-Tag.classStyle('error', {
-    color: 'red'
-})
+Badge.define('el-badge');
+
+let _baseURL = new URL('./', document.currentScript!.src);
+let url = new URL('asset/fonts/FiraSans-Regular.ttf', _baseURL);
 
 addStyle`
-pre[class*="language-"] {
-    border: 0;
-    margin-top: 0;
-    border-top-left-radius: 0;
+@font-face {
+    font-family: 'sans';
+    src: url('${url.toString()}') format('woff2');
+}
+
+html {
+    font-family: sans;
+    padding-bottom: 20vh;
+    line-height: 1.7;
+}
+
+code {
+    border-radius: 4px;
+    background-color: #444;
+    color: white;
+    padding: 0.25rem;
+}
+
+.container {
+    max-width: 1000px;
+    min-width: 280px;
+    width: 90%;
+    margin: auto;
 }
 `

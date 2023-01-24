@@ -1,12 +1,8 @@
 {
   "devDependencies": {
-    "@parcel/transformer-sass": "^2.2.1",
-    "gadjet": "^0.1.9",
-    "highlight.js": "^11.4.0",
-    "parcel": "^2.2.1"
-  },
-  "dependencies": {
-    "prism-themes": "^1.9.0",
-    "prismjs": "^1.26.0"
+    "@parcel/transformer-sass": "^2.8.3",
+    "gadjet": "^1.0.4",
+    "highlight.js": "^11.7.0",
+    "parcel": "^2.8.3"
   }
 }
