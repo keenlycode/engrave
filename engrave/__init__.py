@@ -43,7 +43,12 @@ class Template:
 
 
 class Engrave:
-    def __init__(self, src_dir: Path, dest_dir: Path, mode: str = 'dev'):
+    def __init__(self,
+            src_dir: Path,
+            dest_dir: Path,
+            asset: str = None,
+            mode: str = 'dev'):
+
         src_dir = Path(src_dir)
         dest_dir = Path(dest_dir)
         if not src_dir.exists():
@@ -51,6 +56,7 @@ class Engrave:
 
         self.src_dir = src_dir
         self.dest_dir = dest_dir
+        self.asset = asset
         self.mode = mode
         self.template = Template(src_dir=src_dir, dest_dir=dest_dir).template
 
@@ -115,25 +121,6 @@ class Engrave:
                 path = Path(path)
                 await self._file_change_handler(change, path)
 
-    async def _file_handler(self, path: Path):
-        if path.is_dir():
-            return
-            
-        # Handle HTML files
-        elif re.match('^_.*.html$', path.name):
-            print(f"template: {path.relative_to(self.src_dir)}")
-            for p in path.parent.glob('**/[!_]*.html'):
-                await self._render_html(p)
-                print(f"template: {p.relative_to(self.src_dir)}")
-        elif re.match('.*.html$', path.name):
-            await self._render_html(path)
-            print(f"template: {path.relative_to(self.src_dir)}")
-        elif re.match('.*.html.*.md$', path.name):
-            html_file_name = re.match('.*.html', path.name)[0]
-            for p in path.parent.glob(html_file_name):
-                await self._render_html(p)
-                print(f"template: {path.relative_to(self.src_dir)}")
-
     async def _file_change_handler(self, change, path: Path):
         if change == Change.deleted:
             path = path.relative_to(self.src_dir)
@@ -146,6 +133,29 @@ class Engrave:
         if (change == Change.added or
                 change == Change.modified):
             await self._file_handler(path)
+
+    async def _file_handler(self, path: Path):
+        if path.is_dir():
+            return
+
+        match = re.match('.*(.html$|.html.*.md$)', path.name)
+        if match:
+            await self._html_handler(path)
+
+    async def _html_handler(self, path: Path):
+        if re.match('^_.*.html$', path.name):
+            print(f"template: {path.relative_to(self.src_dir)}")
+            for p in path.parent.glob('**/[!_]*.html'):
+                await self._render_html(p)
+                print(f"template: {p.relative_to(self.src_dir)}")
+        elif re.match('.*.html$', path.name):
+            await self._render_html(path)
+            print(f"template: {path.relative_to(self.src_dir)}")
+        elif re.match('.*.html.*.md$', path.name):
+            html_file_name = re.match('.*.html', path.name)[0]
+            for p in path.parent.glob(html_file_name):
+                await self._render_html(p)
+                print(f"template: {path.relative_to(self.src_dir)}")
 
 
 class CommandParser:
@@ -167,19 +177,26 @@ class CommandParser:
         parser = self.sub_parser.add_parser(
             'dev',
             help='Build html and watch for changes')
+        parser.add_argument('src', help='Source directory')
+        parser.add_argument('dest', help='Destination directory')
         parser.add_argument(
             '--server',
             nargs='?',
             const='0.0.0.0:8000',
             default=None,
-            metavar='addr:port',
+            metavar='host:port',
             help=(
                 "set development http server address and port, "
                 "default to 0.0.0.0:8000"
             )
         )
-        parser.add_argument('src', help='Source directory')
-        parser.add_argument('dest', help='Destination directory')
+        parser.add_argument(
+            '--asset',
+            nargs='+',
+            metavar='RegExp',
+            default=None,
+            help="Regular expression string to match asset files",        
+        )
 
     def parse_args(self):
         self.args = self.parser.parse_args()
