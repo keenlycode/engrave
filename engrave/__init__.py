@@ -15,7 +15,7 @@ from jinja2 import (
 )
 
 import mistune
-from watchgod import awatch, Change
+from watchfiles import awatch, Change
 from markupsafe import Markup
 
 
