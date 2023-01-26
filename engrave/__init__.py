@@ -81,18 +81,6 @@ class Engrave:
 
         await asyncio.gather(*tasks)
 
-    async def build(self):
-        for path in self.src_dir.glob('**/*'):
-            path = Path(path)
-            if re.match('^_.*.html$', path.name):
-                continue
-            await self._file_handler(path)
-        print("\n✔ Build finished\n")
-
-    async def dev(self):
-        await self.build()
-        await self._file_watch()
-
     async def run_server(self, addr="0.0.0.0", port=8000):
         proc = await asyncio.create_subprocess_shell(
             f"python -m http.server {port} --bind {addr} "
