@@ -231,8 +231,7 @@ class CommandParser:
         self._add_server_option(parser)
 
     def make_dev_parser(self):
-        parser = self.sub_parser.add_parser(
-            'dev',
+        parser = self.sub_parser.add_parser('dev',
             help='Build html and watch for changes')
         parser.add_argument('src', help='Source directory')
         parser.add_argument('dest', help='Destination directory')
