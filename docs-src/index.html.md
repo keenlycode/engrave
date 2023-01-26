@@ -1,4 +1,4 @@
-<h1>Engrave</h1> <el-badge>Ver. 2.1.0</el-badge>
+<h1>Engrave</h1> <el-badge>Ver. 2.1.1</el-badge>
 
 Engrave is a tool to generate static website.
 
