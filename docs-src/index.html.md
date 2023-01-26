@@ -1,10 +1,11 @@
-<h1>Engrave</h1> <el-badge>Ver. 2.0.7</el-badge>
+<h1>Engrave</h1> <el-badge>Ver. 2.1.0</el-badge>
 
 Engrave is a tool to generate static website.
 
 ## Features
 - Write contents in HTML and Markdown.
 - HTML template with Jinja2
+- new in V2.1.0: 
 
 ## Changes from Ver. 1.x.x
 - Now `engrave` only handle html files. Due to the release of
