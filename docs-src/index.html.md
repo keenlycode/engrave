@@ -5,7 +5,8 @@ Engrave is a tool to generate static website.
 ## Features
 - Write contents in HTML and Markdown.
 - HTML template with Jinja2
-- new in V2.1.0: 
+- <el-badge>new in V2.1.0</el-badge> : Use `--asset=<RegEx>` to watch and copy asset files.  
+  If `<RegEx>` is not provided, default to: `.*.(apng|avif|gif|jpg|png|svg|webp|ttf|otf|woff|woff2|eot|mp4|webm|3gp|ogg)`
 
 ## Changes from Ver. 1.x.x
 - Now `engrave` only handle html files. Due to the release of
