@@ -15,7 +15,7 @@ from jinja2 import (
 )
 
 import mistune
-from watchgod import awatch, Change
+from watchfiles import awatch, Change
 from markupsafe import Markup
 
 
@@ -43,16 +43,43 @@ class Template:
 
 
 class Engrave:
-    def __init__(self, src_dir: Path, dest_dir: Path, mode: str = 'dev'):
+    def __init__(self,
+            src_dir: Path,
+            dest_dir: Path,
+            asset: str = None,
+            mode: str = 'dev',
+            server: str = None):
+
         src_dir = Path(src_dir)
         dest_dir = Path(dest_dir)
         if not src_dir.exists():
             raise Exception(f"Source directory not found -> '{src_dir}'")
 
-        self.src_dir = src_dir
-        self.dest_dir = dest_dir
-        self.mode = mode
-        self.template = Template(src_dir=src_dir, dest_dir=dest_dir).template
+        self.src_dir: Path = src_dir
+        self.dest_dir: Path = dest_dir
+        self.mode: str = mode
+        self.asset: str = asset
+        self.server: str = server
+        self.template: Template = Template(src_dir=src_dir, dest_dir=dest_dir).template
+
+    async def run(self):
+        tasks = []
+        for path in self.src_dir.glob('**/*'):
+            path = Path(path)
+            if re.match('^_.*.html$', path.name):
+                continue
+            await self._file_handler(path)
+        print("\n✔ Build finished\n")
+
+        if self.mode == 'dev':
+            file_watch_task = asyncio.create_task(self._file_watch())
+            tasks.append(file_watch_task)
+
+        if self.server:
+            server_task = asyncio.create_task(self.run_server())
+            tasks.append(server_task)
+
+        await asyncio.gather(*tasks)
 
     async def build(self):
         for path in self.src_dir.glob('**/*'):
@@ -115,12 +142,31 @@ class Engrave:
                 path = Path(path)
                 await self._file_change_handler(change, path)
 
+    async def _file_change_handler(self, change, path: Path):
+        if change == Change.deleted:
+            path = path.resolve().relative_to(self.src_dir.resolve())
+            path = self.dest_dir.joinpath(path)
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink(missing_ok=True)
+            print(f"delete: {path.relative_to(self.dest_dir)}")
+        if (change == Change.added or
+                change == Change.modified):
+            await self._file_handler(path)
+
     async def _file_handler(self, path: Path):
         if path.is_dir():
             return
-            
-        # Handle HTML files
-        elif re.match('^_.*.html$', path.name):
+
+        if re.match('.*(.html$|.html.*.md$)', path.name):
+            await self._html_handler(path)
+
+        if (self.asset) and (re.match(self.asset, path.name)):
+            await self._asset_handler(path)
+
+    async def _html_handler(self, path: Path):
+        if re.match('^_.*.html$', path.name):
             print(f"template: {path.relative_to(self.src_dir)}")
             for p in path.parent.glob('**/[!_]*.html'):
                 await self._render_html(p)
@@ -134,19 +180,12 @@ class Engrave:
                 await self._render_html(p)
                 print(f"template: {path.relative_to(self.src_dir)}")
 
-    async def _file_change_handler(self, change, path: Path):
-        if change == Change.deleted:
-            path = path.relative_to(self.src_dir)
-            path = self.dest_dir.joinpath(path)
-            if path.is_dir():
-                shutil.rmtree(path)
-            else:
-                path.unlink(missing_ok=True)
-            print(f"delete: {path.relative_to(self.dest_dir)}")
-        if (change == Change.added or
-                change == Change.modified):
-            await self._file_handler(path)
-
+    async def _asset_handler(self, path: Path):
+        path_relative = path.resolve().relative_to(self.src_dir.resolve())
+        dest = self.dest_dir.joinpath(path_relative)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        print(f"asset: {path_relative}")
+        shutil.copyfile(path, dest)
 
 class CommandParser:
     def __init__(self):
@@ -158,28 +197,46 @@ class CommandParser:
         self.make_build_parser()
         self.make_dev_parser()
 
-    def make_build_parser(self):
-        parser = self.sub_parser.add_parser('build', help='Build html')
-        parser.add_argument('src', help='Source directory')
-        parser.add_argument('dest', help='Destination directory')
-
-    def make_dev_parser(self):
-        parser = self.sub_parser.add_parser(
-            'dev',
-            help='Build html and watch for changes')
+    def _add_server_option(self, parser):
         parser.add_argument(
             '--server',
             nargs='?',
             const='0.0.0.0:8000',
             default=None,
-            metavar='addr:port',
+            metavar='host:port',
             help=(
                 "set development http server address and port, "
                 "default to 0.0.0.0:8000"
             )
         )
+
+    def _add_asset_option(self, parser):
+        parser.add_argument(
+            '--asset',
+            nargs='?',
+            const='.*.('+\
+                'apng|avif|gif|jpg|png|svg|webp|ttf|otf|woff|woff2|eot|' +\
+                'mp4|webm|3gp|ogg'
+            ')',
+            metavar='RegExp',
+            default=None,
+            help="Regular expression string to match asset files",        
+        )
+
+    def make_build_parser(self):
+        parser = self.sub_parser.add_parser('build', help='Build html')
         parser.add_argument('src', help='Source directory')
         parser.add_argument('dest', help='Destination directory')
+        self._add_asset_option(parser)
+        self._add_server_option(parser)
+
+    def make_dev_parser(self):
+        parser = self.sub_parser.add_parser('dev',
+            help='Build html and watch for changes')
+        parser.add_argument('src', help='Source directory')
+        parser.add_argument('dest', help='Destination directory')
+        self._add_asset_option(parser)
+        self._add_server_option(parser)
 
     def parse_args(self):
         self.args = self.parser.parse_args()
@@ -188,18 +245,11 @@ class CommandParser:
 async def main():
     command = CommandParser()
     command.parse_args()
-    if command.args.cmd == 'build':
-        engrave = Engrave(command.args.src, command.args.dest, mode='build')
-        await engrave.build()
-    elif command.args.cmd == 'dev':
-        engrave = Engrave(command.args.src, command.args.dest, mode='dev')
-        dev_task = asyncio.create_task(engrave.dev())
-        if command.args.server:
-            print('server')
-            addr, port = command.args.server.split(':')
-            port = int(port)
-            server_task = asyncio.create_task(engrave.run_server(addr, port))
-        await dev_task
-        await server_task
-    else:
-        print(command.parser.print_help())
+    engrave = Engrave(
+        command.args.src,
+        command.args.dest,
+        mode=command.args.cmd,
+        asset=command.args.asset,
+        server=command.args.server)
+    
+    await engrave.run()
