@@ -1,0 +1,68 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    
+    <title>Engrave static website</title>
+    
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fafafa">
+
+    <link rel="stylesheet" href="base.css?v=2">
+    <script defer src="base.js?v=2"></script>
+    
+
+<link rel="stylesheet" href="index.css?v=2">
+
+</head>
+
+<body>
+
+
+<div class="container">
+<h1>Engrave</h1> <el-badge>Ver. 2.1.1</el-badge>
+<p>Engrave is a tool to generate static website.</p>
+<h2>Features</h2>
+<ul>
+<li>Write contents in HTML and Markdown.</li>
+<li>HTML template with Jinja2</li>
+<li><el-badge>new in V2.1.0</el-badge> : Use <code>--asset=&lt;RegEx&gt;</code> to watch and copy asset files.<br />
+If <code>&lt;RegEx&gt;</code> is not provided, default to: <code>.*.(apng|avif|gif|jpg|png|svg|webp|ttf|otf|woff|woff2|eot|mp4|webm|3gp|ogg)</code></li>
+</ul>
+<h2>Changes from Ver. 1.x.x</h2>
+<ul>
+<li>Now <code>engrave</code> only handle html files. Due to the release of
+<code>parcel v2.0</code> which cover many features for other files.</li>
+<li>Render error for debugging.</li>
+</ul>
+<h2>Installation</h2>
+<pre><code class="language-bash">$ pip install engrave
+</code></pre>
+<h2>Usage</h2>
+<pre><code class="language-bash">$ engrave -h
+usage: engrave [-h] {build,dev} ...
+
+Static website generator
+
+positional arguments:
+  {build,dev}
+    build            Build html
+    dev              Build html and watch for changes
+</code></pre>
+<h2>Example</h2>
+<p>This document is made by <strong>Engrave</strong> and it's a good example how engrave works.
+See document's source code at
+<a href="https://github.com/nitipit/engrave/tree/main/docs-src">https://github.com/nitipit/engrave/tree/main/docs-src</a></p>
+<p>To build this document and run development server, use command below</p>
+<pre><code class="language-bash">$ git clone https://github.com/nitipit/engrave.git
+$ cd engrave
+$ npm install # Install Node Libraries
+$ engrave dev docs-src docs --server
+</code></pre>
+
+</div>
+
+</body>
+</html>

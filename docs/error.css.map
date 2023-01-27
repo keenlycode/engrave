@@ -1,0 +1,1 @@
+{"mappings":"AAAA;;;;AAIA","sources":["docs-src/error.scss"],"sourcesContent":["h1 {\n    margin-bottom: 2rem;\n}\n\nel-tag.title-block {\n    margin-top: 1rem;\n}"],"names":[],"version":3,"file":"error.css.map","sourceRoot":"../"}

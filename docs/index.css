@@ -1,0 +1,9 @@
+h2 {
+  margin: 1rem 0 .2rem;
+}
+
+h2 ~ ul {
+  margin-top: 0;
+}
+
+/*# sourceMappingURL=index.css.map */

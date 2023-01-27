@@ -1,0 +1,1 @@
+{"mappings":"AAAA;;;;AAMA","sources":["docs-src/index.scss"],"sourcesContent":["h2 {\n    margin: 0;\n    margin-top: 1rem;\n    margin-bottom: 0.2rem;\n}\n\nh2 ~ ul {\n    margin-top: 0;\n}"],"names":[],"version":3,"file":"index.css.map","sourceRoot":"../"}
