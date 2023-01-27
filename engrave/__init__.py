@@ -50,8 +50,8 @@ class Engrave:
             mode: str = 'dev',
             server: str = None):
 
-        src_dir = Path(src_dir)
-        dest_dir = Path(dest_dir)
+        src_dir = Path(src_dir).resolve()
+        dest_dir = Path(dest_dir).resolve()
         if not src_dir.exists():
             raise Exception(f"Source directory not found -> '{src_dir}'")
 
@@ -80,18 +80,6 @@ class Engrave:
             tasks.append(server_task)
 
         await asyncio.gather(*tasks)
-
-    async def build(self):
-        for path in self.src_dir.glob('**/*'):
-            path = Path(path)
-            if re.match('^_.*.html$', path.name):
-                continue
-            await self._file_handler(path)
-        print("\n✔ Build finished\n")
-
-    async def dev(self):
-        await self.build()
-        await self._file_watch()
 
     async def run_server(self, addr="0.0.0.0", port=8000):
         proc = await asyncio.create_subprocess_shell(
@@ -129,7 +117,7 @@ class Engrave:
         except UndefinedError as exception:
             return
 
-        dest = self.dest_dir.joinpath(str(src)).resolve()
+        dest = self.dest_dir.joinpath(str(src))
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest = open(dest, 'w')
         dest.write(html)
@@ -144,7 +132,7 @@ class Engrave:
 
     async def _file_change_handler(self, change, path: Path):
         if change == Change.deleted:
-            path = path.resolve().relative_to(self.src_dir.resolve())
+            path = path.relative_to(self.src_dir)
             path = self.dest_dir.joinpath(path)
             if path.is_dir():
                 shutil.rmtree(path)
@@ -181,7 +169,7 @@ class Engrave:
                 print(f"template: {path.relative_to(self.src_dir)}")
 
     async def _asset_handler(self, path: Path):
-        path_relative = path.resolve().relative_to(self.src_dir.resolve())
+        path_relative = path.relative_to(self.src_dir)
         dest = self.dest_dir.joinpath(path_relative)
         dest.parent.mkdir(parents=True, exist_ok=True)
         print(f"asset: {path_relative}")
