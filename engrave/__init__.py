@@ -204,8 +204,8 @@ class CommandParser:
             nargs='?',
             const='.*.('+\
                 'apng|avif|gif|jpg|png|svg|webp|ttf|otf|woff|woff2|eot|' +\
-                'mp4|webm|3gp|ogg'
-            ')',
+                'mp4|webm|3gp|ogg)' +\
+                '|sitemap*.xml$|robot*.txt$',
             metavar='RegExp',
             default=None,
             help="Regular expression string to match asset files",        
