@@ -1,46 +1,62 @@
 # Built-in lib
 from collections.abc import Callable
 from pathlib import Path
+from typing import cast
 
 import jinja2  # type: ignore
 import mistune  # type: ignore
 from markupsafe import Markup
 
 
-def _markdown_to_html(text: str) -> str:
-    return mistune.html(text)
+def get_template(
+        *args,
+        src_dir: str | Path,
+        markdown_to_html: Callable[[str], str] | None = None,
+        **kw,
+):
+    """
+    Creates a Jinja2 environment with markdown parsing capabilities.
 
-class Template:
+    Args:
+        src_dir: Directory containing template files
+        markdown_to_html: Optional custom markdown parser function
+        *args, **kw: Additional arguments passed to jinja2.Environment
 
-    markdown_to_html: Callable[[str], str] = mistune.html
+    Returns:
+        A configured Jinja2 environment with markdown support
+    """
+    # Use mistune as default markdown parser if none provided
+    if not markdown_to_html:
+        markdown_to_html = mistune.html  # type: ignore
+    markdown_to_html = cast(Callable[[str], str], markdown_to_html)
 
-    def __init__(
-                self,
-                *,
-                src_dir: Path,
-                dest_dir: Path,
-                markdown_to_html: Callable[[str], str] | None = None,
-                jinja_env: jinja2.Environment | None = None,
-        ):
+    @jinja2.pass_context
+    def _markdown(ctx, path: str | Path) -> str:
+        """
+        Jinja2 filter/function to load and parse markdown files
 
-        if markdown_to_html:
-            self.markdown_to_html = markdown_to_html
+        Usage in template: {{ markdown('path/to/file.md') }}
+        """
+        _path: Path | None = None
+        for search_dir in ctx.environment.loader.searchpath:
+            search_dir = Path(search_dir)
+            _path = search_dir.joinpath(ctx.name).parent.joinpath(path)
+            if _path.exists():
+                break
 
-        @jinja2.pass_context
-        def _markdown(ctx, path: str | Path) -> str:
-            path = src_dir.joinpath(ctx.name).parent.joinpath(path)
-            text: str = open(path, 'r').read()
-            return Markup(self.markdown_to_html(text))
+        if not _path:
+            raise Exception(f'Markdown file not found: {path}')
 
-        template = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(src_dir),
-            enable_async=True,
-            cache_size=0,
-            optimized=False,
-        )
+        text: str = open(_path, "r").read()
+        return Markup(markdown_to_html(text))
 
-        template.globals.update(markdown=_markdown)
+    # Create Jinja2 environment with file system loader
+    template_env = jinja2.Environment(*args, **kw, loader=jinja2.FileSystemLoader(src_dir))
 
-        self.src_dir = src_dir
-        self.dest_dir = dest_dir
-        self.template = template.get_template
+    # Register markdown function in template environment
+    template_env.globals.update(markdown=_markdown)
+
+    # You can also use it as a filter if needed: {{ content|markdown_filter }}
+    template_env.filters['markdown'] = lambda text: Markup(markdown_to_html(text))
+
+    return template_env
