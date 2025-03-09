@@ -1,6 +1,4 @@
-from typing import (
-    Union,
-)
+from typing import Union
 
 from pathlib import Path
 
@@ -14,8 +12,8 @@ from engrave.template import get_template
 
 
 def create_fastapi(
+    *,
     dir_template: Union[str, Path],
-    **jinja2_kwargs,
 ) -> FastAPI:
 
     fast_api = FastAPI()
