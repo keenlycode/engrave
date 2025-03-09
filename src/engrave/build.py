@@ -65,7 +65,7 @@ def build(
     dir_dest.mkdir(parents=True, exist_ok=True)
 
     # Find all HTML files in the source directory
-    gen_html_files = (path for path in iglob(str(dir_src / '**/*.html'), recursive=True) if Path(path).is_file())
+    gen_path_html = (path for path in iglob(str(dir_src / '**/*.html'), recursive=True) if Path(path).is_file())
 
     # Copy non-HTML files (assets) to destination
     for path_src in iglob(str(dir_src / "**/*"), recursive=True):
@@ -93,6 +93,6 @@ def build(
 
     # Process HTML files with thread pool for better performance
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        executor.map(process_html_file, gen_html_files)
+        executor.map(process_html_file, gen_path_html)
 
     logger.info("Build complete")
