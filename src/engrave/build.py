@@ -1,40 +1,35 @@
-import shutil
 from pathlib import Path
 from glob import iglob
+import re
+import shutil
 from typing import (
     Union,
     List,
+    Tuple,
 )
-import logging
+from typing_extensions import Generator
+from loguru import logger
 from concurrent.futures import ThreadPoolExecutor
 
 from engrave.template import get_template
 
-logger = logging.getLogger(__name__)
 
-
-def process_html_file(
+def build_html(
+        *,
         path_html: Path,
         dir_src: Path,
         dir_dest: Path,
-        list_glob_exclude: List[str] = [],
 ) -> None:
-
     # Get template loader
     template = get_template(dir_src=dir_src)
 
     # Get relative path from source directory
     path_rel = path_html.relative_to(dir_src)
 
-    # Skip files matching excluded patterns
-    for pattern in list_glob_exclude:
-        if path_html.match(pattern):
-            logger.info(f"Skipping excluded file: {path_rel}")
-            return
-
     # Create output directory if needed
     path_dest = dir_dest / path_rel
     path_dest.parent.mkdir(parents=True, exist_ok=True)
+    logger.info(path_dest)
 
     # Write rendered content to output file
     with open(path_dest, 'w', encoding='utf-8') as file:
@@ -43,9 +38,29 @@ def process_html_file(
     logger.info(f"Built: {path_rel}")
 
 
+def copy_asset(
+        *,
+        path_asset: Path,
+        dir_src: Path,
+        dir_dest: Path,
+) -> None:
+    # Get relative path from source directory
+    path_rel = path_asset.relative_to(dir_src)
+
+    # Create output directory if needed
+    path_dest = dir_dest / path_rel
+    path_dest.parent.mkdir(parents=True, exist_ok=True)
+
+    # Copy the asset file
+    shutil.copy2(path_asset, path_dest)
+    logger.info(f"Copied asset: {path_rel}")
+
+
 def build(
+        *,
         dir_src: Union[str, Path],
         dir_dest: Union[str, Path],
+        asset_regex: str | None = None,
         list_glob_exclude: List[str] = [],
         max_workers: int | None = None
 ) -> None:
@@ -65,34 +80,42 @@ def build(
     dir_dest.mkdir(parents=True, exist_ok=True)
 
     # Find all HTML files in the source directory
-    gen_path_html = (path for path in iglob(str(dir_src / '**/*.html'), recursive=True) if Path(path).is_file())
+    gen_path_html = (
+        Path(path) for path in iglob(str(dir_src / '**/*.html'), recursive=True)
+        if Path(path).is_file()
+            and not any(Path(path).match(pattern) for pattern in list_glob_exclude)
+    )
 
-    # Copy non-HTML files (assets) to destination
-    for path_src in iglob(str(dir_src / "**/*"), recursive=True):
-        path_src = Path(path_src)
-        if path_src.is_file() and not path_src.name.endswith('.html'):
-            # Skip files matching excluded patterns
-            should_skip = False
-            for pattern in list_glob_exclude:
-                if path_src.match(pattern):
-                    should_skip = True
-                    break
+    # Find all asset files if patterns are provided
+    gen_path_asset: Generator[Path, None, None] | Tuple[Path, ...] = ()
+    if asset_regex:
+        # Compile all regex patterns for assets
+        pattern_asset_regex = re.compile(asset_regex)
 
-            if should_skip:
-                continue
-
-            rel_path = path_src.relative_to(dir_src)
-            path_dest = dir_dest / rel_path
-
-            # Create output directory if needed
-            path_dest.parent.mkdir(parents=True, exist_ok=True)
-
-            # Copy the file
-            shutil.copy2(path_src, path_dest)
-            logger.info(f"Copied: {rel_path}")
+        # Find all files using regex matching
+        gen_path_asset = (
+            Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True)
+            if Path(path).is_file()
+                and pattern_asset_regex.search(str(path))
+                and not any(Path(path).match(pattern) for pattern in list_glob_exclude)
+        )
 
     # Process HTML files with thread pool for better performance
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        executor.map(process_html_file, gen_path_html)
+        executor.map(
+            lambda path: build_html(
+                path_html=path,
+                dir_src=dir_src,
+                dir_dest=dir_dest,
+            ),
+            gen_path_html)
+
+        executor.map(
+            lambda path: copy_asset(
+                path_asset=path,
+                dir_src=dir_src,
+                dir_dest=dir_dest,
+            ),
+            gen_path_asset)
 
     logger.info("Build complete")

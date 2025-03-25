@@ -19,7 +19,7 @@ def create_fastapi(
     fast_api = FastAPI()
     template = get_template(dir_src=dir_template)
 
-    @fast_api.get("/{path:path}", response_class=HTMLResponse)
+    @fast_api.get("/{path:path}")
     async def render(request: Request, path: str):
         # Default to index.html if path is a directory-like
         if not path or path.endswith("/"):
@@ -29,7 +29,7 @@ def create_fastapi(
 
         # Use engrave.template for HTML files, otherwise serve as static file
         if path.endswith('.html'):
-            return template(path).render(request=request)
+            return HTMLResponse(template(path).render(request=request))
         else:
             file_path = Path(dir_template) / path
             if file_path.exists() and file_path.is_file():
