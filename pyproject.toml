@@ -12,3 +12,6 @@ dependencies = [
     "typer>=0.15.2",
     "uvicorn>=0.34.0",
 ]
+
+[project.scripts]
+engrave = "engrave.cli:main"
