@@ -1,14 +1,421 @@
-{% extends '_base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engrave CLI Documentation</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --bg-color: #f8f9fa;
+            --code-bg: #f0f0f0;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
 
-{% set to_root = './' %}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-{% block head %}
-{{ super() }}
-<link rel="stylesheet" href="index.css?v={{_v}}">
-{% endblock %}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 0;
+        }
 
-{% block body %}
-<div class="container">
-{{markdown('index.html.md')}}
-</div>
-{% endblock %}
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--secondary-color);
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .cmd-box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .cmd-title {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .cmd-content {
+            padding: 1.5rem;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .option {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .option:last-child {
+            border-bottom: none;
+        }
+
+        .option-name {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .optional {
+            background-color: #2ecc71;
+        }
+
+        .required {
+            background-color: var(--accent-color);
+        }
+
+        nav {
+            background-color: #2c3e50;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+        }
+
+        .nav-list li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-list a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-list a:hover {
+            color: var(--primary-color);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .examples {
+            margin-top: 1.5rem;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--primary-color);
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+            }
+
+            .nav-list {
+                margin-top: 1rem;
+            }
+
+            .nav-list li {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Engrave CLI Documentation</h1>
+        <p>A static site generator with live preview capability</p>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Engrave</div>
+            <ul class="nav-list">
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#build">Build</a></li>
+                <li><a href="#serve">Serve</a></li>
+                <li><a href="#version">Version</a></li>
+                <li><a href="#examples">Examples</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>Engrave is a static site generator with live preview capability. It provides a CLI interface for building static HTML sites from templates and serving them with a development server that features live previews.</p>
+
+            <p>The CLI offers three main commands:</p>
+            <ul>
+                <li><code>build</code> - Build static HTML files from templates</li>
+                <li><code>serve</code> - Start a development server with live preview</li>
+                <li><code>version</code> - Display the version of Engrave</li>
+            </ul>
+        </section>
+
+        <section id="build">
+            <h2>Build Command</h2>
+            <div class="cmd-box">
+                <div class="cmd-title">engrave build</div>
+                <div class="cmd-content">
+                    <p>Build static HTML files from templates.</p>
+
+                    <h3>Arguments</h3>
+                    <div class="option">
+                        <span class="option-name">src_dir</span>
+                        <span class="tag required">Required</span>
+                        <p>Source directory containing templates. This directory must exist and be a directory, not a file.</p>
+                    </div>
+
+                    <div class="option">
+                        <span class="option-name">dest_dir</span>
+                        <span class="tag required">Required</span>
+                        <p>Destination directory for built HTML files. The directory will be created if it doesn't exist.</p>
+                    </div>
+
+                    <h3>Options</h3>
+                    <div class="option">
+                        <span class="option-name">--asset, -a</span>
+                        <span class="tag optional">Optional</span>
+                        <p>Asset regex pattern to copy. Default: None</p>
+                    </div>
+
+                    <div class="option">
+                        <span class="option-name">--exclude, -e</span>
+                        <span class="tag optional">Optional</span>
+                        <p>Glob patterns to exclude. This option can be used multiple times to specify multiple patterns.</p>
+                        <p>Default: ["**/*.layout.html"] is always included in the exclusion list.</p>
+                    </div>
+
+                    <div class="option">
+                        <span class="option-name">--workers, -w</span>
+                        <span class="tag optional">Optional</span>
+                        <p>Maximum number of worker threads. Default: None (system decides)</p>
+                    </div>
+
+                    <div class="option">
+                        <span class="option-name">--log, -l</span>
+                        <span class="tag optional">Optional</span>
+                        <p>Set Log Level (DEBUG, INFO, WARNING, ERROR, CRITICAL). Default: INFO</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="serve">
+            <h2>Serve Command</h2>
+            <div class="cmd-box">
+                <div class="cmd-title">engrave serve</div>
+                <div class="cmd-content">
+                    <p>Start a development server with live preview.</p>
+
+                    <h3>Arguments</h3>
+                    <div class="option">
+                        <span class="option-name">template_dir</span>
+                        <span class="tag required">Required</span>
+                        <p>Directory containing templates. This directory must exist and be a directory, not a file.</p>
+                    </div>
+
+                    <h3>Options</h3>
+                    <div class="option">
+                        <span class="option-name">--host, -h</span>
+                        <span class="tag optional">Optional</span>
+                        <p>Host to bind the server to. Default: 127.0.0.1</p>
+                    </div>
+
+                    <div class="option">
+                        <span class="option-name">--port, -p</span>
+                        <span class="tag optional">Optional</span>
+                        <p>Port to bind the server to. Default: 8000</p>
+                    </div>
+
+                    <div class="option">
+                        <span class="option-name">--log, -l</span>
+                        <span class="tag optional">Optional</span>
+                        <p>Set Log Level (DEBUG, INFO, WARNING, ERROR, CRITICAL). Default: INFO</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="version">
+            <h2>Version Command</h2>
+            <div class="cmd-box">
+                <div class="cmd-title">engrave version</div>
+                <div class="cmd-content">
+                    <p>Display the version of Engrave.</p>
+                    <p>This command has no arguments or options.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples">
+            <h2>Examples</h2>
+
+            <h3>Build Command Examples</h3>
+            <pre><code>engrave build ./templates ./output</code></pre>
+            <p>Build static HTML files from templates in ./templates directory into ./output directory.</p>
+
+            <pre><code>engrave build ./templates ./output --asset ".*\\.(css|js|png|jpg|svg)$" --exclude "**/_drafts/*.html" -w 4</code></pre>
+            <p>Build static HTML files with specified asset regex pattern, excluding drafts, using 4 worker threads.</p>
+
+            <h3>Serve Command Examples</h3>
+            <pre><code>engrave serve ./templates</code></pre>
+            <p>Start a development server for the ./templates directory with the default host and port.</p>
+
+            <pre><code>engrave serve ./templates --host 0.0.0.0 --port 3000 --log DEBUG</code></pre>
+            <p>Start a development server that binds to all interfaces on port 3000 with DEBUG level logging.</p>
+
+            <h3>Version Command Example</h3>
+            <pre><code>engrave version</code></pre>
+            <p>Display the current version of Engrave.</p>
+        </section>
+    </div>
+
+    <a href="#" class="back-to-top" id="backToTop">↑</a>
+
+    <footer>
+        <p>Engrave: A static site generator with live preview capability</p>
+        <p>Documentation for the CLI module</p>
+    </footer>
+
+    <script>
+        // Back to Top button functionality
+        const backToTopBtn = document.getElementById('backToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                window.scrollTo({
+                    top: targetElement.offsetTop - 70,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

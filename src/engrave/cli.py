@@ -25,7 +25,7 @@ def configure_logger(level: str):
         "<level>{level: <8}</level> | "
         "<level>{message}</level>"
     )
-    logger.add(sys.stderr, format=log_format, level=level.upper())
+    logger.add(sys.stderr, format=log_format, level=level.upper(), diagnose=False)
 
 
 @app.command()
@@ -82,6 +82,7 @@ def build(
     configure_logger(log_level)
 
     logger.info(f"🏗️  Building site from '{src_dir}' to '{dest_dir}'")
+    exclude.insert(0, "**/*.layout.html")
     if exclude:
         logger.info(f"🚫 Excluding patterns: {', '.join(exclude)}")
     if asset:

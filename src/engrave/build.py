@@ -61,7 +61,8 @@ def build(
         dir_dest: Union[str, Path],
         asset_regex: str | None = None,
         list_glob_exclude: List[str] = [],
-        max_workers: int | None = None
+        max_workers: int | None = None,
+        log_level: str = 'INFO',
 ) -> None:
     """
     Build HTML files from Jinja2 templates.
@@ -72,18 +73,20 @@ def build(
         excluded_patterns: Optional list of glob patterns to exclude
         max_workers: Maximum number of worker threads (None = auto)
     """
+
     dir_src = Path(dir_src)
     dir_dest = Path(dir_dest)
 
     # Create destination directory if it doesn't exist
     dir_dest.mkdir(parents=True, exist_ok=True)
-    logger.info(f"🔍 Looking for files in: {dir_src}")
-    logger.info(f"📤 Output directory: {dir_dest}")
+    logger.info(f"🔍 Looking for files in: {dir_src}/")
+    logger.info(f"📤 Output directory: {dir_dest}/")
 
     # Find all HTML files in the source directory
     gen_path_html = (
         Path(path) for path in iglob(str(dir_src / '**/*.html'), recursive=True)
         if Path(path).is_file()
+            and not Path(path).match('*.layout.html')
             and not any(Path(path).match(pattern) for pattern in list_glob_exclude)
     )
 
@@ -105,22 +108,28 @@ def build(
     # Process HTML files with thread pool for better performance
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         logger.info(f"🚀 Building HTML with {max_workers or 'auto'} workers")
-        executor.map(
+        # Use list() to consume the generator and make exceptions propagate
+        list(executor.map(
             lambda path: build_html(
                 path_html=path,
                 dir_src=dir_src,
                 dir_dest=dir_dest,
             ),
-            gen_path_html)
+            gen_path_html,
+            timeout=60  # Add timeout to ensure exceptions aren't suppressed
+        ))
 
         if asset_regex:
             logger.info(f"🚀 Copying assets with {max_workers or 'auto'} workers")
-        executor.map(
-            lambda path: copy_asset(
-                path_asset=path,
-                dir_src=dir_src,
-                dir_dest=dir_dest,
-            ),
-            gen_path_asset)
+            # Use list() to consume the generator and make exceptions propagate
+            list(executor.map(
+                lambda path: copy_asset(
+                    path_asset=path,
+                    dir_src=dir_src,
+                    dir_dest=dir_dest,
+                ),
+                gen_path_asset,
+                timeout=60  # Add timeout to ensure exceptions aren't suppressed
+            ))
 
     logger.success("✨ Build complete")
