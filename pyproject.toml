@@ -1,6 +1,31 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "engrave"
+version = "3.0.2"
+description = "A static site generator with live preview capability"
+authors = [
+  {name = "Nitipit Nontasuwan", email = "nitipit@gmail.com"}
 ]
-build-backend = "setuptools.build_meta"
+maintainers = [
+  {name = "Nitipit Nontasuwan", email = "nitipit@gmail.com"}
+]
+readme = "README.md"
+keywords = ["static site generator", "web", "generator", "preview", "website", "template"]
+license = "MIT"  # or license = {file = "LICENSE.txt"} for legacy declaration
+license-files = ["LICENSE"]
+dependencies = [
+    "fastapi[standard]>=0.115.8",
+    "jinja2>=3.1.5",
+    "loguru>=0.7.3",
+    "markupsafe>=3.0.2",
+    "mistune>=3.1.2",
+    "typer>=0.15.2",
+    "uvicorn>=0.34.0",
+]
+requires-python = ">=3.10"
+
+[project.scripts]
+engrave = "engrave.cli:main"
