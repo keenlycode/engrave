@@ -13,8 +13,6 @@ import uvicorn
 from engrave.build import build as _build
 from engrave.server import create_fastapi
 
-# Set up logger
-
 
 app = typer.Typer(help="Engrave: A static site generator with live preview capability")
 
@@ -70,8 +68,8 @@ def build(
     ] = "INFO",
 ):
     """Build static HTML files from templates."""
-    # logger.remove()
-    # logger.add(sys.stderr, level=log_level)
+    logger.remove()
+    logger.add(sys.stderr, format="{message}", level=log_level)
     logger.info(f"Building from {src_dir} to {dest_dir}")
     if exclude:
         logger.info(f"Excluding patterns: {exclude}")
