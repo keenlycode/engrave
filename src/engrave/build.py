@@ -2,6 +2,7 @@ from pathlib import Path
 from glob import iglob
 import re
 import shutil
+import os
 from typing import (
     Union,
     List,
@@ -10,7 +11,6 @@ from typing import (
 from typing_extensions import Generator
 from loguru import logger
 from concurrent.futures import ThreadPoolExecutor
-
 from engrave.template import get_template
 
 
@@ -29,13 +29,12 @@ def build_html(
     # Create output directory if needed
     path_dest = dir_dest / path_rel
     path_dest.parent.mkdir(parents=True, exist_ok=True)
-    logger.info(path_dest)
 
     # Write rendered content to output file
     with open(path_dest, 'w', encoding='utf-8') as file:
         file.write(template(str(path_rel)).render())
 
-    logger.info(f"Built: {path_rel}")
+    logger.success(f"✓ Built HTML: {path_rel} → {os.path.relpath(path_dest)}")
 
 
 def copy_asset(
@@ -53,7 +52,7 @@ def copy_asset(
 
     # Copy the asset file
     shutil.copy2(path_asset, path_dest)
-    logger.info(f"Copied asset: {path_rel}")
+    logger.success(f"📁 Copied asset: {path_rel} → {os.path.relpath(path_dest)}")
 
 
 def build(
@@ -78,6 +77,8 @@ def build(
 
     # Create destination directory if it doesn't exist
     dir_dest.mkdir(parents=True, exist_ok=True)
+    logger.info(f"🔍 Looking for files in: {dir_src}")
+    logger.info(f"📤 Output directory: {dir_dest}")
 
     # Find all HTML files in the source directory
     gen_path_html = (
@@ -91,6 +92,7 @@ def build(
     if asset_regex:
         # Compile all regex patterns for assets
         pattern_asset_regex = re.compile(asset_regex)
+        logger.info(f"🔍 Finding assets matching: {asset_regex}")
 
         # Find all files using regex matching
         gen_path_asset = (
@@ -102,6 +104,7 @@ def build(
 
     # Process HTML files with thread pool for better performance
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        logger.info(f"🚀 Building HTML with {max_workers or 'auto'} workers")
         executor.map(
             lambda path: build_html(
                 path_html=path,
@@ -110,6 +113,8 @@ def build(
             ),
             gen_path_html)
 
+        if asset_regex:
+            logger.info(f"🚀 Copying assets with {max_workers or 'auto'} workers")
         executor.map(
             lambda path: copy_asset(
                 path_asset=path,
@@ -118,4 +123,4 @@ def build(
             ),
             gen_path_asset)
 
-    logger.info("Build complete")
+    logger.success("✨ Build complete")
