@@ -1,7 +1,13 @@
 [project]
 name = "engrave"
 version = "3.0.0"
-description = "Add your description here"
+description = "A static site generator with live preview capability"
+authors = [
+  {name = "Nitipit Nontasuwan", email = "nitipit@gmail.com"}
+]
+maintainers = [
+  {name = "Nitipit Nontasuwan", email = "nitipit@gmail.com"}
+]
 readme = "README.md"
 dependencies = [
     "fastapi[standard]>=0.115.8",
@@ -12,6 +18,5 @@ dependencies = [
     "typer>=0.15.2",
     "uvicorn>=0.34.0",
 ]
-
 [project.scripts]
 engrave = "engrave.cli:main"
