@@ -84,10 +84,11 @@ def build(
 
     # Find all HTML files in the source directory
     gen_path_html = (
-        Path(path) for path in iglob(str(dir_src / '**/*.html'), recursive=True)
-        if Path(path).is_file()
-            and not Path(path).match('*.layout.html')
+        Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True)
+        if not any(part.startswith('_') for part in Path(path).parts)
+            and Path(path).is_file()
             and not any(Path(path).match(pattern) for pattern in list_glob_exclude)
+            and Path(path).suffix == '.html'
     )
 
     # Find all asset files if patterns are provided
