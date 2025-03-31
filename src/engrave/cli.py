@@ -105,7 +105,7 @@ def build(
 
 
 @app.command()
-def serve(
+def server(
     template_dir: Path = typer.Argument(
         ...,
         help="Directory containing templates",
