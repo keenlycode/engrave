@@ -1,9 +1,11 @@
-import asyncio
 from typing import (
     Tuple,
     AsyncGenerator,
     Set,
+    Union,
+    List,
 )
+from pathlib import Path
 
 from watchfiles import Change, DefaultFilter, awatch
 from watchfiles.main import FileChange
@@ -41,60 +43,15 @@ async def watch_files(
     )):
         yield(changes)
 
-async def handle_html(async_gen_path):
-    async for changes in async_gen_path:
-        for change in changes:
-            print(change)
 
-async def handle_asset(async_gen_path):
-    async for changes in async_gen_path:
-        for change in changes:
-            print(change)
-
-async def main():
-    async_html = watch_files(dir_src='html-src/', extensions=('.html',))
-    task1 = asyncio.create_task(handle_html(async_html))
-    await asyncio.gather(task1)
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
-
-# app = FastAPI()
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # or specific domain
-#     allow_methods=["GET"],
-#     allow_headers=["*"],
-# )
-
-# @app.get("/events")
-# async def server_side_event_stream(request: Request) -> StreamingResponse:
-#     dir_src: str = getattr(app.state.config, "dir_src", "html-src/")
-#     regex_asset: str | None = getattr(app.state.config, "asset_regex", None)
-#     list_glob_exclude: List[str] = getattr(app.state.config, "list_glob_exclude", [])
-#     max_workers: int | None = getattr(app.state.config, "max_workers", None)
-#     log_level: str = getattr(app.state.config, "log_level", 'INFO')
-
-#     return StreamingResponse(watch_dir(
-#         dir_src=dir_src,
-#         regex_asset=regex_asset,
-#         list_glob_exclude=list_glob_exclude,
-#         max_workers=max_workers,
-#         log_level=log_level,
-#         stream_event=True,
-#     ), media_type="text/event-stream")
-
-
-# file_event = {
-#     "file_event": []
-# }
-
-# file_event["file_event"].append({
-#     "change_type": change_type,
-#     "path": path,
-#     "timestamp": datetime.now().isoformat()
-# })
-
-# yield f"data: {file_event}\n\n"
+async def watch_build(
+    *,
+    dir_src: Union[str, Path],
+    dir_dest: Union[str, Path],
+    asset_regex: str | None = None,
+    list_glob_exclude: List[str] = [],
+    max_workers: int | None = None,
+    log_level: str = 'INFO',
+):
+    """work like build() but also watch for changes"""
+    pass

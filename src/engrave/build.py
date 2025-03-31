@@ -1,66 +1,41 @@
+# lib: built-in
 from pathlib import Path
 from glob import iglob
 import re
-import shutil
-import os
 from typing import (
     Union,
     List,
-    Tuple,
 )
-from typing_extensions import Generator
-from loguru import logger
 from concurrent.futures import ThreadPoolExecutor
-from engrave.template import get_template
+
+# lib: external
+from loguru import logger
+
+# lib: local
+from .process import build_html, copy_file
 
 
-def build_html(
-        *,
-        path_html: Path,
-        dir_src: Path,
-        dir_dest: Path,
-) -> None:
-    # Get template loader
-    template = get_template(dir_src=dir_src)
+def is_valid_html(path: Path, exclude_patterns: List[str]) -> bool:
+    return (
+        not any(part.startswith('_') for part in path.parts)  # exclude path part start with '_'
+        and path.is_file()
+        and not any(path.match(pattern) for pattern in exclude_patterns)
+        and Path(path).suffix == '.html'
+    )
 
-    # Get relative path from source directory
-    path_rel = path_html.relative_to(dir_src)
-
-    # Create output directory if needed
-    path_dest = dir_dest / path_rel
-    path_dest.parent.mkdir(parents=True, exist_ok=True)
-
-    # Write rendered content to output file
-    with open(path_dest, 'w', encoding='utf-8') as file:
-        file.write(template(str(path_rel)).render())
-
-    logger.success(f"✓ Built HTML: {path_rel} → {os.path.relpath(path_dest)}")
-
-
-def copy_asset(
-        *,
-        path_asset: Path,
-        dir_src: Path,
-        dir_dest: Path,
-) -> None:
-    # Get relative path from source directory
-    path_rel = path_asset.relative_to(dir_src)
-
-    # Create output directory if needed
-    path_dest = dir_dest / path_rel
-    path_dest.parent.mkdir(parents=True, exist_ok=True)
-
-    # Copy the asset file
-    shutil.copy2(path_asset, path_dest)
-    logger.success(f"📁 Copied asset: {path_rel} → {os.path.relpath(path_dest)}")
-
+def is_valid_asset(path: Path, compiled_asset_regex: re.Pattern, exclude_patterns: List[str]) -> bool:
+    return (
+        path.is_file()
+        and bool(compiled_asset_regex.search(str(path)))
+        and not any(path.match(pattern) for pattern in exclude_patterns)
+    )
 
 def build(
         *,
         dir_src: Union[str, Path],
         dir_dest: Union[str, Path],
         asset_regex: str | None = None,
-        list_glob_exclude: List[str] = [],
+        exclude_patterns: List[str] = [],
         max_workers: int | None = None,
         log_level: str = 'INFO',
 ) -> None:
@@ -83,27 +58,22 @@ def build(
     logger.info(f"📤 Output directory: {dir_dest}/")
 
     # Find all HTML files in the source directory
-    gen_path_html = (
-        Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True)
-        if not any(part.startswith('_') for part in Path(path).parts)
-            and Path(path).is_file()
-            and not any(Path(path).match(pattern) for pattern in list_glob_exclude)
-            and Path(path).suffix == '.html'
+    gen_path_html = filter(
+        lambda p: is_valid_html(p, exclude_patterns),
+        (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 
     # Find all asset files if patterns are provided
-    gen_path_asset: Generator[Path, None, None] | Tuple[Path, ...] = ()
+    gen_path_asset = ()
     if asset_regex:
         # Compile all regex patterns for assets
-        pattern_asset_regex = re.compile(asset_regex)
+        compiled_asset_regex = re.compile(asset_regex)
         logger.info(f"🔍 Finding assets matching: {asset_regex}")
 
         # Find all files using regex matching
-        gen_path_asset = (
-            Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True)
-            if Path(path).is_file()
-                and pattern_asset_regex.search(str(path))
-                and not any(Path(path).match(pattern) for pattern in list_glob_exclude)
+        gen_path_asset = filter(
+            lambda p: is_valid_asset(p, compiled_asset_regex, exclude_patterns),
+            (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
         )
 
     # Process HTML files with thread pool for better performance
@@ -124,7 +94,7 @@ def build(
             logger.info(f"🚀 Copying assets with {max_workers or 'auto'} workers")
             # Use list() to consume the generator and make exceptions propagate
             list(executor.map(
-                lambda path: copy_asset(
+                lambda path: copy_file(
                     path_asset=path,
                     dir_src=dir_src,
                     dir_dest=dir_dest,

@@ -19,7 +19,6 @@ def create_fastapi(
     fast_api = FastAPI()
     template = get_template(dir_src=dir_template)
 
-    @fast_api.get("/{path:path}")
     async def render(request: Request, path: str):
         # Default to index.html if path is a directory-like
         if not path or path.endswith("/"):
@@ -37,5 +36,6 @@ def create_fastapi(
             else:
                 from fastapi import HTTPException
                 raise HTTPException(status_code=404, detail=f"File not found: {path}")
+
 
     return fast_api
