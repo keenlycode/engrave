@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import (
+    List,
+)
 
 
 @dataclass
@@ -17,4 +19,5 @@ class BuildInfo:
     asset_regex: str | None = None
     exclude_globs: List[str] = field(default_factory=list)
     flag_watch: bool = False
+    server: str = '127.0.0.1:8000'
     log_level: str = 'INFO'
