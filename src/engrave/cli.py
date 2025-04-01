@@ -1,18 +1,21 @@
+# lib: built-in
 import sys
 import time
 from loguru import logger
 from pathlib import Path
 from typing import (
     List,
-    Optional,
     Annotated,
 )
 
+# lib: external
 import typer
 import uvicorn
 
-from engrave.build import build as _build
-from engrave.server import create_fastapi
+# lib: local
+from .dataclass import BuildInfo
+from .build import build as _build
+from .server import create_fastapi
 
 
 app = typer.Typer(help="Engrave: A static site generator with live preview capability")
@@ -61,14 +64,6 @@ def build(
             help="(default: []) Glob patterns to exclude (can set multiple times)",
         ),
     ] = [],
-    workers: Annotated[
-        Optional[int],
-        typer.Option(
-            "--workers",
-            "-w",
-            help="(default: None) Maximum number of worker threads",
-        ),
-    ] = None,
     log_level: Annotated[
         str,
         typer.Option(
@@ -87,18 +82,17 @@ def build(
         logger.info(f"🚫 Excluding patterns: {', '.join(exclude)}")
     if asset:
         logger.info(f"📦 Asset pattern: {asset}")
-    if workers:
-        logger.info(f"👷 Using {workers} worker threads")
 
     start_time = time.time()
 
-    _build(
+    build_info = BuildInfo(
         dir_src=src_dir,
         dir_dest=dest_dir,
         asset_regex=asset,
-        list_glob_exclude=exclude,
-        max_workers=workers,
+        exclude_globs=exclude,
     )
+
+    _build(build_info)
 
     elapsed_time = time.time() - start_time
     logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{dest_dir}'")

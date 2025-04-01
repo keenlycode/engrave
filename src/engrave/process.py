@@ -1,55 +1,64 @@
 # lib: built-in
-from pathlib import Path
 import shutil
+from pathlib import Path
+from typing import List
+import re
 
 # lib: external
 from loguru import logger
 
 # lib: local
-from engrave.template import get_template
+from .template import get_template
+from .dataclass import FileProcessInfo
 
 
-def build_html(
-        *,
-        path_html: Path,
-        dir_src: Path,
-        dir_dest: Path,
-) -> None:
+def is_valid_html(path: Path, exclude_globs: List[str]) -> bool:
+    return (
+        not any(part.startswith('_') for part in path.parts)  # exclude path part start with '_'
+        and path.is_file()
+        and not any(path.match(pattern) for pattern in exclude_globs)
+        and Path(path).suffix == '.html'
+    )
+
+def is_valid_path(path: Path, compiled_path_regex: re.Pattern, exclude_globs: List[str]) -> bool:
+    return (
+        path.is_file()
+        and bool(compiled_path_regex.search(str(path)))
+        and not any(path.match(pattern) for pattern in exclude_globs)
+    )
+
+
+def build_html(file_process_info: FileProcessInfo) -> None:
     # Get template loader
-    template = get_template(dir_src=dir_src)
+    template = get_template(dir_src=file_process_info.dir_src)
 
     # Get relative path from source directory
-    path_rel = path_html.relative_to(dir_src)
+    path_rel = file_process_info.path.relative_to(file_process_info.dir_src)
 
     # Create output directory if needed
-    path_dest = dir_dest / path_rel
+    path_dest = file_process_info.dir_dest / path_rel
     path_dest.parent.mkdir(parents=True, exist_ok=True)
 
     # Write rendered content to output file
     with open(path_dest, 'w', encoding='utf-8') as file:
         file.write(template(str(path_rel)).render())
 
-    logger.success(f"✓ Built HTML: {path_rel} → {os.path.relpath(path_dest)}")
+    logger.success(f"✓ Built HTML: {path_rel} → {path_dest}")
 
 
-def copy_file(
-        *,
-        path_asset: Path,
-        dir_src: Path,
-        dir_dest: Path,
-) -> None:
+def copy_file(file_process_info: FileProcessInfo) -> None:
     # Get relative path from source directory
-    path_rel = path_asset.relative_to(dir_src)
+    path_rel = file_process_info.path.relative_to(file_process_info.dir_src)
 
     # Create output directory if needed
-    path_dest = dir_dest / path_rel
+    path_dest = file_process_info.dir_dest / path_rel
     path_dest.parent.mkdir(parents=True, exist_ok=True)
 
     # Copy the asset file
-    shutil.copy2(path_asset, path_dest)
-    logger.success(f"📁 Copied asset: {path_rel} → {os.path.relpath(path_dest)}")
+    shutil.copy2(file_process_info.path, path_dest)
+    logger.success(f"📁 Copied asset: {path_rel} → {path_dest}")
 
 
-def delete_file(path: Path):
-    path.unlink()
-    logger.success(f"🗑 Deleted file: {path}")
+def delete_file(file_process_info: FileProcessInfo) -> None:
+    file_process_info.path.unlink()
+    logger.success(f"🗑 Deleted file: {file_process_info.path}")
