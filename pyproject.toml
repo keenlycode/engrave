@@ -17,6 +17,7 @@ keywords = ["static site generator", "web", "generator", "preview", "website", "
 license = "MIT"  # or license = {file = "LICENSE.txt"} for legacy declaration
 license-files = ["LICENSE"]
 dependencies = [
+    "cyclopts>=3.11.2",
     "fastapi[standard]>=0.115.8",
     "jinja2>=3.1.5",
     "loguru>=0.7.3",

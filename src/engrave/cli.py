@@ -7,6 +7,8 @@ from typing import (
     List,
     Annotated,
 )
+import asyncio
+from importlib.metadata import version as get_version
 
 # lib: external
 import typer
@@ -73,6 +75,14 @@ def build(
             help="(default: False) Watch for changes and rebuild",
         ),
     ] = False,
+    server: Annotated[
+        str,
+        typer.Option(
+            "--server",
+            "-s",
+            help="(default: '127.0.0.1:8000') Start HTTP server",
+        ),
+    ] = '127.0.0.1:8000',
     log_level: Annotated[
         str,
         typer.Option(
@@ -103,9 +113,6 @@ def build(
     build_run(build_info)
     elapsed_time = time.time() - start_time
     logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{dest_dir}'")
-
-    if build_info.flag_watch:
-        watch_run(build_info)
 
 
 @app.command()
@@ -165,7 +172,6 @@ def server(
 @app.command()
 def version():
     """Display the version of Engrave."""
-    from importlib.metadata import version as get_version
     configure_logger("INFO")
     version = get_version("engrave")
     logger.info(f"📋 Engrave version: {version}")
@@ -173,8 +179,8 @@ def version():
 
 def main():
     """Entry point for the CLI."""
-    app()
+    asyncio.run(app())
 
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)
