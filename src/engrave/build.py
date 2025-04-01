@@ -12,7 +12,7 @@ from . import process
 from .dataclass import BuildInfo, FileProcessInfo
 
 
-def build(build_info: BuildInfo) -> None:
+def run(build_info: BuildInfo) -> None:
     """
     Build HTML files from Jinja2 templates.
 
@@ -30,7 +30,7 @@ def build(build_info: BuildInfo) -> None:
 
     # Find all HTML files in the source directory
     gen_path_html = filter(
-        lambda p: process.is_valid_html(p, build_info.exclude_globs),
+        lambda path: process.is_valid_html(path=path, exclude_globs=build_info.exclude_globs),
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 
@@ -43,7 +43,11 @@ def build(build_info: BuildInfo) -> None:
 
         # Find all files using regex matching
         gen_path_asset = filter(
-            lambda p: process.is_valid_path(p, compiled_asset_regex, build_info.exclude_globs),
+            lambda path: process.is_valid_path(
+                path=path,
+                compiled_path_regex=compiled_asset_regex,
+                exclude_globs=build_info.exclude_globs
+            ),
             (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
         )
 
@@ -61,3 +65,4 @@ def build(build_info: BuildInfo) -> None:
 
 
 def watch(build_info: BuildInfo):
+    run(build_info)

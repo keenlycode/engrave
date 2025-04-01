@@ -14,7 +14,7 @@ import uvicorn
 
 # lib: local
 from .dataclass import BuildInfo
-from .build import build as _build
+from .build import run as build_run
 from .server import create_fastapi
 
 
@@ -92,7 +92,7 @@ def build(
         exclude_globs=exclude,
     )
 
-    _build(build_info)
+    build_run(build_info)
 
     elapsed_time = time.time() - start_time
     logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{dest_dir}'")
