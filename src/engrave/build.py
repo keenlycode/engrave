@@ -58,3 +58,6 @@ def build(build_info: BuildInfo) -> None:
             process.build_html(file_process_info)
 
     logger.success("✨ Build complete")
+
+
+def watch(build_info: BuildInfo):

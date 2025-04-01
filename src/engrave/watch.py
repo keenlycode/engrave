@@ -2,10 +2,7 @@ from typing import (
     Tuple,
     AsyncGenerator,
     Set,
-    Union,
-    List,
 )
-from pathlib import Path
 
 from watchfiles import Change, DefaultFilter, awatch
 from watchfiles.main import FileChange
@@ -42,16 +39,3 @@ async def watch_files(
         ignore_paths=ignore_paths,
     )):
         yield(changes)
-
-
-async def watch_build(
-    *,
-    dir_src: Union[str, Path],
-    dir_dest: Union[str, Path],
-    asset_regex: str | None = None,
-    list_glob_exclude: List[str] = [],
-    max_workers: int | None = None,
-    log_level: str = 'INFO',
-):
-    """work like build() but also watch for changes"""
-    pass
