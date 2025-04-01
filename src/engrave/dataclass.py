@@ -16,4 +16,5 @@ class BuildInfo:
     dir_dest: str | Path
     asset_regex: str | None = None
     exclude_globs: List[str] = field(default_factory=list)
+    flag_watch: bool = False
     log_level: str = 'INFO'

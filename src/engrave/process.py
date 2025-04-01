@@ -20,9 +20,10 @@ def is_valid_html(*, path: Path, exclude_globs: List[str]) -> bool:
         and Path(path).suffix == '.html'
     )
 
-def is_valid_path(*, path: Path, compiled_path_regex: re.Pattern, exclude_globs: List[str]) -> bool:
+def is_valid_path(*, path: Path, compiled_path_regex: re.Pattern | None, exclude_globs: List[str]) -> bool:
     return (
         path.is_file()
+        and compiled_path_regex is not None
         and bool(compiled_path_regex.search(str(path)))
         and not any(path.match(pattern) for pattern in exclude_globs)
     )
