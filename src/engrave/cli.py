@@ -7,6 +7,7 @@ from typing import (
     List,
     Annotated,
 )
+import asyncio
 
 # lib: external
 import typer
@@ -15,6 +16,7 @@ import uvicorn
 # lib: local
 from .dataclass import BuildInfo
 from .build import run as build_run
+from .watch import build as watch_build
 from .server import create_fastapi
 
 
@@ -64,6 +66,14 @@ def build(
             help="(default: []) Glob patterns to exclude (can set multiple times)",
         ),
     ] = [],
+    watch: Annotated[
+        bool,
+        typer.Option(
+            "--watch",
+            "-w",
+            help="(default: False) Watch for changes and rebuild",
+        ),
+    ] = False,
     log_level: Annotated[
         str,
         typer.Option(
@@ -84,19 +94,18 @@ def build(
         logger.info(f"📦 Asset pattern: {asset}")
 
     start_time = time.time()
-
     build_info = BuildInfo(
         dir_src=src_dir,
         dir_dest=dest_dir,
         asset_regex=asset,
         exclude_globs=exclude,
     )
-
     build_run(build_info)
-
     elapsed_time = time.time() - start_time
     logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{dest_dir}'")
 
+    for changes in watch_build(build_info):
+        logger.info(f"Changes detected: {changes}")
 
 @app.command()
 def server(

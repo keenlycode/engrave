@@ -1,23 +1,20 @@
 # lib: built-in
 from typing import (
-    AsyncGenerator,
-    Set,
     List,
 )
 import re
 from pathlib import Path
 
 # lib: external
-from watchfiles import Change, DefaultFilter, awatch
-from watchfiles.main import FileChange
-
-# lib: local
-from .dataclass import BuildInfo
-from .process import (
-    is_valid_html,
-    is_valid_path,
+from watchfiles import (
+    Change,
+    DefaultFilter,
+    watch,
 )
 
+# lib: local
+from .dataclass import BuildInfo, FileProcessInfo
+from . import process
 
 
 class WatchFilter(DefaultFilter):
@@ -33,10 +30,13 @@ class WatchFilter(DefaultFilter):
         super().__init__(*args, **kw)
 
     def __call__(self, change: Change, path: str) -> bool:
+        if change == Change.deleted:
+            return super().__call__(change, path)
+
         _path = Path(path)
-        _is_valid_html = is_valid_html(path=_path, exclude_globs=self.exclude_globs)
-        _is_valid_path = (
-            is_valid_path(
+        _is_valid_html = process.is_valid_html(path=_path, exclude_globs=self.exclude_globs)
+        _is_valid_asset = (
+            process.is_valid_path(
                 path=_path,
                 compiled_path_regex=self.asset_regex,
                 exclude_globs=self.exclude_globs)
@@ -45,22 +45,32 @@ class WatchFilter(DefaultFilter):
 
         return (
             super().__call__(change, path) and
-            (
-                is_valid_html(path)
-                or is_valid_path(path, self.asset_regex)
-            )
+            (_is_valid_html or _is_valid_asset)
         )
 
 
-async def watch_files(
-        build_info: BuildInfo,
-) -> AsyncGenerator[Set[FileChange], None]:
+def build(build_info: BuildInfo):
     asset_regex = re.compile(re.escape(build_info.asset_regex)) if build_info.asset_regex else None
-    async for changes in awatch(
+    gen_batch_changes = watch(
         build_info.dir_src,
         watch_filter=WatchFilter(
             asset_regex=asset_regex,
             exclude_globs=build_info.exclude_globs,
-        ),
-    ):
-        yield(changes)
+        )
+    )
+
+    gen_change = (gen_change for batch_changes in gen_batch_changes for gen_change in batch_changes)
+    for change, path in gen_change:
+        path = Path(path)
+        file_process_info = FileProcessInfo(
+            path=path,
+            dir_src=Path(build_info.dir_src),
+            dir_dest=Path(build_info.dir_dest),
+        )
+        if change == Change.deleted:
+            process.delete_file(file_process_info)
+        elif change == Change.modified or change == Change.added:
+            if path.suffix == '.html':
+                process.build_html(file_process_info)
+            else:
+                process.copy_file(file_process_info)

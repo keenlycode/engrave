@@ -33,7 +33,7 @@ def build_html(file_process_info: FileProcessInfo) -> None:
     template = get_template(dir_src=file_process_info.dir_src)
 
     # Get relative path from source directory
-    path_rel = file_process_info.path.relative_to(file_process_info.dir_src)
+    path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
 
     # Create output directory if needed
     path_dest = file_process_info.dir_dest / path_rel
@@ -48,7 +48,7 @@ def build_html(file_process_info: FileProcessInfo) -> None:
 
 def copy_file(file_process_info: FileProcessInfo) -> None:
     # Get relative path from source directory
-    path_rel = file_process_info.path.relative_to(file_process_info.dir_src)
+    path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
 
     # Create output directory if needed
     path_dest = file_process_info.dir_dest / path_rel
@@ -60,5 +60,10 @@ def copy_file(file_process_info: FileProcessInfo) -> None:
 
 
 def delete_file(file_process_info: FileProcessInfo) -> None:
-    file_process_info.path.unlink()
+    # Get relative path from source directory
+    path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
+
+    path_dest = file_process_info.dir_dest / path_rel
+    path_dest.unlink()
+
     logger.success(f"🗑 Deleted file: {file_process_info.path}")
