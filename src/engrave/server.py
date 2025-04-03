@@ -3,7 +3,6 @@ from pathlib import Path
 
 # lib: external
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import (
     HTMLResponse,
     FileResponse,
@@ -21,8 +20,8 @@ def create_fastapi(server_info: ServerInfo) -> FastAPI:
     async def render(path: str):
         _path = Path(path)
         template = get_template(dir_src=server_info.dir_src)
-
-        if _path.parts == () or _path.parts[-1] == '/':
+        print(path)
+        if path == '' or path.endswith('/'):
             _path = _path / 'index.html'
 
         if _path.suffix == '.html':
@@ -30,8 +29,5 @@ def create_fastapi(server_info: ServerInfo) -> FastAPI:
 
         dir_dest = Path(server_info.dir_dest)
         return FileResponse(dir_dest / _path)
-
-
-    fast_api.mount("/", StaticFiles(directory=server_info.dir_dest), name="static")
 
     return fast_api
