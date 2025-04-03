@@ -19,5 +19,9 @@ class BuildInfo:
     asset: str | None = None
     exclude: List[str] = field(default_factory=list)
     watch: bool = False
-    server: str = '127.0.0.1:8000'
     log: str = 'INFO'
+
+@dataclass
+class ServerInfo(BuildInfo):
+    host: str = '127.0.0.1'
+    port: int = 8000

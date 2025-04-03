@@ -1,16 +1,14 @@
 # lib: built-in
-import sys
 import time
-from loguru import logger
-from pathlib import Path
 from typing import (
-    List,
     Annotated,
+    Optional,
 )
-import asyncio
+from dataclasses import dataclass
 from importlib.metadata import version as get_version
 
 # lib: external
+from loguru import logger
 from cyclopts import (
     App,
     Parameter,
@@ -18,19 +16,36 @@ from cyclopts import (
 import uvicorn
 
 # lib: local
-from .dataclass import BuildInfo
+from .dataclass import (
+    BuildInfo as _BuildInfo,
+    ServerInfo as _ServerInfo,
+)
 from .build import run as build_run
 from .watch import run as watch_run
 from .server import create_fastapi
 from . import log
 
 
+@Parameter(name="*")
+@dataclass
+class BuildInfo(_BuildInfo):
+    asset: Annotated[Optional[str|None], Parameter(name=['--asset'])] = None
+
+
+@Parameter(name="*")
+@dataclass
+class ServerInfo(_ServerInfo):
+    pass
+
+
 log.configure("INFO")
-app = App(help="Engrave: A static site generator with live preview capability")
+app = App(
+    help="Engrave: A static site generator with live preview capability",
+)
 
 
 @app.command()
-async def build(build_info: Annotated[BuildInfo, Parameter(name="*")]):
+async def build(build_info: BuildInfo):
     """Build static HTML files from templates."""
 
     logger.info(f"🏗️  Building site from '{build_info.dir_src}' to '{build_info.dir_dest}'")
@@ -44,73 +59,37 @@ async def build(build_info: Annotated[BuildInfo, Parameter(name="*")]):
     elapsed_time = time.time() - start_time
     logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{build_info.dir_dest}'")
 
-    async_tasks = []
-    if build_info.watch:
-        async_tasks.append(asyncio.create_task(watch_run(build_info)))
-
-    await asyncio.gather(*async_tasks)
+    await watch_run(build_info)
 
 
-# @app.command()
-# def server(
-#     template_dir: Path = typer.Argument(
-#         ...,
-#         help="Directory containing templates",
-#         exists=True,
-#         file_okay=False,
-#         dir_okay=True,
-#     ),
-#     host: str = typer.Option(
-#         "127.0.0.1",
-#         "--host",
-#         "-h",
-#         help="Host to bind the server to",
-#     ),
-#     port: int = typer.Option(
-#         8000,
-#         "--port",
-#         "-p",
-#         help="Port to bind the server to",
-#     ),
-#     log_level: str = typer.Option(
-#         "INFO",
-#         "--log",
-#         "-l",
-#         help="Set Log Level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
-#     ),
-# ):
-#     """Start a development server with live preview."""
-#     configure_logger(log_level)
+@app.command()
+def server(server_info: ServerInfo):
+    """Start a development server with live preview."""
 
-#     logger.info(f"🚀 Starting development server for '{template_dir}'")
-#     logger.info(f"🌐 Server running at http://{host}:{port}")
-#     logger.info("⚡ Live preview mode activated")
-#     logger.info("💡 Press CTRL+C to stop")
+    logger.info(f"🚀 Starting development server for '{server_info.dir_src} -> {server_info.dir_dest}'")
+    logger.info(f"🌐 Server running at http://{server_info.host}:{server_info.port}")
+    logger.info("⚡ Live preview mode activated")
 
-#     # Create FastAPI application
-#     fastapi_app = create_fastapi(dir_template=template_dir)
+    # Create FastAPI application
+    fastapi_app = create_fastapi(server_info)
 
-#     # Start Uvicorn server
-#     try:
-#         uvicorn.run(
-#             fastapi_app,
-#             host=host,
-#             port=port,
-#         )
-#     except KeyboardInterrupt:
-#         logger.info("🛑 Server stopped by user")
-#     except Exception as e:
-#         logger.error(f"❌ Server error: {str(e)}")
-#         logger.exception("Detailed exception information:")
-#         sys.exit(1)
+    # Start Uvicorn server
+    try:
+        uvicorn.run(
+            fastapi_app,
+            host=server_info.host,
+            port=server_info.port,
+        )
+    except KeyboardInterrupt:
+        logger.info("🛑 Server stopped by user")
 
 
-# @app.command()
-# def version():
-#     """Display the version of Engrave."""
-#     configure_logger("INFO")
-#     version = get_version("engrave")
-#     logger.info(f"📋 Engrave version: {version}")
+@app.command()
+def version():
+    """Display the version of Engrave."""
+
+    version = get_version("engrave")
+    logger.info(f"📋 Engrave version: {version}")
 
 
 def main():
