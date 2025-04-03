@@ -50,12 +50,12 @@ class WatchFilter(DefaultFilter):
 
 
 def run(build_info: BuildInfo):
-    asset_regex = re.compile(re.escape(build_info.asset_regex)) if build_info.asset_regex else None
+    asset_regex = re.compile(re.escape(build_info.asset)) if build_info.asset else None
     gen_batch_changes = watch(
         build_info.dir_src,
         watch_filter=WatchFilter(
             asset_regex=asset_regex,
-            exclude_globs=build_info.exclude_globs,
+            exclude_globs=build_info.exclude,
         )
     )
 

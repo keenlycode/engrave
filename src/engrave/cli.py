@@ -40,14 +40,13 @@ def configure_logger(level: str):
 @app.command()
 def build(build_info: Annotated[BuildInfo, Parameter(name="*")]):
     """Build static HTML files from templates."""
-    configure_logger(build_info.log_level)
+    configure_logger(build_info.log)
 
     logger.info(f"🏗️  Building site from '{build_info.dir_src}' to '{build_info.dir_dest}'")
-    build_info.exclude_globs.insert(0, "**/*.layout.html")
-    if build_info.exclude_globs:
-        logger.info(f"🚫 Excluding patterns: {', '.join(build_info.exclude_globs)}")
-    if build_info.asset_regex:
-        logger.info(f"📦 Asset pattern: {build_info.asset_regex}")
+    if build_info.exclude:
+        logger.info(f"🚫 Excluding patterns: {', '.join(build_info.exclude)}")
+    if build_info.asset:
+        logger.info(f"📦 Asset pattern: {build_info.asset}")
 
     start_time = time.time()
     build_run(build_info)
