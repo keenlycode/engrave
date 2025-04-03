@@ -28,11 +28,11 @@ def run(build_info: BuildInfo) -> None:
     logger.info(f"🔍 Looking for files in: {dir_src}/")
     logger.info(f"📤 Output directory: {dir_dest}/")
 
-    compiled_asset_regex = re.compile(build_info.asset_regex) if build_info.asset_regex else None
+    compiled_asset_regex = re.compile(build_info.asset) if build_info.asset else None
 
     # Find all HTML files in the source directory
     gen_path = filter(
-        lambda path: process.is_valid_html(path=path, exclude_globs=build_info.exclude_globs)
+        lambda path: process.is_valid_html(path=path, exclude_globs=build_info.exclude)
             or process.is_valid_path(path=path, compiled_path_regex=compiled_asset_regex, exclude_globs=build_info.exclude_globs),
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )

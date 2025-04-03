@@ -9,7 +9,7 @@ from pathlib import Path
 from watchfiles import (
     Change,
     DefaultFilter,
-    watch,
+    awatch,
 )
 
 # lib: local
@@ -49,9 +49,9 @@ class WatchFilter(DefaultFilter):
         )
 
 
-def run(build_info: BuildInfo):
+async def run(build_info: BuildInfo):
     asset_regex = re.compile(re.escape(build_info.asset)) if build_info.asset else None
-    gen_batch_changes = watch(
+    gen_batch_changes = awatch(
         build_info.dir_src,
         watch_filter=WatchFilter(
             asset_regex=asset_regex,
@@ -59,8 +59,8 @@ def run(build_info: BuildInfo):
         )
     )
 
-    gen_change = (gen_change for batch_changes in gen_batch_changes for gen_change in batch_changes)
-    for change, path in gen_change:
+    gen_change = (gen_change async for batch_changes in gen_batch_changes for gen_change in batch_changes)
+    async for change, path in gen_change:
         path = Path(path)
         file_process_info = FileProcessInfo(
             path=path,

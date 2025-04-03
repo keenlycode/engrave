@@ -22,25 +22,16 @@ from .dataclass import BuildInfo
 from .build import run as build_run
 from .watch import run as watch_run
 from .server import create_fastapi
+from . import log
 
 
+log.configure("INFO")
 app = App(help="Engrave: A static site generator with live preview capability")
 
 
-def configure_logger(level: str):
-    """Configure loguru logger with a nice format."""
-    logger.remove()
-    log_format = (
-        "<level>{level: <8}</level> | "
-        "<level>{message}</level>"
-    )
-    logger.add(sys.stderr, format=log_format, level=level.upper(), diagnose=False)
-
-
 @app.command()
-def build(build_info: Annotated[BuildInfo, Parameter(name="*")]):
+async def build(build_info: Annotated[BuildInfo, Parameter(name="*")]):
     """Build static HTML files from templates."""
-    configure_logger(build_info.log)
 
     logger.info(f"🏗️  Building site from '{build_info.dir_src}' to '{build_info.dir_dest}'")
     if build_info.exclude:
@@ -52,6 +43,12 @@ def build(build_info: Annotated[BuildInfo, Parameter(name="*")]):
     build_run(build_info)
     elapsed_time = time.time() - start_time
     logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{build_info.dir_dest}'")
+
+    async_tasks = []
+    if build_info.watch:
+        async_tasks.append(asyncio.create_task(watch_run(build_info)))
+
+    await asyncio.gather(*async_tasks)
 
 
 # @app.command()
