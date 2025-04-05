@@ -11,21 +11,22 @@ from watchfiles import (
     DefaultFilter,
     awatch,
 )
+from aiostream import stream
 
 # lib: local
-from .dataclass import BuildInfo, FileProcessInfo
+from .dataclass import PreviewConfig, FileProcessInfo
 from . import process
 
 
 class WatchFilter(DefaultFilter):
     def __init__(self,
         *args,
-        asset_regex: re.Pattern | None,
+        list_regex: List[re.Pattern] = [],
         exclude_globs: List[str],
 
         **kw,
     ):
-        self.asset_regex = asset_regex
+        self.list_regex = list_regex
         self.exclude_globs = exclude_globs
         super().__init__(*args, **kw)
 
@@ -34,37 +35,53 @@ class WatchFilter(DefaultFilter):
             return super().__call__(change, path)
 
         _path = Path(path)
-        _is_valid_html = process.is_valid_path(
+        _is_valid_path = process.is_valid_path(
             path=_path,
-            compiled_path_regex=re.compile(r'^.*\.html$'),
-            exclude_globs=self.exclude_globs
-        )
-        _is_valid_asset = (
-            process.is_valid_path(
-                path=_path,
-                compiled_path_regex=self.asset_regex,
-                exclude_globs=self.exclude_globs)
-            if self.asset_regex else False
+            list_regex=self.list_regex,
+            exclude_globs=self.exclude_globs,
         )
 
         return (
-            super().__call__(change, path) and
-            (_is_valid_html or _is_valid_asset)
+            super().__call__(change, path) and _is_valid_path
         )
 
 
-async def run(build_info: BuildInfo):
-    asset_regex = re.compile(re.escape(build_info.asset)) if build_info.asset else None
+async def run(preview_config: PreviewConfig):
+    html_regex = re.compile(r'.*\.html$')
+    list_asset_regex = [re.compile(copy_regex) for copy_regex in preview_config.copy]
+    list_watch_regex = [re.compile(watch_regex) for watch_regex in preview_config.watch]
 
-    gen_batch_changes = awatch(
-        build_info.dir_src,
+    async_html_list_change = awatch(
+        preview_config.dir_src,
         watch_filter=WatchFilter(
-            asset_regex=asset_regex,
-            exclude_globs=build_info.exclude,
+            list_regex=[html_regex],
+            exclude_globs=preview_config.exclude,
         )
     )
 
-    gen_change = (gen_change async for batch_changes in gen_batch_changes for gen_change in batch_changes)
+    async_asset_list_change = awatch(
+        preview_config.dir_src,
+        watch_filter=WatchFilter(
+            regex=list_asset_regex,
+            exclude_globs=preview_config.exclude,
+        )
+    )
+
+    async_watch_list_change = awatch(
+        preview_config.dir_src,
+        watch_filter=WatchFilter(
+            regex=list_watch_regex,
+            exclude_globs=preview_config.exclude,
+        )
+    )
+
+    async_merged = stream.merge(
+        async_html_list_change,
+        async_asset_list_change,
+        async_watch_list_change,
+    )
+
+    gen_change = (gen_change async for list_change in async_merged for gen_change in list_change)
 
     async for change, path in gen_change:
         path = Path(path)

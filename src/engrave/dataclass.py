@@ -13,15 +13,18 @@ class FileProcessInfo:
 
 
 @dataclass
-class BuildInfo:
+class BuildConfig:
     dir_src: str | Path
     dir_dest: str | Path
-    asset: str | None = None
+    copy: List[str] = field(default_factory=list)
     exclude: List[str] = field(default_factory=list)
-    watch: bool = False
     log: str = 'INFO'
 
 @dataclass
-class ServerInfo(BuildInfo):
-    host: str = '127.0.0.1'
-    port: int = 8000
+class PreviewConfig(BuildConfig):
+    watch: List[str] = field(default_factory=list)
+
+# @dataclass
+# class ServerInfo(BuildInfo):
+#     host: str = '127.0.0.1'
+#     port: int = 8000

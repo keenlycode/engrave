@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "engrave"
-version = "3.0.3"
+version = "3.1.0dev"
 description = "A static site generator with live preview capability"
 authors = [
   {name = "Nitipit Nontasuwan", email = "nitipit@gmail.com"}
@@ -30,3 +30,8 @@ requires-python = ">=3.10"
 
 [project.scripts]
 engrave = "engrave.cli:main"
+
+[dependency-groups]
+dev = [
+    "aiostream>=0.6.4",
+]

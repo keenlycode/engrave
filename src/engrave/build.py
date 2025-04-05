@@ -9,10 +9,10 @@ from loguru import logger
 
 # lib: local
 from . import process
-from .dataclass import BuildInfo, FileProcessInfo
+from .dataclass import BuildConfig, FileProcessInfo
 
 
-def run(build_info: BuildInfo) -> None:
+def run(build_config: BuildConfig) -> None:
     """
     Build HTML files from Jinja2 templates.
 
@@ -20,27 +20,30 @@ def run(build_info: BuildInfo) -> None:
         build_info: Build information containing source and destination directories
     """
 
-    dir_src = Path(build_info.dir_src)
-    dir_dest = Path(build_info.dir_dest)
+    dir_src = Path(build_config.dir_src)
+    dir_dest = Path(build_config.dir_dest)
 
     # Create destination directory if it doesn't exist
     dir_dest.mkdir(parents=True, exist_ok=True)
     logger.info(f"🔍 Looking for files in: {dir_src}/")
     logger.info(f"📤 Output directory: {dir_dest}/")
 
-    compiled_asset_regex = re.compile(build_info.asset) if build_info.asset else None
+    list_asset_regex = [re.compile(regex) for regex in build_config.copy]
 
     gen_html = filter(lambda path:
         not any(part.startswith('_') for part in path.parts)
         and process.is_valid_path(
             path=path,
-            compiled_path_regex=re.compile(r'^.*\.html$'),
-            exclude_globs=build_info.exclude),
+            list_regex=[re.compile(r'^.*\.html$')],
+            exclude_globs=build_config.exclude),
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 
     gen_asset = filter(
-        lambda path: process.is_valid_path(path=path, compiled_path_regex=compiled_asset_regex, exclude_globs=build_info.exclude),
+        lambda path: process.is_valid_path(
+            path=path,
+            list_regex=list_asset_regex,
+            exclude_globs=build_config.exclude),
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 

@@ -3,6 +3,18 @@ revision = 1
 requires-python = ">=3.10"
 
 [[package]]
+name = "aiostream"
+version = "0.6.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a5/fe/aa14603fcd5cc4333f81791bbdf58cd4cb8677c8e21e3cc691d27c00173f/aiostream-0.6.4.tar.gz", hash = "sha256:f99bc6b1b9cea3e70885dc235a233523597555fe4a585ed21d65264b3f1ff3d2", size = 67983 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/71/5c/639dc59441df1d5cec49a09c36eb89af651476760f950b7d018bdf0ec4a7/aiostream-0.6.4-py3-none-any.whl", hash = "sha256:bd8c6a8b90a52c0325a3b19406f0f2a131448e596c06398886f5be1c73b4cea9", size = 53665 },
+]
+
+[[package]]
 name = "annotated-types"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -123,7 +135,7 @@ wheels = [
 
 [[package]]
 name = "engrave"
-version = "3.0.3"
+version = "3.1.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "cyclopts" },
@@ -134,6 +146,11 @@ dependencies = [
     { name = "mistune" },
     { name = "typer" },
     { name = "uvicorn" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "aiostream" },
 ]
 
 [package.metadata]
@@ -147,6 +164,9 @@ requires-dist = [
     { name = "typer", specifier = ">=0.15.2" },
     { name = "uvicorn", specifier = ">=0.34.0" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "aiostream", specifier = ">=0.6.4" }]
 
 [[package]]
 name = "exceptiongroup"
