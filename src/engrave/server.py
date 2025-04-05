@@ -9,7 +9,6 @@ from fastapi.responses import (
     FileResponse,
     StreamingResponse,
 )
-from fastapi.middleware.cors import CORSMiddleware
 from watchfiles import awatch, Change
 
 from .template import get_template
@@ -18,12 +17,7 @@ from .dataclass import ServerInfo
 
 def create_fastapi(server_info: ServerInfo) -> FastAPI:
     fast_api = FastAPI()
-    fast_api.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_methods=["GET"],
-        allow_headers=["*"],
-    )
+
 
     async def watch_dir(dir_src: str):
         async for changes in awatch(server_info.dir_src):

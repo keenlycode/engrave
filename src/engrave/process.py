@@ -12,14 +12,6 @@ from .template import get_template
 from .dataclass import FileProcessInfo
 
 
-def is_valid_html(*, path: Path, exclude_globs: List[str]) -> bool:
-    return (
-        not any(part.startswith('_') for part in path.parts)  # exclude path part start with '_'
-        and path.is_file()
-        and not any(path.match(pattern) for pattern in exclude_globs)
-        and Path(path).suffix == '.html'
-    )
-
 def is_valid_path(*, path: Path, compiled_path_regex: re.Pattern | None, exclude_globs: List[str]) -> bool:
     return (
         path.is_file()

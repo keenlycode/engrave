@@ -1,9 +1,6 @@
 # lib: built-in
 import time
-from typing import (
-    Annotated,
-    Optional,
-)
+import asyncio
 from dataclasses import dataclass
 from importlib.metadata import version as get_version
 
@@ -29,7 +26,7 @@ from . import log
 @Parameter(name="*")
 @dataclass
 class BuildInfo(_BuildInfo):
-    asset: Annotated[Optional[str|None], Parameter(name=['--asset'])] = None
+    pass
 
 
 @Parameter(name="*")
@@ -59,8 +56,11 @@ async def build(build_info: BuildInfo):
     elapsed_time = time.time() - start_time
     logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{build_info.dir_dest}'")
 
-    await watch_run(build_info)
-
+    if build_info.watch:
+        try:
+            await watch_run(build_info)
+        except asyncio.CancelledError:
+            logger.info("🛑 Watch mode stopped")
 
 @app.command()
 def server(server_info: ServerInfo):
@@ -94,7 +94,10 @@ def version():
 
 def main():
     """Entry point for the CLI."""
-    app()
+    try:
+        app()
+    except KeyboardInterrupt:
+        logger.info("🛑 CLI stopped by user")
 
 
 if __name__ == "__main__":

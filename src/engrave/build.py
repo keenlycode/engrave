@@ -30,16 +30,25 @@ def run(build_info: BuildInfo) -> None:
 
     compiled_asset_regex = re.compile(build_info.asset) if build_info.asset else None
 
-    # Find all HTML files in the source directory
-    gen_path = filter(
-        lambda path: process.is_valid_html(path=path, exclude_globs=build_info.exclude)
-            or process.is_valid_path(path=path, compiled_path_regex=compiled_asset_regex, exclude_globs=build_info.exclude),
+    gen_html = filter(lambda path:
+        not any(part.startswith('_') for part in path.parts)
+        and process.is_valid_path(
+            path=path,
+            compiled_path_regex=re.compile(r'^.*\.html$'),
+            exclude_globs=build_info.exclude),
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 
+    gen_asset = filter(
+        lambda path: process.is_valid_path(path=path, compiled_path_regex=compiled_asset_regex, exclude_globs=build_info.exclude),
+        (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
+    )
+
+    gen_path = chain(gen_html, gen_asset)
+
     gen_file_process_info = (
         FileProcessInfo(path=path, dir_src=dir_src, dir_dest=dir_dest)
-        for path in chain(gen_path)
+        for path in gen_path
     )
 
     # Process each file

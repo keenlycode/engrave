@@ -34,7 +34,11 @@ class WatchFilter(DefaultFilter):
             return super().__call__(change, path)
 
         _path = Path(path)
-        _is_valid_html = process.is_valid_html(path=_path, exclude_globs=self.exclude_globs)
+        _is_valid_html = process.is_valid_path(
+            path=_path,
+            compiled_path_regex=re.compile(r'^.*\.html$'),
+            exclude_globs=self.exclude_globs
+        )
         _is_valid_asset = (
             process.is_valid_path(
                 path=_path,
@@ -51,6 +55,7 @@ class WatchFilter(DefaultFilter):
 
 async def run(build_info: BuildInfo):
     asset_regex = re.compile(re.escape(build_info.asset)) if build_info.asset else None
+
     gen_batch_changes = awatch(
         build_info.dir_src,
         watch_filter=WatchFilter(
@@ -60,6 +65,7 @@ async def run(build_info: BuildInfo):
     )
 
     gen_change = (gen_change async for batch_changes in gen_batch_changes for gen_change in batch_changes)
+
     async for change, path in gen_change:
         path = Path(path)
         file_process_info = FileProcessInfo(
