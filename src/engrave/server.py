@@ -1,6 +1,7 @@
 # lib: Built-in
 from pathlib import Path
-from typing import AsyncGenerator
+import asyncio
+
 
 # lib: external
 from fastapi import FastAPI
@@ -9,25 +10,45 @@ from fastapi.responses import (
     FileResponse,
     StreamingResponse,
 )
-from watchfiles import awatch
+from fastapi.middleware.cors import CORSMiddleware
+from watchfiles import awatch, Change
 
 from .template import get_template
 from .dataclass import ServerInfo
 
 
 def create_fastapi(server_info: ServerInfo) -> FastAPI:
-
     fast_api = FastAPI()
+    fast_api.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["GET"],
+        allow_headers=["*"],
+    )
 
-    async def watch_dir(dir_src):
+    async def watch_dir(dir_src: str):
         async for changes in awatch(server_info.dir_src):
             list_change = []
             for change, path in changes:
+                path = Path(path).relative_to(Path(dir_src).resolve())
+                path = str(path)
+                if change == Change.added:
+                    change = 'added'
+                elif change == Change.modified:
+                    change = 'modified'
+                elif change == Change.deleted:
+                    change = 'deleted'
                 list_change.append({
-                    path: change,
+                    change: path,
                 })
-            print('stream')
             yield f"data: {list_change}\n\n"
+
+    @fast_api.get("/__event/watch_dir")
+    async def event_watch_dir():
+        return StreamingResponse(
+            watch_dir(str(server_info.dir_src)),
+            media_type="text/event-stream",
+        )
 
     @fast_api.get("/{path:path}")
     async def render(path: str):
@@ -41,12 +62,5 @@ def create_fastapi(server_info: ServerInfo) -> FastAPI:
 
         dir_dest = Path(server_info.dir_dest)
         return FileResponse(dir_dest / _path)
-
-    @fast_api.get("/__events/watch_dir")
-    async def events() -> StreamingResponse:
-        return StreamingResponse(
-            watch_dir(server_info.dir_src),
-            media_type="text/event-stream",
-        )
 
     return fast_api
