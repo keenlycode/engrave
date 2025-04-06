@@ -28,15 +28,15 @@ from . import process
 
 class WatchFilter(DefaultFilter):
     def __init__(self,
-        *args,
-        dir_base: Path,
-        list_regex: List[re.Pattern] = [],
-        exclude_globs: List[str],
-        **kw,
+            *args,
+            dir_base: Path,
+            list_regex: List[re.Pattern] = [],
+            exclude_globs: List[str],
+            **kw,
     ):
+        self.dir_base = dir_base
         self.list_regex = list_regex
         self.exclude_globs = exclude_globs
-        self.dir_base = dir_base
         super().__init__(*args, **kw)
 
     def __call__(self, change: Change, path: str) -> bool:
@@ -53,12 +53,14 @@ class WatchFilter(DefaultFilter):
 
 
 async def handle_async_html_list_change(
-    build_config: BuildConfig,
-    async_html_list_file_change: AsyncGenerator[Set[FileChange]]
+        build_config: BuildConfig,
+        async_html_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[WatchResult]:
+
     async_file_change = (file_change
         async for list_file_change in async_html_list_file_change
         for file_change in list_file_change)
+
     async for change, path in async_file_change:
         file_process_info = FileProcessInfo(
             path=Path(path),
@@ -71,16 +73,16 @@ async def handle_async_html_list_change(
                or (change == Change.added)):
             process.build_html(file_process_info)
 
-        yield WatchResult(
-            file_process_info=file_process_info,
-            type='html',
-            change=change,
+        path_rel = Path(path).relative_to(
+            Path(build_config.dir_src).resolve()
         )
+        yield WatchResult(path=str(path_rel), type='html', change=change,)
 
 async def handle_async_copy_list_change(
-    build_config: BuildConfig,
-    async_copy_list_file_change: AsyncGenerator[Set[FileChange]]
+        build_config: BuildConfig,
+        async_copy_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[WatchResult]:
+
     async_file_change = (file_change
         async for list_file_change in async_copy_list_file_change
         for file_change in list_file_change)
@@ -96,35 +98,28 @@ async def handle_async_copy_list_change(
                or (change == Change.added)):
             process.copy_file(file_process_info)
 
-        yield WatchResult(
-            file_process_info=file_process_info,
-            type='copy',
-            change=change,
+        path_rel = Path(path).relative_to(
+            Path(build_config.dir_src).resolve()
         )
+        yield WatchResult(path=str(path_rel), type='copy', change=change,)
 
 
 async def handle_async_watch_list_change(
-    build_config: BuildConfig,
-    async_watch_list_file_change: AsyncGenerator[Set[FileChange]]
+        build_config: BuildConfig,
+        async_watch_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[WatchResult]:
+
     async_file_change = (file_change
         async for list_file_change in async_watch_list_file_change
         for file_change in list_file_change)
+
     async for change, path in async_file_change:
-        file_process_info = FileProcessInfo(
-            path=Path(path),
-            dir_src=Path(build_config.dir_src),
-            dir_dest=Path(build_config.dir_dest),
+        path_rel = Path(path).relative_to(
+            Path(build_config.dir_dest).resolve()
         )
+        yield WatchResult(path=str(path_rel), type='watch', change=change,)
 
-        yield WatchResult(
-            file_process_info=file_process_info,
-            type='watch',
-            change=change,
-        )
-
-
-async def run(build_config: BuildConfig):
+async def run(build_config: BuildConfig) -> AsyncGenerator[WatchResult]:
     html_regex = re.compile(r'.*\.html$')
     list_copy_regex = [re.compile(copy_regex) for copy_regex in build_config.copy]
     list_watch_regex = [re.compile(watch_regex) for watch_regex in build_config.watch]

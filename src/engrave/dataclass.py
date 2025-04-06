@@ -19,7 +19,7 @@ class FileProcessInfo:
 
 @dataclass
 class WatchResult:
-    file_process_info: FileProcessInfo
+    path: str
     type: Literal['html', 'copy', 'watch']
     change: Change
 

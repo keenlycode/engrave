@@ -25,7 +25,7 @@ def build_html(file_process_info: FileProcessInfo) -> None:
 
     # Get relative path from source directory
     path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
-
+    path_src = file_process_info.dir_src / path_rel
     # Create output directory if needed
     path_dest = file_process_info.dir_dest / path_rel
     path_dest.parent.mkdir(parents=True, exist_ok=True)
@@ -34,27 +34,26 @@ def build_html(file_process_info: FileProcessInfo) -> None:
     with open(path_dest, 'w', encoding='utf-8') as file:
         file.write(template(str(path_rel)).render())
 
-    logger.success(f"✓ Built HTML: {path_rel} → {path_dest}")
+    logger.success(f"✅ Built HTML: {path_src} → {path_dest}")
 
 
 def copy_file(file_process_info: FileProcessInfo) -> None:
     # Get relative path from source directory
     path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
-
+    path_src = file_process_info.dir_src / path_rel
     # Create output directory if needed
     path_dest = file_process_info.dir_dest / path_rel
     path_dest.parent.mkdir(parents=True, exist_ok=True)
 
     # Copy the asset file
     shutil.copy2(file_process_info.path, path_dest)
-    logger.success(f"📁 Copied asset: {path_rel} → {path_dest}")
+    logger.success(f"📁 Copied asset: {path_src} → {path_dest}")
 
 
 def delete_file(file_process_info: FileProcessInfo) -> None:
     # Get relative path from source directory
     path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
-
+    path_src = file_process_info.dir_src / path_rel
     path_dest = file_process_info.dir_dest / path_rel
     path_dest.unlink()
-
-    logger.success(f"🗑 Deleted file: {file_process_info.path}")
+    logger.success(f"🗑 Deleted file: {path_src} → {path_dest}")
