@@ -28,7 +28,7 @@ def run(build_config: BuildConfig) -> None:
     logger.info(f"🔍 Looking for files in: {dir_src}/")
     logger.info(f"📤 Output directory: {dir_dest}/")
 
-    list_asset_regex = [re.compile(regex) for regex in build_config.copy]
+    list_copy_regex = [re.compile(regex) for regex in build_config.copy]
 
     gen_html = filter(lambda path:
         not any(part.startswith('_') for part in path.parts)
@@ -39,15 +39,15 @@ def run(build_config: BuildConfig) -> None:
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 
-    gen_asset = filter(
+    gen_copy = filter(
         lambda path: process.is_valid_path(
             path=path,
-            list_regex=list_asset_regex,
+            list_regex=list_copy_regex,
             exclude_globs=build_config.exclude),
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 
-    gen_path = chain(gen_html, gen_asset)
+    gen_path = chain(gen_html, gen_copy)
 
     gen_file_process_info = (
         FileProcessInfo(path=path, dir_src=dir_src, dir_dest=dir_dest)

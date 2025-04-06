@@ -18,7 +18,7 @@ from .dataclass import (
 )
 from .build import run as build_run
 from .watch import run as watch_run
-from .server import create_fastapi
+# from .server import create_fastapi
 from . import log
 
 
@@ -48,6 +48,9 @@ async def build(build_config: BuildConfig):
     build_run(build_config)
     elapsed_time = time.time() - start_time
     logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{build_config.dir_dest}'")
+
+    async for watch_result in watch_run(build_config):
+        print(watch_result)
 
 
 # @app.command()

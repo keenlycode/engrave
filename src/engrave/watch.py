@@ -18,7 +18,7 @@ from aiostream import stream
 
 # lib: local
 from .dataclass import (
-    PreviewConfig,
+    BuildConfig,
     FileProcessInfo,
     WatchResult,
 )
@@ -29,22 +29,20 @@ from . import process
 class WatchFilter(DefaultFilter):
     def __init__(self,
         *args,
+        dir_base: Path,
         list_regex: List[re.Pattern] = [],
         exclude_globs: List[str],
-
         **kw,
     ):
         self.list_regex = list_regex
         self.exclude_globs = exclude_globs
+        self.dir_base = dir_base
         super().__init__(*args, **kw)
 
     def __call__(self, change: Change, path: str) -> bool:
-        if change == Change.deleted:
-            return super().__call__(change, path)
-
-        _path = Path(path)
+        path_rel = Path(path).relative_to(self.dir_base)
         _is_valid_path = process.is_valid_path(
-            path=_path,
+            path=path_rel,
             list_regex=self.list_regex,
             exclude_globs=self.exclude_globs,
         )
@@ -55,7 +53,7 @@ class WatchFilter(DefaultFilter):
 
 
 async def handle_async_html_list_change(
-    preview_config: PreviewConfig,
+    build_config: BuildConfig,
     async_html_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[WatchResult]:
     async_file_change = (file_change
@@ -64,8 +62,8 @@ async def handle_async_html_list_change(
     async for change, path in async_file_change:
         file_process_info = FileProcessInfo(
             path=Path(path),
-            dir_src=Path(preview_config.dir_src),
-            dir_dest=Path(preview_config.dir_dest),
+            dir_src=Path(build_config.dir_src),
+            dir_dest=Path(build_config.dir_dest),
         )
         if change == Change.deleted:
             process.delete_file(file_process_info)
@@ -80,17 +78,17 @@ async def handle_async_html_list_change(
         )
 
 async def handle_async_copy_list_change(
-    preview_config: PreviewConfig,
-    async_asset_list_file_change: AsyncGenerator[Set[FileChange]]
+    build_config: BuildConfig,
+    async_copy_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[WatchResult]:
     async_file_change = (file_change
-        async for list_file_change in async_asset_list_file_change
+        async for list_file_change in async_copy_list_file_change
         for file_change in list_file_change)
     async for change, path in async_file_change:
         file_process_info = FileProcessInfo(
             path=Path(path),
-            dir_src=Path(preview_config.dir_src),
-            dir_dest=Path(preview_config.dir_dest),
+            dir_src=Path(build_config.dir_src),
+            dir_dest=Path(build_config.dir_dest),
         )
         if change == Change.deleted:
             process.delete_file(file_process_info)
@@ -106,7 +104,7 @@ async def handle_async_copy_list_change(
 
 
 async def handle_async_watch_list_change(
-    preview_config: PreviewConfig,
+    build_config: BuildConfig,
     async_watch_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[WatchResult]:
     async_file_change = (file_change
@@ -115,8 +113,8 @@ async def handle_async_watch_list_change(
     async for change, path in async_file_change:
         file_process_info = FileProcessInfo(
             path=Path(path),
-            dir_src=Path(preview_config.dir_src),
-            dir_dest=Path(preview_config.dir_dest),
+            dir_src=Path(build_config.dir_src),
+            dir_dest=Path(build_config.dir_dest),
         )
 
         yield WatchResult(
@@ -126,54 +124,53 @@ async def handle_async_watch_list_change(
         )
 
 
-async def run(preview_config: PreviewConfig):
+async def run(build_config: BuildConfig):
     html_regex = re.compile(r'.*\.html$')
-    list_copy_regex = [re.compile(copy_regex) for copy_regex in preview_config.copy]
-    list_watch_regex = [re.compile(watch_regex) for watch_regex in preview_config.watch]
+    list_copy_regex = [re.compile(copy_regex) for copy_regex in build_config.copy]
+    list_watch_regex = [re.compile(watch_regex) for watch_regex in build_config.watch]
 
     async_html_list_change = awatch(
-        preview_config.dir_src,
+        build_config.dir_src,
         watch_filter=WatchFilter(
+            dir_base=Path(build_config.dir_src).resolve(),
             list_regex=[html_regex],
-            exclude_globs=preview_config.exclude,
+            exclude_globs=build_config.exclude,
         )
     )
 
     async_copy_list_change = awatch(
-        preview_config.dir_src,
+        build_config.dir_src,
         watch_filter=WatchFilter(
-            regex=list_copy_regex,
-            exclude_globs=preview_config.exclude,
+            dir_base=Path(build_config.dir_src).resolve(),
+            list_regex=list_copy_regex,
+            exclude_globs=build_config.exclude,
         )
     )
 
     async_watch_list_change = awatch(
-        preview_config.dir_src,
+        build_config.dir_dest,
         watch_filter=WatchFilter(
-            regex=list_watch_regex,
-            exclude_globs=preview_config.exclude,
+            dir_base=Path(build_config.dir_dest).resolve(),
+            list_regex=list_watch_regex,
+            exclude_globs=build_config.exclude,
         )
     )
 
-    # async_merged = stream.merge(
-    #     async_html_list_change,
-    #     async_asset_list_change,
-    #     async_watch_list_change,
-    # )
+    stream_watch = stream.merge(
+        handle_async_html_list_change(
+            build_config,
+            async_html_list_change
+        ),
+        handle_async_copy_list_change(
+            build_config,
+            async_copy_list_change
+        ),
+        handle_async_watch_list_change(
+            build_config,
+            async_watch_list_change
+        ),
+    )
 
-    async_change = (change async for list_change in async_merged for change in list_change)
-
-    async for change, path in async_change:
-        path = Path(path)
-        file_process_info = FileProcessInfo(
-            path=path,
-            dir_src=Path(preview_config.dir_src),
-            dir_dest=Path(preview_config.dir_dest),
-        )
-        if change == Change.deleted:
-            process.delete_file(file_process_info)
-        elif change == Change.modified or change == Change.added:
-            if path.suffix == '.html':
-                process.build_html(file_process_info)
-            else:
-                process.copy_file(file_process_info)
+    async with stream_watch.stream() as streamer:
+        async for watch_result in streamer:
+            yield watch_result

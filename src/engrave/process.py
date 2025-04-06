@@ -14,8 +14,7 @@ from .dataclass import FileProcessInfo
 
 def is_valid_path(*, path: Path, list_regex: List[re.Pattern] = [], exclude_globs: List[str]) -> bool:
     return (
-        path.is_file()
-        and any(regex.match(str(path)) for regex in list_regex)
+        any(regex.match(str(path)) for regex in list_regex)
         and not any(path.match(pattern) for pattern in exclude_globs)
     )
 
