@@ -1,6 +1,8 @@
 # lib: built-in
 from typing import (
     List,
+    AsyncGenerator,
+    Set,
 )
 import re
 from pathlib import Path
@@ -11,10 +13,16 @@ from watchfiles import (
     DefaultFilter,
     awatch,
 )
+from watchfiles.main import FileChange
 from aiostream import stream
 
 # lib: local
-from .dataclass import PreviewConfig, FileProcessInfo
+from .dataclass import (
+    PreviewConfig,
+    FileProcessInfo,
+    WatchResult,
+)
+
 from . import process
 
 
@@ -46,9 +54,81 @@ class WatchFilter(DefaultFilter):
         )
 
 
+async def handle_async_html_list_change(
+    preview_config: PreviewConfig,
+    async_html_list_file_change: AsyncGenerator[Set[FileChange]]
+) -> AsyncGenerator[WatchResult]:
+    async_file_change = (file_change
+        async for list_file_change in async_html_list_file_change
+        for file_change in list_file_change)
+    async for change, path in async_file_change:
+        file_process_info = FileProcessInfo(
+            path=Path(path),
+            dir_src=Path(preview_config.dir_src),
+            dir_dest=Path(preview_config.dir_dest),
+        )
+        if change == Change.deleted:
+            process.delete_file(file_process_info)
+        elif ((change == Change.modified)
+               or (change == Change.added)):
+            process.build_html(file_process_info)
+
+        yield WatchResult(
+            file_process_info=file_process_info,
+            type='html',
+            change=change,
+        )
+
+async def handle_async_copy_list_change(
+    preview_config: PreviewConfig,
+    async_asset_list_file_change: AsyncGenerator[Set[FileChange]]
+) -> AsyncGenerator[WatchResult]:
+    async_file_change = (file_change
+        async for list_file_change in async_asset_list_file_change
+        for file_change in list_file_change)
+    async for change, path in async_file_change:
+        file_process_info = FileProcessInfo(
+            path=Path(path),
+            dir_src=Path(preview_config.dir_src),
+            dir_dest=Path(preview_config.dir_dest),
+        )
+        if change == Change.deleted:
+            process.delete_file(file_process_info)
+        elif ((change == Change.modified)
+               or (change == Change.added)):
+            process.copy_file(file_process_info)
+
+        yield WatchResult(
+            file_process_info=file_process_info,
+            type='copy',
+            change=change,
+        )
+
+
+async def handle_async_watch_list_change(
+    preview_config: PreviewConfig,
+    async_watch_list_file_change: AsyncGenerator[Set[FileChange]]
+) -> AsyncGenerator[WatchResult]:
+    async_file_change = (file_change
+        async for list_file_change in async_watch_list_file_change
+        for file_change in list_file_change)
+    async for change, path in async_file_change:
+        file_process_info = FileProcessInfo(
+            path=Path(path),
+            dir_src=Path(preview_config.dir_src),
+            dir_dest=Path(preview_config.dir_dest),
+        )
+
+        yield WatchResult(
+            file_process_info=file_process_info,
+            type='watch',
+            change=change,
+        )
+
+
 async def run(preview_config: PreviewConfig):
     html_regex = re.compile(r'.*\.html$')
-    list_asset_regex = [re.compile(copy_regex) for copy_regex in preview_config.copy]
+    list_copy_regex = [re.compile(copy_regex) for copy_regex in preview_config.copy]
     list_watch_regex = [re.compile(watch_regex) for watch_regex in preview_config.watch]
 
     async_html_list_change = awatch(
@@ -59,10 +139,10 @@ async def run(preview_config: PreviewConfig):
         )
     )
 
-    async_asset_list_change = awatch(
+    async_copy_list_change = awatch(
         preview_config.dir_src,
         watch_filter=WatchFilter(
-            regex=list_asset_regex,
+            regex=list_copy_regex,
             exclude_globs=preview_config.exclude,
         )
     )
@@ -75,20 +155,20 @@ async def run(preview_config: PreviewConfig):
         )
     )
 
-    async_merged = stream.merge(
-        async_html_list_change,
-        async_asset_list_change,
-        async_watch_list_change,
-    )
+    # async_merged = stream.merge(
+    #     async_html_list_change,
+    #     async_asset_list_change,
+    #     async_watch_list_change,
+    # )
 
-    gen_change = (gen_change async for list_change in async_merged for gen_change in list_change)
+    async_change = (change async for list_change in async_merged for change in list_change)
 
-    async for change, path in gen_change:
+    async for change, path in async_change:
         path = Path(path)
         file_process_info = FileProcessInfo(
             path=path,
-            dir_src=Path(build_info.dir_src),
-            dir_dest=Path(build_info.dir_dest),
+            dir_src=Path(preview_config.dir_src),
+            dir_dest=Path(preview_config.dir_dest),
         )
         if change == Change.deleted:
             process.delete_file(file_process_info)
