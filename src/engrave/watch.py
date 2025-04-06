@@ -76,6 +76,7 @@ async def handle_async_html_list_change(
         path_rel = Path(path).relative_to(
             Path(build_config.dir_src).resolve()
         )
+        path_rel = Path(build_config.dir_src) / path_rel
         yield WatchResult(path=str(path_rel), type='html', change=change,)
 
 async def handle_async_copy_list_change(
@@ -101,6 +102,7 @@ async def handle_async_copy_list_change(
         path_rel = Path(path).relative_to(
             Path(build_config.dir_src).resolve()
         )
+        path_rel = build_config.dir_src / path_rel
         yield WatchResult(path=str(path_rel), type='copy', change=change,)
 
 
@@ -117,6 +119,7 @@ async def handle_async_watch_list_change(
         path_rel = Path(path).relative_to(
             Path(build_config.dir_dest).resolve()
         )
+        path_rel = Path(build_config.dir_dest) / path_rel
         yield WatchResult(path=str(path_rel), type='watch', change=change,)
 
 async def run(build_config: BuildConfig) -> AsyncGenerator[WatchResult]:

@@ -26,8 +26,8 @@ class WatchResult:
 
 @dataclass
 class BuildConfig:
-    dir_src: str | Path
-    dir_dest: str | Path
+    dir_src: str
+    dir_dest: str
     copy: List[str] = field(default_factory=list)
     watch: List[str] = field(default_factory=list)
     exclude: List[str] = field(default_factory=list)
