@@ -26,14 +26,31 @@ from . import log
 
 log.configure("INFO")
 
-watch_event_queue = asyncio.Queue()
+set_queue_clients = set()
+
+async def publish_queue_put(data, set_queue_clients):
+    to_remove = set()
+    for queue in set_queue_clients:
+        try:
+            await queue.put(data)
+        except asyncio.QueueFull:
+            to_remove.add(queue)
+    set_queue_clients.difference_update(to_remove)
+
 
 async def watch_build(build_config: BuildConfig):
     async for list_file_change_result in watch_run(build_config):
         results = []
         for file_change_result in list_file_change_result:
             results.append(asdict(file_change_result))
-        await watch_event_queue.put(results)
+            await publish_queue_put(results, set_queue_clients)
+            # to_remove = set()
+            # for queue in clients:
+            #     try:
+            #         await queue.put(results)
+            #     except asyncio.QueueFull:
+            #         to_remove.add(queue)
+            # clients.difference_update(to_remove)
 
 
 def create_fastapi(server_config: ServerConfig) -> FastAPI:
@@ -45,9 +62,16 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
     )
 
     async def watch_event_stream():
-        while True:
-            data = await watch_event_queue.get()
-            yield f"data: {json.dumps(data)}\n\n"
+        queue = asyncio.Queue()
+        set_queue_clients.add(queue)
+        try:
+            while True:
+                data = await queue.get()
+                yield f"data: {json.dumps(data)}\n\n"
+        except asyncio.CancelledError:
+            logger.info("Client disconnected")
+        finally:
+            set_queue_clients.remove(queue)
 
     # Startup event to launch background watcher
     @fast_api.on_event("startup")
