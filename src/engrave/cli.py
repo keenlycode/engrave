@@ -1,10 +1,13 @@
 # lib: built-in
-import time
-import asyncio
-from dataclasses import dataclass
+
+from dataclasses import (
+    dataclass,
+    asdict,
+)
 from importlib.metadata import version as get_version
 
 # lib: external
+import dacite
 from loguru import logger
 from cyclopts import (
     App,
@@ -15,16 +18,22 @@ import uvicorn
 # lib: local
 from .dataclass import (
     BuildConfig as _BuildConfig,
+    ServerConfig as _ServerConfig,
 )
 from .build import run as build_run
-from .watch import run as watch_run
-# from .server import create_fastapi
+from .server import create_fastapi
 from . import log
 
 
 @Parameter(name="*")
 @dataclass
 class BuildConfig(_BuildConfig):
+    pass
+
+
+@Parameter(name="*")
+@dataclass
+class ServerConfig(_ServerConfig):
     pass
 
 
@@ -44,35 +53,32 @@ async def build(build_config: BuildConfig):
     if build_config.copy:
         logger.info(f"📦 Copy pattern: {build_config.copy}")
 
-    start_time = time.time()
     build_run(build_config)
-    elapsed_time = time.time() - start_time
-    logger.success(f"✅ Build complete in {elapsed_time:.2f}s - Files generated in '{build_config.dir_dest}'")
-
-    async for watch_result in watch_run(build_config):
-        print(watch_result)
 
 
-# @app.command()
-# def server(server_info: ServerInfo):
-#     """Start a development server with live preview."""
+@app.command()
+def server(server_config: ServerConfig):
+    """Start a development server with live preview."""
 
-#     logger.info(f"🚀 Starting development server for '{server_info.dir_src} -> {server_info.dir_dest}'")
-#     logger.info(f"🌐 Server running at http://{server_info.host}:{server_info.port}")
-#     logger.info("⚡ Live preview mode activated")
+    build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(server_config))
+    build_run(build_config)
 
-#     # Create FastAPI application
-#     fastapi_app = create_fastapi(server_info)
+    logger.info(f"🚀 Starting development server for '{server_config.dir_src} -> {server_config.dir_dest}'")
+    logger.info(f"🌐 Server running at http://{server_config.host}:{server_config.port}")
+    logger.info("⚡ Live preview mode activated")
 
-#     # Start Uvicorn server
-#     try:
-#         uvicorn.run(
-#             fastapi_app,
-#             host=server_info.host,
-#             port=server_info.port,
-#         )
-#     except KeyboardInterrupt:
-#         logger.info("🛑 Server stopped by user")
+    # Create FastAPI application
+    fastapi_app = create_fastapi(server_config)
+
+    # Start Uvicorn server
+    try:
+        uvicorn.run(
+            fastapi_app,
+            host=server_config.host,
+            port=server_config.port,
+        )
+    except KeyboardInterrupt:
+        logger.info("🛑 Server stopped by user")
 
 
 @app.command()

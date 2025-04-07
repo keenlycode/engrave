@@ -56,4 +56,4 @@ def delete_file(file_process_info: FileProcessInfo) -> None:
     path_src = file_process_info.dir_src / path_rel
     path_dest = file_process_info.dir_dest / path_rel
     path_dest.unlink()
-    logger.success(f"🗑 Deleted file: {path_src} → {path_dest}")
+    logger.success(f"🗑  Deleted file: {path_src} → {path_dest}")

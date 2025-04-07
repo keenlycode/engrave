@@ -34,4 +34,5 @@ engrave = "engrave.cli:main"
 [dependency-groups]
 dev = [
     "aiostream>=0.6.4",
+    "dacite>=1.9.2",
 ]

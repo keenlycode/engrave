@@ -20,7 +20,7 @@ from aiostream import stream
 from .dataclass import (
     BuildConfig,
     FileProcessInfo,
-    WatchResult,
+    FileChangeResult,
 )
 
 from . import process
@@ -55,74 +55,108 @@ class WatchFilter(DefaultFilter):
 async def handle_async_html_list_change(
         build_config: BuildConfig,
         async_html_list_file_change: AsyncGenerator[Set[FileChange]]
-) -> AsyncGenerator[WatchResult]:
+) -> AsyncGenerator[List[FileChangeResult]]:
 
-    async_file_change = (file_change
-        async for list_file_change in async_html_list_file_change
-        for file_change in list_file_change)
+    async_list_file_change = (
+        list_file_change
+        async for list_file_change
+        in async_html_list_file_change
+    )
 
-    async for change, path in async_file_change:
-        file_process_info = FileProcessInfo(
-            path=Path(path),
-            dir_src=Path(build_config.dir_src),
-            dir_dest=Path(build_config.dir_dest),
-        )
-        if change == Change.deleted:
-            process.delete_file(file_process_info)
-        elif ((change == Change.modified)
-               or (change == Change.added)):
-            process.build_html(file_process_info)
+    async for list_file_change in async_list_file_change:
+        list_file_change_result: list[FileChangeResult] = []
+        for change, path in list_file_change:
+            file_process_info = FileProcessInfo(
+                path=Path(path),
+                dir_src=Path(build_config.dir_src),
+                dir_dest=Path(build_config.dir_dest),
+            )
+            if change == Change.deleted:
+                process.delete_file(file_process_info)
+            elif ((change == Change.modified)
+                or (change == Change.added)):
+                process.build_html(file_process_info)
 
-        path_rel = Path(path).relative_to(
-            Path(build_config.dir_src).resolve()
-        )
-        path_rel = Path(build_config.dir_src) / path_rel
-        yield WatchResult(path=str(path_rel), type='html', change=change,)
+            path_rel = Path(path).relative_to(
+                Path(build_config.dir_src).resolve()
+            )
+            path_rel = Path(build_config.dir_src) / path_rel
+            list_file_change_result.append(
+                FileChangeResult(
+                    path=str(path_rel),
+                    type='html',
+                    change=change,
+                )
+            )
+        yield list_file_change_result
 
 async def handle_async_copy_list_change(
         build_config: BuildConfig,
         async_copy_list_file_change: AsyncGenerator[Set[FileChange]]
-) -> AsyncGenerator[WatchResult]:
+) -> AsyncGenerator[List[FileChangeResult]]:
 
-    async_file_change = (file_change
-        async for list_file_change in async_copy_list_file_change
-        for file_change in list_file_change)
-    async for change, path in async_file_change:
-        file_process_info = FileProcessInfo(
-            path=Path(path),
-            dir_src=Path(build_config.dir_src),
-            dir_dest=Path(build_config.dir_dest),
-        )
-        if change == Change.deleted:
-            process.delete_file(file_process_info)
-        elif ((change == Change.modified)
-               or (change == Change.added)):
-            process.copy_file(file_process_info)
+    async_list_file_change = (
+        list_file_change
+        async for list_file_change
+        in async_copy_list_file_change
+    )
 
-        path_rel = Path(path).relative_to(
-            Path(build_config.dir_src).resolve()
-        )
-        path_rel = build_config.dir_src / path_rel
-        yield WatchResult(path=str(path_rel), type='copy', change=change,)
+    async for list_file_change in async_list_file_change:
+        list_file_change_result: list[FileChangeResult] = []
+        for change, path in list_file_change:
+            file_process_info = FileProcessInfo(
+                path=Path(path),
+                dir_src=Path(build_config.dir_src),
+                dir_dest=Path(build_config.dir_dest),
+            )
+            if change == Change.deleted:
+                process.delete_file(file_process_info)
+            elif ((change == Change.modified)
+                or (change == Change.added)):
+                process.copy_file(file_process_info)
+
+            path_rel = Path(path).relative_to(
+                Path(build_config.dir_src).resolve()
+            )
+            path_rel = build_config.dir_src / path_rel
+            list_file_change_result.append(
+                FileChangeResult(
+                    path=str(path_rel),
+                    type='html',
+                    change=change,
+                )
+            )
+        yield list_file_change_result
 
 
 async def handle_async_watch_list_change(
         build_config: BuildConfig,
         async_watch_list_file_change: AsyncGenerator[Set[FileChange]]
-) -> AsyncGenerator[WatchResult]:
+) -> AsyncGenerator[List[FileChangeResult]]:
 
-    async_file_change = (file_change
-        async for list_file_change in async_watch_list_file_change
-        for file_change in list_file_change)
+    async_list_file_change = (
+        list_file_change
+        async for list_file_change
+        in async_watch_list_file_change
+    )
 
-    async for change, path in async_file_change:
-        path_rel = Path(path).relative_to(
-            Path(build_config.dir_dest).resolve()
-        )
-        path_rel = Path(build_config.dir_dest) / path_rel
-        yield WatchResult(path=str(path_rel), type='watch', change=change,)
+    async for list_file_change in async_list_file_change:
+        list_file_change_result: list[FileChangeResult] = []
+        for change, path in list_file_change:
+            path_rel = Path(path).relative_to(
+                Path(build_config.dir_dest).resolve()
+            )
+            path_rel = Path(build_config.dir_dest) / path_rel
+            list_file_change_result.append(
+                FileChangeResult(
+                    path=str(path_rel),
+                    type='html',
+                    change=change,
+                )
+            )
+        yield list_file_change_result
 
-async def run(build_config: BuildConfig) -> AsyncGenerator[WatchResult]:
+async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult]]:
     html_regex = re.compile(r'.*\.html$')
     list_copy_regex = [re.compile(copy_regex) for copy_regex in build_config.copy]
     list_watch_regex = [re.compile(watch_regex) for watch_regex in build_config.watch]

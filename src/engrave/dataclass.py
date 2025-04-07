@@ -18,7 +18,7 @@ class FileProcessInfo:
 
 
 @dataclass
-class WatchResult:
+class FileChangeResult:
     path: str
     type: Literal['html', 'copy', 'watch']
     change: Change
@@ -36,6 +36,6 @@ class BuildConfig:
 
 
 @dataclass
-class PreviewConfig(BuildConfig):
+class ServerConfig(BuildConfig):
     host: str = '127.0.0.1'
     port: int = 8000
