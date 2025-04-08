@@ -66,16 +66,20 @@ async def handle_async_html_list_change(
     async for list_file_change in async_list_file_change:
         list_file_change_result: list[FileChangeResult] = []
         for change, path in list_file_change:
-            file_process_info = FileProcessInfo(
-                path=Path(path),
-                dir_src=Path(build_config.dir_src),
-                dir_dest=Path(build_config.dir_dest),
-            )
-            if change == Change.deleted:
-                process.delete_file(file_process_info)
-            elif ((change == Change.modified)
-                or (change == Change.added)):
-                process.build_html(file_process_info)
+            type = 'html'
+            if path.endswith('.html'):
+                file_process_info = FileProcessInfo(
+                    path=Path(path),
+                    dir_src=Path(build_config.dir_src),
+                    dir_dest=Path(build_config.dir_dest),
+                )
+                if change == Change.deleted:
+                    process.delete_file(file_process_info)
+                elif ((change == Change.modified)
+                    or (change == Change.added)):
+                    process.build_html(file_process_info)
+            elif path.endswith('.md'):
+                type = 'markdown'
 
             path_rel = Path(path).relative_to(
                 Path(build_config.dir_src).resolve()
@@ -84,7 +88,7 @@ async def handle_async_html_list_change(
             list_file_change_result.append(
                 FileChangeResult(
                     path=str(path_rel),
-                    type='html',
+                    type=type,
                     change=change,
                 )
             )
@@ -122,7 +126,7 @@ async def handle_async_copy_list_change(
             list_file_change_result.append(
                 FileChangeResult(
                     path=str(path_rel),
-                    type='html',
+                    type='copy',
                     change=change,
                 )
             )
@@ -150,14 +154,14 @@ async def handle_async_watch_list_change(
             list_file_change_result.append(
                 FileChangeResult(
                     path=str(path_rel),
-                    type='html',
+                    type='watch',
                     change=change,
                 )
             )
         yield list_file_change_result
 
 async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult]]:
-    html_regex = re.compile(r'.*\.html$')
+    list_html_regex = [re.compile(r'.*\.html$'), re.compile(r'.*\.md$')]
     list_copy_regex = [re.compile(copy_regex) for copy_regex in build_config.copy]
     list_watch_regex = [re.compile(watch_regex) for watch_regex in build_config.watch]
 
@@ -165,7 +169,7 @@ async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult
         build_config.dir_src,
         watch_filter=WatchFilter(
             dir_base=Path(build_config.dir_src).resolve(),
-            list_regex=[html_regex],
+            list_regex=list_html_regex,
             exclude_globs=build_config.exclude,
         )
     )
@@ -193,14 +197,14 @@ async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult
             build_config,
             async_html_list_change
         ),
-        handle_async_copy_list_change(
-            build_config,
-            async_copy_list_change
-        ),
-        handle_async_watch_list_change(
-            build_config,
-            async_watch_list_change
-        ),
+        # handle_async_copy_list_change(
+        #     build_config,
+        #     async_copy_list_change
+        # ),
+        # handle_async_watch_list_change(
+        #     build_config,
+        #     async_watch_list_change
+        # ),
     )
 
     async with stream_watch.stream() as streamer:

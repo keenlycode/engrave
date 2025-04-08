@@ -20,7 +20,7 @@ class FileProcessInfo:
 @dataclass
 class FileChangeResult:
     path: str
-    type: Literal['html', 'copy', 'watch']
+    type: Literal['html', 'markdown', 'copy', 'watch']
     change: Change
 
 

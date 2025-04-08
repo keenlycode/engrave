@@ -3,6 +3,7 @@ from pathlib import Path
 from dataclasses import asdict
 import asyncio
 import json
+import traceback
 
 # lib: external
 from fastapi import FastAPI
@@ -44,13 +45,13 @@ async def watch_build(build_config: BuildConfig):
         for file_change_result in list_file_change_result:
             results.append(asdict(file_change_result))
             await publish_queue_put(results, set_queue_clients)
-            # to_remove = set()
-            # for queue in clients:
-            #     try:
-            #         await queue.put(results)
-            #     except asyncio.QueueFull:
-            #         to_remove.add(queue)
-            # clients.difference_update(to_remove)
+            to_remove = set()
+            for queue in set_queue_clients:
+                try:
+                    await queue.put(results)
+                except asyncio.QueueFull:
+                    to_remove.add(queue)
+            set_queue_clients.difference_update(to_remove)
 
 
 def create_fastapi(server_config: ServerConfig) -> FastAPI:
@@ -69,7 +70,7 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
                 data = await queue.get()
                 yield f"data: {json.dumps(data)}\n\n"
         except asyncio.CancelledError:
-            logger.info("Client disconnected")
+            logger.debug("Client disconnected")
         finally:
             set_queue_clients.remove(queue)
 
@@ -94,7 +95,19 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
             _path = _path / 'index.html'
 
         if _path.suffix == '.html':
-            return HTMLResponse(template(str(_path)).render())
+            try:
+                response = template(str(_path)).render()
+            except Exception as error:
+                message = str(error)
+                tb = traceback.format_exc()
+                response = get_template(
+                    dir_src=Path(__file__).parent
+                )('error.html').render(
+                    message=message,
+                    traceback=tb,
+                )
+
+            return HTMLResponse(response)
 
         dir_dest = Path(server_config.dir_dest)
         return FileResponse(dir_dest / _path)
