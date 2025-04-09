@@ -36,7 +36,7 @@ class BuildConfig(_BuildConfig):
 class ServerConfig(_ServerConfig):
     pass
 
-
+logger.remove()
 log.configure("INFO")
 app = App(
     help="Engrave: A static site generator with live preview capability",

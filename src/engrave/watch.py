@@ -197,14 +197,14 @@ async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult
             build_config,
             async_html_list_change
         ),
-        # handle_async_copy_list_change(
-        #     build_config,
-        #     async_copy_list_change
-        # ),
-        # handle_async_watch_list_change(
-        #     build_config,
-        #     async_watch_list_change
-        # ),
+        handle_async_copy_list_change(
+            build_config,
+            async_copy_list_change
+        ),
+        handle_async_watch_list_change(
+            build_config,
+            async_watch_list_change
+        ),
     )
 
     async with stream_watch.stream() as streamer:
