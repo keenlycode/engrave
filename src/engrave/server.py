@@ -22,10 +22,7 @@ from .dataclass import (
     BuildConfig,
 )
 from .watch import run as watch_run
-from . import log
 
-
-log.configure("INFO")
 
 set_queue_clients = set()
 
@@ -45,13 +42,6 @@ async def watch_build(build_config: BuildConfig):
         for file_change_result in list_file_change_result:
             results.append(asdict(file_change_result))
             await publish_queue_put(results, set_queue_clients)
-            to_remove = set()
-            for queue in set_queue_clients:
-                try:
-                    await queue.put(results)
-                except asyncio.QueueFull:
-                    to_remove.add(queue)
-            set_queue_clients.difference_update(to_remove)
 
 
 def create_fastapi(server_config: ServerConfig) -> FastAPI:
@@ -68,7 +58,7 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
         try:
             while True:
                 data = await queue.get()
-                yield f"data: {json.dumps(data)}\n\n"
+                yield f"event: change\ndata: {json.dumps(data)}\n\n"
         except asyncio.CancelledError:
             logger.debug("Client disconnected")
         finally:

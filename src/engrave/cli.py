@@ -1,5 +1,4 @@
 # lib: built-in
-
 from dataclasses import (
     dataclass,
     asdict,
@@ -71,14 +70,11 @@ def server(server_config: ServerConfig):
     fastapi_app = create_fastapi(server_config)
 
     # Start Uvicorn server
-    try:
-        uvicorn.run(
-            fastapi_app,
-            host=server_config.host,
-            port=server_config.port,
-        )
-    except KeyboardInterrupt:
-        logger.info("🛑 Server stopped by user")
+    uvicorn.run(
+        fastapi_app,
+        host=server_config.host,
+        port=server_config.port,
+    )
 
 
 @app.command()
