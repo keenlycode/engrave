@@ -183,10 +183,12 @@ async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult
         )
     )
 
+    print(Path.cwd())
+    print(list_watch_regex)
     async_watch_list_change = awatch(
-        build_config.dir_dest,
+        Path.cwd(),
         watch_filter=WatchFilter(
-            dir_base=Path(build_config.dir_dest).resolve(),
+            dir_base=Path.cwd().resolve(),
             list_regex=list_watch_regex,
             exclude_globs=build_config.exclude,
         )
