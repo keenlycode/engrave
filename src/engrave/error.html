@@ -1,0 +1,43 @@
+<style>
+    .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 20px 0;
+    }
+    .error h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+    .error p {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    .error h3 {
+        font-size: 20px;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+    .error pre {
+        background-color: #f1f1f1;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+    .error ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    .error ul li {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+</style>
+<div class="error">
+    <h2>An error occurred</h2>
+    <p>{{ message }}</p>
+    <h3>Traceback:</h3>
+    <pre>{{ traceback }}</pre>
+</div>

@@ -1,135 +1,66 @@
+# lib: built-in
 from pathlib import Path
 from glob import iglob
 import re
-import shutil
-import os
-from typing import (
-    Union,
-    List,
-    Tuple,
-)
-from typing_extensions import Generator
+from itertools import chain
+
+# lib: external
 from loguru import logger
-from concurrent.futures import ThreadPoolExecutor
-from engrave.template import get_template
+
+# lib: local
+from . import process
+from .dataclass import BuildConfig, FileProcessInfo
 
 
-def build_html(
-        *,
-        path_html: Path,
-        dir_src: Path,
-        dir_dest: Path,
-) -> None:
-    # Get template loader
-    template = get_template(dir_src=dir_src)
-
-    # Get relative path from source directory
-    path_rel = path_html.relative_to(dir_src)
-
-    # Create output directory if needed
-    path_dest = dir_dest / path_rel
-    path_dest.parent.mkdir(parents=True, exist_ok=True)
-
-    # Write rendered content to output file
-    with open(path_dest, 'w', encoding='utf-8') as file:
-        file.write(template(str(path_rel)).render())
-
-    logger.success(f"✓ Built HTML: {path_rel} → {os.path.relpath(path_dest)}")
-
-
-def copy_asset(
-        *,
-        path_asset: Path,
-        dir_src: Path,
-        dir_dest: Path,
-) -> None:
-    # Get relative path from source directory
-    path_rel = path_asset.relative_to(dir_src)
-
-    # Create output directory if needed
-    path_dest = dir_dest / path_rel
-    path_dest.parent.mkdir(parents=True, exist_ok=True)
-
-    # Copy the asset file
-    shutil.copy2(path_asset, path_dest)
-    logger.success(f"📁 Copied asset: {path_rel} → {os.path.relpath(path_dest)}")
-
-
-def build(
-        *,
-        dir_src: Union[str, Path],
-        dir_dest: Union[str, Path],
-        asset_regex: str | None = None,
-        list_glob_exclude: List[str] = [],
-        max_workers: int | None = None,
-        log_level: str = 'INFO',
-) -> None:
+def run(build_config: BuildConfig) -> None:
     """
     Build HTML files from Jinja2 templates.
 
     Args:
-        src_dir: Source directory containing templates
-        dest_dir: Destination directory for built HTML files
-        excluded_patterns: Optional list of glob patterns to exclude
-        max_workers: Maximum number of worker threads (None = auto)
+        build_info: Build information containing source and destination directories
     """
 
-    dir_src = Path(dir_src)
-    dir_dest = Path(dir_dest)
+    dir_src = Path(build_config.dir_src)
+    dir_dest = Path(build_config.dir_dest)
 
     # Create destination directory if it doesn't exist
     dir_dest.mkdir(parents=True, exist_ok=True)
     logger.info(f"🔍 Looking for files in: {dir_src}/")
     logger.info(f"📤 Output directory: {dir_dest}/")
 
-    # Find all HTML files in the source directory
-    gen_path_html = (
-        Path(path) for path in iglob(str(dir_src / '**/*.html'), recursive=True)
-        if Path(path).is_file()
-            and not Path(path).match('*.layout.html')
-            and not any(Path(path).match(pattern) for pattern in list_glob_exclude)
+    list_copy_regex = [re.compile(regex) for regex in build_config.copy]
+
+    gen_html = filter(lambda path:
+        not any(part.startswith('_') for part in path.parts)
+        and process.is_valid_path(
+            path=path,
+            list_regex=[re.compile(r'^.*\.html$')],
+            exclude_globs=build_config.exclude),
+        (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 
-    # Find all asset files if patterns are provided
-    gen_path_asset: Generator[Path, None, None] | Tuple[Path, ...] = ()
-    if asset_regex:
-        # Compile all regex patterns for assets
-        pattern_asset_regex = re.compile(asset_regex)
-        logger.info(f"🔍 Finding assets matching: {asset_regex}")
+    gen_copy = filter(
+        lambda path: process.is_valid_path(
+            path=path,
+            list_regex=list_copy_regex,
+            exclude_globs=build_config.exclude),
+        (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
+    )
 
-        # Find all files using regex matching
-        gen_path_asset = (
-            Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True)
-            if Path(path).is_file()
-                and pattern_asset_regex.search(str(path))
-                and not any(Path(path).match(pattern) for pattern in list_glob_exclude)
-        )
+    gen_path = chain(gen_html, gen_copy)
 
-    # Process HTML files with thread pool for better performance
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        logger.info(f"🚀 Building HTML with {max_workers or 'auto'} workers")
-        # Use list() to consume the generator and make exceptions propagate
-        list(executor.map(
-            lambda path: build_html(
-                path_html=path,
-                dir_src=dir_src,
-                dir_dest=dir_dest,
-            ),
-            gen_path_html,
-            timeout=60  # Add timeout to ensure exceptions aren't suppressed
-        ))
+    gen_file_process_info = (
+        FileProcessInfo(path=path, dir_src=dir_src, dir_dest=dir_dest)
+        for path in gen_path
+    )
 
-        if asset_regex:
-            logger.info(f"🚀 Copying assets with {max_workers or 'auto'} workers")
-            # Use list() to consume the generator and make exceptions propagate
-            list(executor.map(
-                lambda path: copy_asset(
-                    path_asset=path,
-                    dir_src=dir_src,
-                    dir_dest=dir_dest,
-                ),
-                gen_path_asset,
-                timeout=60  # Add timeout to ensure exceptions aren't suppressed
-            ))
+    # Process each file
+    for file_process_info in gen_file_process_info:
+        if file_process_info.path.suffix == '.html':
+            logger.info(f"Processing HTML file: {file_process_info.path}")
+            process.build_html(file_process_info)
+        else:
+            logger.info(f"Copying file: {file_process_info.path}")
+            process.copy_file(file_process_info)
 
     logger.success("✨ Build complete")

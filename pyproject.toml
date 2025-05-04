@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "engrave"
-version = "3.0.2"
+version = "3.1.0"
 description = "A static site generator with live preview capability"
 authors = [
   {name = "Nitipit Nontasuwan", email = "nitipit@gmail.com"}
@@ -17,13 +17,15 @@ keywords = ["static site generator", "web", "generator", "preview", "website", "
 license = "MIT"  # or license = {file = "LICENSE.txt"} for legacy declaration
 license-files = ["LICENSE"]
 dependencies = [
+    "cyclopts>=3.11.2",
     "fastapi[standard]>=0.115.8",
     "jinja2>=3.1.5",
     "loguru>=0.7.3",
     "markupsafe>=3.0.2",
     "mistune>=3.1.2",
-    "typer>=0.15.2",
     "uvicorn>=0.34.0",
+    "aiostream>=0.6.4",
+    "dacite>=1.9.2",
 ]
 requires-python = ">=3.10"
 
