@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "engrave"
-version = "3.1.0"
+version = "3.1.1"
 description = "A static site generator with live preview capability"
 authors = [
   {name = "Nitipit Nontasuwan", email = "nitipit@gmail.com"}
