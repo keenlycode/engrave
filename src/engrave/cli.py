@@ -65,6 +65,10 @@ def server(server_config: ServerConfig):
     logger.info(f"🚀 Starting development server for '{server_config.dir_src} -> {server_config.dir_dest}'")
     logger.info(f"🌐 Server running at http://{server_config.host}:{server_config.port}")
     logger.info("⚡ Live preview mode activated")
+    logger.info("📢 To enable live reload, your browser should connect to the '/__engrave/watch' endpoint using EventSource (SSE).")
+    logger.info("💡 Example JavaScript to listen for changes:")
+    logger.info("    const source = new EventSource('/__engrave/watch');")
+    logger.info("    source.addEventListener('change', (event) => { window.location.reload(); };")
 
     # Create FastAPI application
     fastapi_app = create_fastapi(server_config)
