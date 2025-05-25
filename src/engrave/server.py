@@ -70,7 +70,7 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
         asyncio.create_task(watch_build(build_config))
         logger.info("Started background file watcher")
 
-    @fast_api.get("/__event/watch")
+    @fast_api.get("/__engrave/watch")
     async def event_watch():
         return StreamingResponse(
             watch_event_stream(),
