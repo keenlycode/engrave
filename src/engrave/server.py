@@ -4,6 +4,7 @@ from dataclasses import asdict
 import asyncio
 import json
 import traceback
+from contextlib import asynccontextmanager
 
 # lib: external
 from fastapi import FastAPI
@@ -45,12 +46,16 @@ async def watch_build(build_config: BuildConfig):
 
 
 def create_fastapi(server_config: ServerConfig) -> FastAPI:
-    fast_api = FastAPI()
-
     build_config = dacite.from_dict(
         data_class=BuildConfig,
         data=asdict(server_config)
     )
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        asyncio.create_task(watch_build(build_config))
+        logger.info("Started background files watcher")
+        yield
 
     async def watch_event_stream():
         queue = asyncio.Queue()
@@ -64,11 +69,8 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
         finally:
             set_queue_clients.remove(queue)
 
-    # Startup event to launch background watcher
-    @fast_api.on_event("startup")
-    async def startup_event():
-        asyncio.create_task(watch_build(build_config))
-        logger.info("Started background file watcher")
+    fast_api = FastAPI(lifespan=lifespan)
+
 
     @fast_api.get("/__engrave/watch")
     async def event_watch():
