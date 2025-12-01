@@ -205,5 +205,94 @@ class TemplateTests(unittest.TestCase):
             shutil.rmtree(error_dir)
 
 
+    def test_absolute_paths_disallowed(self):
+        """Absolute paths in markdown() should be rejected."""
+        abs_md = str(Path(self.md_file).resolve())
+        abs_tpl = os.path.join(self.temp_dir, "abs_path.html")
+        with open(abs_tpl, "w") as f:
+            f.write(f'{{{{ markdown("{abs_md}") }}}}')
+
+        template_loader = get_template(dir_src=self.temp_dir)
+        template = template_loader("abs_path.html")
+
+        with self.assertRaises(ValueError) as ctx:
+            template.render()
+        self.assertIn("Absolute paths are not allowed", str(ctx.exception))
+
+    def test_path_traversal_is_blocked(self):
+        """Attempted path traversal outside loader roots should fail."""
+        outside_file = Path(self.temp_dir).parent / "outside.md"
+        try:
+            outside_file.write_text("# Outside\n\nShould not be readable.", encoding="utf-8")
+
+            tpl_path = os.path.join(self.temp_dir, "traversal.html")
+            with open(tpl_path, "w") as f:
+                f.write('{{ markdown("../outside.md") }}')
+
+            template_loader = get_template(dir_src=self.temp_dir)
+            template = template_loader("traversal.html")
+
+            with self.assertRaises(FileNotFoundError) as ctx:
+                template.render()
+            self.assertIn("outside allowed roots", str(ctx.exception))
+        finally:
+            if outside_file.exists():
+                outside_file.unlink()
+
+    def test_file_cache_invalidation_on_mtime_change(self):
+        """Changing the markdown file should invalidate the file cache."""
+        import time
+
+        template_loader = get_template(dir_src=self.temp_dir)
+        template = template_loader("main.html")
+
+        # First render with initial content
+        first = template.render(title="T", content="x", partial_content="y")
+        self.assertIn("<h1>Hello World</h1>", first)
+
+        # Update markdown file ensuring filesystem mtime resolution is surpassed
+        time.sleep(0.02)
+        Path(self.md_file).write_text("# Updated Title\n\nNew body.", encoding="utf-8")
+
+        # Second render should reflect updated content
+        second = template.render(title="T", content="x", partial_content="y")
+        self.assertIn("<h1>Updated Title</h1>", second)
+        self.assertNotIn("<h1>Hello World</h1>", second)
+
+    def test_inline_filter_lru_cache_returns_same_object(self):
+        """Inline markdown filter should return the same object for identical inputs (cache hit)."""
+        template_loader = get_template(dir_src=self.temp_dir)
+        env = template_loader("main.html").environment
+
+        md_filter = env.filters["markdown"]
+        out1 = md_filter("**cached**")
+        out2 = md_filter("**cached**")
+
+        self.assertIs(out1, out2)
+        self.assertIn("<strong>cached</strong>", str(out1))
+
+    def test_nested_template_markdown_resolution(self):
+        """Markdown path should resolve relative to nested template directory."""
+        pages_dir = os.path.join(self.temp_dir, "pages", "includes")
+        os.makedirs(pages_dir, exist_ok=True)
+
+        # Create nested markdown
+        nested_md = os.path.join(pages_dir, "note.md")
+        with open(nested_md, "w") as f:
+            f.write("# Note\n\nNested content.")
+
+        # Create nested template referencing the relative markdown
+        nested_tpl = os.path.join(self.temp_dir, "pages", "nested.html")
+        with open(nested_tpl, "w") as f:
+            f.write('<section>{{ markdown("includes/note.md") }}</section>')
+
+        template_loader = get_template(dir_src=self.temp_dir)
+        template = template_loader("pages/nested.html")
+        out = template.render()
+
+        self.assertIn("<h1>Note</h1>", out)
+        self.assertIn("<p>Nested content.</p>", out)
+
+
 if __name__ == "__main__":
     unittest.main()
