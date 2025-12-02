@@ -48,8 +48,8 @@ class BuildConfig:
     """
     dir_src: Annotated[str, "Source directory containing input files"]
     dir_dest: Annotated[str, "Destination directory for build output"]
-    copy: Annotated[List[str], "Glob patterns for files/directories to copy verbatim"] = field(default_factory=list)
-    watch: Annotated[List[str], "Glob patterns to watch for incremental rebuilds"] = field(default_factory=list)
+    copy: Annotated[List[str], "RegEx patterns for files/directories to copy verbatim"] = field(default_factory=list)
+    watch: Annotated[List[str], "RegEx patterns to watch for incremental rebuilds"] = field(default_factory=list)
     exclude: Annotated[List[str], "Glob patterns to exclude from processing and watching"] = field(default_factory=list)
     log: Annotated[str, "Logging level (e.g., DEBUG, INFO, WARNING, ERROR)"] = 'INFO'
 

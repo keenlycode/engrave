@@ -2,8 +2,12 @@
 from dataclasses import (
     dataclass,
     asdict,
+    field,
 )
 from importlib.metadata import version as get_version
+from typing import (
+    List,
+)
 
 # lib: external
 import dacite
@@ -26,13 +30,45 @@ from ..util.log import getLogger
 @Parameter(name="*")
 @dataclass
 class BuildConfig(_BuildConfig):
-    pass
+    dir_src: str
+    "Source directory"
+
+    dir_dest: str
+    "Destination directory for build output"
+
+    copy: List[str] = field(default_factory=list)
+    "RegEx patterns based on `dir_src` for files/directories to copy verbatim"
+
+    watch: List[str] = field(default_factory=list)
+    "RegEx patterns based on current directory to watch for incremental rebuilds and stream event to web SSE"
+
+    exclude: List[str] = field(default_factory=list)
+    "RegEx patterns to exclude from processing and watching"
 
 
 @Parameter(name="*")
 @dataclass
 class ServerConfig(_ServerConfig):
-    pass
+    dir_src: str
+    "Source directory"
+
+    dir_dest: str
+    "Destination directory for build output"
+
+    copy: List[str] = field(default_factory=list)
+    "RegEx patterns based on `dir_src` for files/directories to copy verbatim"
+
+    watch: List[str] = field(default_factory=list)
+    "RegEx patterns based on current directory to watch for incremental rebuilds and stream event to web SSE"
+
+    exclude: List[str] = field(default_factory=list)
+    "RegEx patterns to exclude from processing and watching"
+
+    host: str = '127.0.0.1'
+    "Host interface to bind the development server"
+
+    port: int = 8000
+    "Port number for the development server"
 
 
 logger = getLogger(__name__)
@@ -46,28 +82,6 @@ app = App(
 @app.command()
 async def build(build_config: BuildConfig):
     """Build static HTML files from templates.
-
-    Parameters
-    ----------
-    build_config : BuildConfig
-        Configuration for the build step parsed from CLI/dataclass.
-
-    Notes
-    -----
-    - This command does not start a server; it only renders files to the destination.
-    - Exclusions and copy patterns are logged for visibility.
-
-    Examples
-    --------
-    Run from the command line:
-
-        engrave build --dir-src ./site --dir-dest ./public \
-                      --exclude "*.draft.*" --copy "static/**"
-
-    Programmatic usage:
-
-        from engrave.core.cli import build, BuildConfig
-        await build(BuildConfig(dir_src="site", dir_dest="public"))
     """
 
     logger.info(f"Building site from '{build_config.dir_src}' to '{build_config.dir_dest}'")
@@ -82,29 +96,6 @@ async def build(build_config: BuildConfig):
 @app.command()
 def server(server_config: ServerConfig):
     """Start a development server with live preview.
-
-    Parameters
-    ----------
-    server_config : ServerConfig
-        Server and build configuration.
-
-    Notes
-    -----
-    - A full build is performed before the server starts.
-    - Live preview is enabled via Server-Sent Events on '/__engrave/watch'.
-      To trigger a browser reload, listen for 'change' events and reload the page.
-
-    Examples
-    --------
-    Command line:
-
-        engrave server --dir-src ./site --dir-dest ./public \
-                       --host 127.0.0.1 --port 8000
-
-    Client-side JavaScript to auto-reload:
-
-        const source = new EventSource('/__engrave/watch');
-        source.addEventListener('change', () => { window.location.reload(); });
     """
 
     build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(server_config))
