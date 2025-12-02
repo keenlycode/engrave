@@ -17,7 +17,7 @@ from watchfiles.main import FileChange
 from aiostream import stream
 
 # lib: local
-from .dataclass import (
+from ..dataclass import (
     BuildConfig,
     FileProcessInfo,
     FileChangeResult,

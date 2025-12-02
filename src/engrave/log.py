@@ -1,15 +1,17 @@
 # lib: built-in
 import sys
+import os
+import logging
 
-# lib: external
-from loguru import logger
+
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=log_level,
+    format="[%(asctime)s] [%(levelname)s] %(message)s"
+)
 
 
-def configure(*levels):
-    """Configure loguru logger with a nice format."""
-    log_format = (
-        "<level>{level: <8}</level> | "
-        "<level>{message}</level>"
-    )
-    for level in levels:
-        logger.add(sys.stderr, format=log_format, level=level.upper(), diagnose=False)
+def getLogger(name) -> logging.Logger:
+    return logging.getLogger(name)

@@ -15,13 +15,13 @@ from cyclopts import (
 import uvicorn
 
 # lib: local
-from .dataclass import (
+from ..dataclass import (
     BuildConfig as _BuildConfig,
     ServerConfig as _ServerConfig,
 )
 from .build import run as build_run
-from .server import create_fastapi
-from . import log
+from ..server import create_fastapi
+from ..log import getLogger
 
 
 @Parameter(name="*")
@@ -35,8 +35,10 @@ class BuildConfig(_BuildConfig):
 class ServerConfig(_ServerConfig):
     pass
 
-logger.remove()
-log.configure("INFO")
+
+logger = getLogger(__name__)
+
+
 app = App(
     help="Engrave: A static site generator with live preview capability",
 )
@@ -46,11 +48,11 @@ app = App(
 async def build(build_config: BuildConfig):
     """Build static HTML files from templates."""
 
-    logger.info(f"🏗️  Building site from '{build_config.dir_src}' to '{build_config.dir_dest}'")
+    logger.info(f"Building site from '{build_config.dir_src}' to '{build_config.dir_dest}'")
     if build_config.exclude:
-        logger.info(f"🚫 Excluding patterns: {', '.join(build_config.exclude)}")
+        logger.info(f"Excluding patterns: {', '.join(build_config.exclude)}")
     if build_config.copy:
-        logger.info(f"📦 Copy pattern: {build_config.copy}")
+        logger.info(f"Copy pattern: {build_config.copy}")
 
     build_run(build_config)
 
@@ -62,13 +64,17 @@ def server(server_config: ServerConfig):
     build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(server_config))
     build_run(build_config)
 
-    logger.info(f"🚀 Starting development server for '{server_config.dir_src} -> {server_config.dir_dest}'")
-    logger.info(f"🌐 Server running at http://{server_config.host}:{server_config.port}")
-    logger.info("⚡ Live preview mode activated")
-    logger.info("📢 To enable live reload, your browser should connect to the '/__engrave/watch' endpoint using EventSource (SSE).")
-    logger.info("💡 Example JavaScript to listen for changes:")
-    logger.info("    const source = new EventSource('/__engrave/watch');")
-    logger.info("    source.addEventListener('change', (event) => { window.location.reload(); };")
+    logger.info(
+        f"""
+- Starting development server for '{server_config.dir_src} -> {server_config.dir_dest}'
+- Server running at http://{server_config.host}:{server_config.port}
+- Live preview mode activated
+- To enable live reload, your browser should connect to the '/__engrave/watch' endpoint using EventSource (SSE).
+- Example JavaScript to listen for changes:
+  const source = new EventSource('/__engrave/watch');
+  source.addEventListener('change', (event) => {{ window.location.reload(); }};
+""".strip()
+    )
 
     # Create FastAPI application
     fastapi_app = create_fastapi(server_config)
@@ -86,16 +92,4 @@ def version():
     """Display the version of Engrave."""
 
     version = get_version("engrave")
-    logger.info(f"📋 Engrave version: {version}")
-
-
-def main():
-    """Entry point for the CLI."""
-    try:
-        app()
-    except KeyboardInterrupt:
-        logger.info("🛑 CLI stopped by user")
-
-
-if __name__ == "__main__":
-    main()
+    logger.info(f"Engrave version: {version}")

@@ -22,7 +22,7 @@ from .dataclass import (
     ServerConfig,
     BuildConfig,
 )
-from .watch import run as watch_run
+from .core.watch import run as watch_run
 
 
 set_queue_clients = set()

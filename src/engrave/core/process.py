@@ -8,8 +8,8 @@ import re
 from loguru import logger
 
 # lib: local
-from .template import get_template
-from .dataclass import FileProcessInfo
+from ..template import get_template
+from ..dataclass import FileProcessInfo
 
 
 def is_valid_path(*, path: Path, list_regex: List[re.Pattern] = [], exclude_globs: List[str]) -> bool:
