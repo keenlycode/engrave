@@ -4,12 +4,13 @@ from pathlib import Path
 from typing import List
 import re
 
-# lib: external
-from loguru import logger
-
 # lib: local
 from ..template import get_template
 from ..dataclass import FileProcessInfo
+from ..log import getLogger
+
+
+logger = getLogger(__name__)
 
 
 def is_valid_path(*, path: Path, list_regex: List[re.Pattern] = [], exclude_globs: List[str]) -> bool:
@@ -34,7 +35,7 @@ def build_html(file_process_info: FileProcessInfo) -> None:
     with open(path_dest, 'w', encoding='utf-8') as file:
         file.write(template(str(path_rel)).render())
 
-    logger.success(f"✅ Built HTML: {path_src} → {path_dest}")
+    logger.info(f"Built HTML: {path_src} → {path_dest}")
 
 
 def copy_file(file_process_info: FileProcessInfo) -> None:
@@ -47,7 +48,7 @@ def copy_file(file_process_info: FileProcessInfo) -> None:
 
     # Copy the asset file
     shutil.copy2(file_process_info.path, path_dest)
-    logger.success(f"📁 Copied asset: {path_src} → {path_dest}")
+    logger.info(f"Copied asset: {path_src} → {path_dest}")
 
 
 def delete_file(file_process_info: FileProcessInfo) -> None:
@@ -56,4 +57,4 @@ def delete_file(file_process_info: FileProcessInfo) -> None:
     path_src = file_process_info.dir_src / path_rel
     path_dest = file_process_info.dir_dest / path_rel
     path_dest.unlink()
-    logger.success(f"🗑  Deleted file: {path_src} → {path_dest}")
+    logger.info(f"Deleted file: {path_src} → {path_dest}")
