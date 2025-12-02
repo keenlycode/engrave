@@ -14,13 +14,13 @@ from cyclopts import (
 import uvicorn
 
 # lib: local
-from ..dataclass import (
+from ..util.dataclass import (
     BuildConfig as _BuildConfig,
     ServerConfig as _ServerConfig,
 )
 from .build import run as build_run
 from ..server import create_fastapi
-from ..log import getLogger
+from ..util.log import getLogger
 
 
 @Parameter(name="*")

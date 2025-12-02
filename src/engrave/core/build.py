@@ -5,9 +5,9 @@ import re
 from itertools import chain
 
 # lib: local
-from . import process
-from ..dataclass import BuildConfig, FileProcessInfo
-from ..log import getLogger
+from ..util import process
+from ..util.dataclass import BuildConfig, FileProcessInfo
+from ..util.log import getLogger
 
 
 logger = getLogger(__name__)

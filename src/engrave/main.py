@@ -1,6 +1,6 @@
 # lib: local
 from .core.cli import app as cli
-from .log import getLogger
+from .util.log import getLogger
 
 
 logger = getLogger(__name__)
