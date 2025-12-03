@@ -40,7 +40,10 @@ class BuildConfig(_BuildConfig):
     "RegEx patterns based on `dir_src` for files/directories to copy verbatim"
 
     watch: List[str] = field(default_factory=list)
-    "RegEx patterns based on current directory to watch for incremental rebuilds and stream event to web SSE"
+    """Additional paths to watch, expressed as regular expression patterns relative to the current working directory.
+    These are in addition to files under `dir_src` and any paths matched by `copy`. Changes to matched paths
+    will be streamed to web clients via Server-Sent Events (SSE) to enable live preview/reload.
+    """
 
     exclude: List[str] = field(default_factory=list)
     "RegEx patterns to exclude from processing and watching"
@@ -59,7 +62,10 @@ class ServerConfig(_ServerConfig):
     "RegEx patterns based on `dir_src` for files/directories to copy verbatim"
 
     watch: List[str] = field(default_factory=list)
-    "RegEx patterns based on current directory to watch for incremental rebuilds and stream event to web SSE"
+    """Additional paths to watch, expressed as regular expression patterns relative to the current working directory.
+These are in addition to files under `dir_src` and any paths matched by `copy`. Changes to matched paths
+will be streamed to web clients via Server-Sent Events (SSE) to enable live preview/reload.
+"""
 
     exclude: List[str] = field(default_factory=list)
     "RegEx patterns to exclude from processing and watching"
