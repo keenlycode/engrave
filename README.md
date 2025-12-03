@@ -1,7 +1,7 @@
 # Engrave
 
 **A lightweight static-site generator using Python + Jinja2**
-Version: 2.1.2
+Version: 3.1.3
 
 ## 🚀 What is Engrave
 
