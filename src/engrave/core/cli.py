@@ -135,11 +135,3 @@ Press CTRL+C to stop the server.
         host=server_config.host,
         port=server_config.port,
     )
-
-
-@app.command()
-def version():
-    """Display the installed Engrave version."""
-
-    version = get_version("engrave")
-    logger.info(f"Engrave version: {version}")
