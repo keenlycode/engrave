@@ -4,7 +4,6 @@ from dataclasses import (
     asdict,
     field,
 )
-from importlib.metadata import version as get_version
 from typing import (
     List,
 )
