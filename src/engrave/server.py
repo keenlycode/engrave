@@ -44,7 +44,6 @@ from fastapi.responses import (
     StreamingResponse,
 )
 import dacite
-from loguru import logger
 
 # lib: local
 from .template import get_template
@@ -52,9 +51,11 @@ from .util.dataclass import (
     ServerConfig,
     BuildConfig,
 )
+from .util.log import getLogger
 from .core.watch import run as watch_run
 
 
+logger = getLogger(__name__)
 set_queue_clients = set()
 
 async def publish_queue_put(data, set_queue_clients):
