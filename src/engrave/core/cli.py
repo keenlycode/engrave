@@ -38,12 +38,6 @@ class BuildConfig(_BuildConfig):
     copy: List[str] = field(default_factory=list)
     "RegEx patterns based on `dir_src` for files/directories to copy verbatim"
 
-    watch: List[str] = field(default_factory=list)
-    """Additional paths to watch, expressed as regular expression patterns relative to the current working directory.
-    These are in addition to files under `dir_src` and any paths matched by `copy`. Changes to matched paths
-    will be streamed to web clients via Server-Sent Events (SSE) to enable live preview/reload.
-    """
-
     exclude: List[str] = field(default_factory=list)
     "RegEx patterns to exclude from processing and watching"
 
@@ -113,12 +107,12 @@ Engrave development server started
 - Source directory: {server_config.dir_src}
 - Output directory: {server_config.dir_dest}
 - Address: http://{server_config.host}:{server_config.port}
-- Live preview: enabled via Server-Sent Events (SSE)
+- Live preview: Using Server-Sent Events (SSE)
 
 Live reload instructions:
-  - The browser should connect to: http://{server_config.host}:{server_config.port}/__engrave/watch
+  - The browser should connect to: http://{server_config.host}:{server_config.port}/{server_config.sse_url}
   - Example JavaScript:
-      const source = new EventSource('/__engrave/watch');
+      const source = new EventSource('/{server_config.sse_url}');
       source.addEventListener('change', () => window.location.reload());
 
 Press CTRL+C to stop the server.

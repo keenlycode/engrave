@@ -163,7 +163,7 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
 
     fast_api = FastAPI(lifespan=lifespan)
 
-    @fast_api.get("/__engrave/watch")
+    @fast_api.get(server_config.sse_url)
     async def event_watch():
         return StreamingResponse(
             watch_event_stream(),

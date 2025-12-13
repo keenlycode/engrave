@@ -49,8 +49,7 @@ class BuildConfig:
     dir_src: Annotated[str, "Source directory containing input files"]
     dir_dest: Annotated[str, "Destination directory for build output"]
     copy: Annotated[List[str], "RegEx patterns for files/directories to copy verbatim"] = field(default_factory=list)
-    watch: Annotated[List[str], "RegEx patterns to watch for incremental rebuilds"] = field(default_factory=list)
-    exclude: Annotated[List[str], "Glob patterns to exclude from processing and watching"] = field(default_factory=list)
+    exclude: Annotated[List[str], "Glob patterns to exclude from processing"] = field(default_factory=list)
     log: Annotated[str, "Logging level (e.g., DEBUG, INFO, WARNING, ERROR)"] = 'INFO'
 
 
@@ -62,3 +61,5 @@ class ServerConfig(BuildConfig):
     """
     host: Annotated[str, "Host interface to bind the development server"] = '127.0.0.1'
     port: Annotated[int, "Port number for the development server"] = 8000
+    watch: Annotated[List[str], "Path RegEx patterns to watch for changes and emit SSE"] = field(default_factory=list)
+    sse_url: Annotated[str, "SSE URL (Server Side Event) to emite watch event"] = '__engrave/watch'
