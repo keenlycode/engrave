@@ -59,7 +59,8 @@ Start a development server with live preview.
 │    --exclude --empty-exclude  Path RegEx to exclude from processing [default: []]                                          │
 │    --host                     Host interface to bind the development server [default: 127.0.0.1]                           │
 │    --port                     Port number for the development server [default: 8000]                                       │
-│    --watch --empty-watch      Additional path regex patterns to watch for changes (in addition to .html and patterns       │
+│    --watch-add --empty-watch-add                                                                                           │
+│                               Additional path regex patterns to watch for changes (in addition to .html and patterns       │
 │                               matched by --copy). Matching paths will trigger Server-Sent Events (SSE). [default: []]      │
 │    --sse-url                  SSE URL (Server Side Event) to emite watch event [default: __engrave/watch]                  │
 │    --log-level                [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default: INFO]        │
@@ -68,7 +69,7 @@ Start a development server with live preview.
 
 - Serves rendered `.html` directly from `DIR_SRC` and other assets from `DIR_DEST`.
 - Watches `DIR_SRC` for `.html`/`.md` changes, applies the same copy/exclude rules as `build`, and mirrors deletions.
-- `--watch` accepts additional regex patterns (relative to the current working directory) whose changes are forwarded to clients as `type='watch'`.
+- `--watch-add` accepts additional regex patterns (relative to the current working directory) whose changes are forwarded to clients as `type='watch'`.
 - Add a reload hook in your page:
 
 ```js

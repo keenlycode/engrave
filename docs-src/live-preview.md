@@ -6,15 +6,15 @@
 ```bash
 engrave server site/ build/ \
   --copy '.*\.(css|png|svg)$' \
-  --watch 'build/.*\.(js)$' \
+  --watch-add 'build/.*\.(js)$' \
   --exclude 'drafts/.*' \
   --host 127.0.0.1 --port 8000 \
   --sse-url '__engrave/watch'
 ```
-- Performs an initial build, then watches `.html`/`.md` plus any `--copy` targets. `--watch` adds extra regexes matched against your current working directory; these emit SSE events only (they do not trigger builds or copies).
+- Performs an initial build, then watches `.html`/`.md` plus any `--copy` targets. `--watch-add` adds extra regexes matched against your current working directory; these emit SSE events only (they do not trigger builds or copies).
 - `--copy` and `--exclude` are regular expressions evaluated against path strings under `site/`; avoid copy patterns that include `.html` to prevent double work.
 - Serves `.html` by rendering directly from `site/` (exceptions fall back to the bundled error template) and serves other requests from `build/`.
-- Leave out `--watch` if you only care about the source tree. Adjust `--sse-url` if you want the SSE endpoint mounted elsewhere.
+- Leave out `--watch-add` if you only care about the source tree. Adjust `--sse-url` if you want the SSE endpoint mounted elsewhere.
 
 ## Hooking up reloads
 The server exposes an SSE endpoint (default `/__engrave/watch`) that streams JSON lists of file changes. Wire it into your pages with a tiny script:
@@ -34,4 +34,4 @@ The server exposes an SSE endpoint (default `/__engrave/watch`) that streams JSO
 - HTML templates: rendered on added/modified; deleted files remove their counterpart in `DIR_DEST` and emit `{type: "html"}`.
 - Markdown files: reported as `{type: "markdown"}` so you can reload clients; they are not auto-rendered unless a template pulls them in.
 - Copy targets: copied on added/modified and removed on delete with `{type: "copy"}`.
-- Extra watch targets: anything matching `--watch` regex patterns relative to the current working directory, emitted as `{type: "watch"}` events for your own handling.
+- Extra watch targets: anything matching `--watch-add` regex patterns relative to the current working directory, emitted as `{type: "watch"}` events for your own handling.

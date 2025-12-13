@@ -67,8 +67,8 @@ engrave build site/ build/ --copy '.*\.(css|png|svg)$' --exclude 'drafts/.*'
 
 ## 4) Develop with live preview
 ```bash
-engrave server site/ build/ --copy '.*\.(css|png|svg)$' --watch 'build/.*\.(html|css|png|svg|js)$'
+engrave server site/ build/ --copy '.*\.(css|png|svg)$' --watch-add 'build/.*\.(html|css|png|svg|js)$'
 ```
 - Engrave builds once, renders `.html` requests directly from `site/`, and copies matching assets into `build/`.
-- Watches `.html` and `.md` under `site/` plus any copy targets. Add `--watch REGEX` for extra paths relative to your current working directory—these emit SSE events only (no auto-copy/build).
+- Watches `.html` and `.md` under `site/` plus any copy targets. Add `--watch-add REGEX` for extra paths relative to your current working directory—these emit SSE events only (no auto-copy/build).
 - Browse `http://127.0.0.1:8000/` and add the reload snippet from [Live Preview](live-preview.md) for auto-refresh via SSE (default endpoint `/__engrave/watch`).

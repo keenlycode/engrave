@@ -37,7 +37,8 @@ Start a development server with live preview.
 │    --exclude --empty-exclude  Path RegEx to exclude from processing [default: []]                                          │
 │    --host                     Host interface to bind the development server [default: 127.0.0.1]                           │
 │    --port                     Port number for the development server [default: 8000]                                       │
-│    --watch --empty-watch      Additional path regex patterns to watch for changes (in addition to .html and patterns       │
+│    --watch-add --empty-watch-add                                                                                           │
+│                               Additional path regex patterns to watch for changes (in addition to .html and patterns       │
 │                               matched by --copy). Matching paths will trigger Server-Sent Events (SSE). [default: []]      │
 │    --sse-url                  SSE URL (Server Side Event) to emite watch event [default: __engrave/watch]                  │
 │    --log-level                [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default: INFO]        │
@@ -46,6 +47,6 @@ Start a development server with live preview.
 
 - Performs an initial build using the same pipeline as `engrave build`.
 - Serves `.html` by rendering directly from `DIR_SRC`; other requests are served from `DIR_DEST`.
-- Watches `.html` and `.md` under `DIR_SRC`, plus copy targets. Additional `--watch` regexes are matched against the current working directory and only emit SSE events (no build/copy).
+- Watches `.html` and `.md` under `DIR_SRC`, plus copy targets. Additional `--watch-add` regexes are matched against the current working directory and only emit SSE events (no build/copy).
 - Streams change events to the SSE endpoint at `--sse-url` (default `__engrave/watch`) for browser reload hooks.
 - Host/port control the FastAPI + Uvicorn development server; log level follows `--log-level` / `LOG_LEVEL`.
