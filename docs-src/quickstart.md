@@ -57,10 +57,10 @@ This site is rendered from HTML templates. Markdown is pulled in on demand with
 
 ## 3) Build once
 ```bash
-engrave build site/ build/ --copy '.*\.(css|png|svg)$' --exclude 'drafts/**'
+engrave build site/ build/ --copy '.*\.(css|png|svg)$' --exclude 'drafts/.*'
 ```
 - HTML under `site/` is rendered into `build/` (segments prefixed with `_` are skipped for HTML rendering).
-- Assets matching the regex are copied verbatim; `--exclude` uses glob-style matching to skip both rendering and copying.
+- Assets matching the regex are copied verbatim; `--exclude` uses regex matching against the path string to skip both rendering and copying.
 - Add `--log-level DEBUG` (or set `LOG_LEVEL`) if you want more verbose output.
 
 ## 4) Develop with live preview

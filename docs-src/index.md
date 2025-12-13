@@ -11,5 +11,5 @@ Opinionated documentation for Engrave, a lightweight static-site generator built
 ## Core behaviors to know
 - Engrave renders only `.html` files; any path segment starting with `_` is skipped for HTML output (still usable via `{% include %}`).
 - Markdown is pulled in from templates via the `markdown()` helper or `|markdown` filter with path-traversal protection and mtime-based caching.
-- Asset copying is opt-in with `--copy` regex patterns; `--exclude` uses glob matching across both rendering and copying.
+- Asset copying is opt-in with `--copy` regex patterns; `--exclude` uses regex matching across both rendering and copying.
 - The dev server renders `.html` directly from `dir_src`, serves other files from `dir_dest`, and streams file-change events from a configurable SSE endpoint (`--sse-url`, default `__engrave/watch`).

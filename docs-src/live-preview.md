@@ -7,11 +7,12 @@
 engrave server site/ build/ \
   --copy '.*\\.(css|png|svg)$' \
   --watch 'shared-assets/.*\\.(css|js)$' \
-  --exclude '**/drafts/**' \
+  --exclude 'drafts/.*' \
   --host 127.0.0.1 --port 8000 \
   --sse-url '__engrave/watch'
 ```
 - Performs an initial build, then watches `.html`/`.md` plus any `--copy` targets. `--watch` adds extra regexes matched against your current working directory; these emit SSE events only (they do not trigger builds or copies).
+- `--copy` and `--exclude` are regular expressions evaluated against path strings under `site/`; avoid copy patterns that include `.html` to prevent double work.
 - Serves `.html` by rendering directly from `site/` (exceptions fall back to the bundled error template) and serves other requests from `build/`.
 - Leave out `--watch` if you only care about the source tree. Adjust `--sse-url` if you want the SSE endpoint mounted elsewhere.
 
