@@ -31,13 +31,14 @@ class CLICoreIntegrationTests(unittest.TestCase):
     def test_build_command_renders_html_and_copies_assets(self):
         self._write("index.html", "<p>Hello Build</p>")
         self._write("static/style.css", "body { color: black; }")
+        self._write("drafts/ignore.html", "<p>Skip me</p>")
+        self._write("drafts/skip.css", "body { color: red; }")
 
         config = cli.BuildConfig(
             dir_src=str(self.dir_src),
             dir_dest=str(self.dir_dest),
             copy=[r".*\.css$"],
-            watch=[],
-            exclude=[],
+            exclude=[r".*/drafts/.*"],
         )
 
         # Run the build coroutine so we exercise the real build pipeline.
@@ -45,11 +46,15 @@ class CLICoreIntegrationTests(unittest.TestCase):
 
         html_out = self.dir_dest / "index.html"
         css_out = self.dir_dest / "static/style.css"
+        html_excluded = self.dir_dest / "drafts/ignore.html"
+        css_excluded = self.dir_dest / "drafts/skip.css"
 
         self.assertTrue(html_out.exists(), "HTML file should be rendered to destination")
         self.assertTrue(css_out.exists(), "Asset file should be copied to destination")
         self.assertIn("Hello Build", html_out.read_text(encoding="utf-8"))
         self.assertIn("color: black", css_out.read_text(encoding="utf-8"))
+        self.assertFalse(html_excluded.exists(), "Excluded HTML should not be built")
+        self.assertFalse(css_excluded.exists(), "Excluded asset should not be copied")
 
     def test_server_builds_and_invokes_uvicorn(self):
         self._write("home.html", "<h1>Server Page</h1>")

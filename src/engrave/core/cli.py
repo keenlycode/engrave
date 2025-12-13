@@ -37,10 +37,10 @@ class BuildConfig(_BuildConfig):
     "Destination directory for build output"
 
     copy: List[str] = field(default_factory=list)
-    "Path RegEx patterns copy verbatim"
+    "Path RegEx copy verbatim"
 
     exclude: List[str] = field(default_factory=list)
-    "Path RegEx patterns to exclude from processing"
+    "Path RegEx to exclude from processing"
 
 
 @Parameter(name="*")
@@ -53,13 +53,13 @@ class ServerConfig(_ServerConfig):
     "Destination directory for build output"
 
     copy: List[str] = field(default_factory=list)
-    "Path RegEx patterns copy verbatim"
+    "Path RegEx copy verbatim"
 
     watch: List[str] = field(default_factory=list)
-    "Path RegEx patterns to watch for changes and emit SSE"
+    "Path RegEx to watch for changes and emit SSE"
 
     exclude: List[str] = field(default_factory=list)
-    "Path RegEx patterns to exclude from processing"
+    "Path RegEx to exclude from processing"
 
     host: str = '127.0.0.1'
     "Host interface to bind the development server"

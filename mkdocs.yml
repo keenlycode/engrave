@@ -1,0 +1,22 @@
+site_name: Engrave Docs
+site_description: Guides and references for the Engrave static-site generator
+docs_dir: docs-src
+site_dir: docs
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - CLI Reference: cli.md
+  - Templates & Markdown: templates.md
+  - Live Preview: live-preview.md
+
+theme:
+  name: readthedocs
+
+plugins:
+  - search
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition

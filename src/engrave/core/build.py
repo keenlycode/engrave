@@ -62,13 +62,14 @@ def run(build_config: BuildConfig) -> None:
     logger.info(f"Output directory: {dir_dest}/")
 
     list_copy_regex = [re.compile(regex) for regex in build_config.copy]
+    list_exclude_regex = [re.compile(regex) for regex in build_config.exclude]
 
     gen_html = filter(lambda path:
         not any(part.startswith('_') for part in path.parts)
         and process.is_valid_path(
             path=path,
             list_regex=[re.compile(r'^.*\.html$')],
-            exclude_globs=build_config.exclude),
+            list_exclude_regex=list_exclude_regex),
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 
@@ -76,7 +77,7 @@ def run(build_config: BuildConfig) -> None:
         lambda path: process.is_valid_path(
             path=path,
             list_regex=list_copy_regex,
-            exclude_globs=build_config.exclude),
+            list_exclude_regex=list_exclude_regex),
         (Path(path) for path in iglob(str(dir_src / '**/*'), recursive=True))
     )
 

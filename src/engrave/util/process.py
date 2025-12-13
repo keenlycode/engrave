@@ -27,7 +27,7 @@ def is_valid_path(
         *,
         path: Path,
         list_regex: List[re.Pattern] = [],
-        exclude_globs: List[str]) -> bool:
+        list_exclude_regex: List[re.Pattern]) -> bool:
     """Check whether a path should be processed.
 
     Parameters
@@ -60,7 +60,7 @@ def is_valid_path(
     """
     return (
         any(regex.match(str(path)) for regex in list_regex)
-        and not any(path.match(pattern) for pattern in exclude_globs)
+        and not any(regex.match(str(path)) for regex in list_exclude_regex)
     )
 
 

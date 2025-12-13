@@ -56,8 +56,8 @@ class BuildConfig(GlobalConfig):
     """
     dir_src: Annotated[str, "Source directory containing input files"]
     dir_dest: Annotated[str, "Destination directory for build output"]
-    copy: Annotated[List[str], "Path RegEx patterns copy verbatim"] = field(default_factory=list)
-    exclude: Annotated[List[str], "Path RegEx patterns to exclude from processing"] = field(default_factory=list)
+    copy: Annotated[List[str], "Path RegEx copy verbatim"] = field(default_factory=list)
+    exclude: Annotated[List[str], "Path RegEx to exclude from processing"] = field(default_factory=list)
 
 
 @dataclass(kw_only=True)

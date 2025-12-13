@@ -1,25 +1,19 @@
 # Engrave
 
-**A lightweight static-site generator using Python + Jinja2**
-Version: 3.1.4
+**A lightweight static-site generator using Python + Jinja2**  
+Version: 3.1.6dev
 
 ## 🚀 What is Engrave
 
-Engrave is a static-site generator that transforms plain HTML or Markdown files into ready-to-deploy static websites using Jinja2 templating. It’s ideal for documentation sites, project landing pages, blogs, or any static content without server-side rendering.
+Engrave turns a directory of HTML templates (plus optional Markdown snippets) into a ready-to-serve static site. It is ideal for documentation, simple marketing pages, or any static content that benefits from Jinja2 templating without adding a backend.
 
-## ✅ Why use Engrave / Use-cases
+## 🌟 Highlights
 
-* Quickly build documentation sites, landing pages, or simple blogs without needing a database or backend
-* Write content in HTML or Markdown and reuse templates/layouts easily
-* Lightweight and easy to deploy (works well with GitHub Pages, Netlify, S3/static-hosting)
-* Highly flexible via Jinja2 templates — layout, partials, includes
-
-## 🌟 Features
-
-* Supports HTML and Markdown as input
-* Uses Jinja2 templates for layout and partials
-* Simple CLI command for build and watch/rebuild workflow
-* Clean project structure and Python packaging-ready
+- Renders `.html` templates with Jinja2; path segments starting with `_` are ignored for HTML builds.
+- Built-in Markdown helpers: include Markdown files via `markdown('path.md')` and render inline strings with the `|markdown` filter.
+- Regex-driven asset copying (`--copy`) and exclusion rules (`--exclude`) applied to both renders and copies.
+- Live preview server powered by FastAPI + Uvicorn with watchfiles + SSE for instant reload hooks.
+- Simple Cyclopts-based CLI; works on Python 3.10+.
 
 ## 🧰 Installation
 
@@ -27,56 +21,68 @@ Engrave is a static-site generator that transforms plain HTML or Markdown files 
 pip install engrave
 ```
 
-## 🚀 Quick Start / Usage
-
 ## 📘 CLI Usage
 
 ### Build
 
-Generate a static site from a source directory into the output directory.
+Render templates and copy assets from a source directory into an output directory.
 
 ```bash
-engrave build <content_dir> <output_dir>
+engrave build -h
+Usage: engrave build [ARGS] [OPTIONS]
+
+Build static HTML files from templates.
+
+╭─ Parameters ───────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --dir-src                  Source directory containing input files [required]                                           │
+│ *  --dir-dest                 Destination directory for build output [required]                                            │
+│    --copy --empty-copy        Path RegEx copy verbatim [default: []]                                                       │
+│    --exclude --empty-exclude  Path RegEx to exclude from processing [default: []]                                          │
+│    --log-level                [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default: INFO]        │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-### Development Mode (Auto‑Rebuild + SSE)
+### Development Server (auto-rebuild + SSE)
 
-Rebuilds automatically when files change. Can optionally run a preview server.
+Run an initial build, start FastAPI/Uvicorn, and stream file-change events for live reload.
 
 ```bash
-engrave server <content_dir> <output_dir> [--watch]
-
-# Example: watch only Markdown + HTML files
-engrave server docs/ build/ --watch ".*\.(md|html)$"
-```
-
-### CLI Help
-`engrave -h`  
-`engrave server -h`
-
-```
+engrave server -h
 Usage: engrave server [ARGS] [OPTIONS]
 
 Start a development server with live preview.
 
 ╭─ Parameters ───────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  DIR-SRC --dir-src                  Source directory [required]                                                          │
-│ *  DIR-DEST --dir-dest                Destination directory for build output [required]                                    │
-│    COPY --copy --empty-copy           RegEx patterns based on dir_src for files/directories to copy verbatim [default: []] │
-│    WATCH --watch --empty-watch        Additional paths to watch, expressed as regular expression patterns relative to the  │
-│                                       current working directory. These are in addition to files under dir_src and any      │
-│                                       paths matched by copy. Changes to matched paths will be streamed to web clients via  │
-│                                       Server-Sent Events (SSE) to enable live preview/reload. [default: []]                │
-│    EXCLUDE --exclude --empty-exclude  RegEx patterns to exclude from processing and watching [default: []]                 │
-│    LOG --log                          [default: INFO]                                                                      │
-│    HOST --host                        Host interface to bind the development server [default: 127.0.0.1]                   │
-│    PORT --port                        Port number for the development server [default: 8000]                               │
+│ *  --dir-src                  Source directory containing input files [required]                                           │
+│ *  --dir-dest                 Destination directory for build output [required]                                            │
+│    --copy --empty-copy        Path RegEx copy verbatim [default: []]                                                       │
+│    --exclude --empty-exclude  Path RegEx to exclude from processing [default: []]                                          │
+│    --host                     Host interface to bind the development server [default: 127.0.0.1]                           │
+│    --port                     Port number for the development server [default: 8000]                                       │
+│    --watch --empty-watch      Path RegEx to watch for changes and emit SSE [default: []]                                   │
+│    --sse-url                  SSE URL (Server Side Event) to emite watch event [default: __engrave/watch]                  │
+│    --log-level                [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default: INFO]        │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-## 🛠️ Testing
+- Serves rendered `.html` directly from `DIR_SRC` and other assets from `DIR_DEST`.
+- Watches `DIR_SRC` for `.html`/`.md` changes, applies the same copy/exclude rules as `build`, and mirrors deletions.
+- `--watch` accepts additional regex patterns (relative to the current working directory) whose changes are forwarded to clients as `type='watch'`.
+- Add a reload hook in your page:
 
-To run all tests, use:
+```js
+const source = new EventSource('/__engrave/watch');
+source.addEventListener('change', () => window.location.reload());
+```
+
+## 🧱 Templates & Markdown helpers
+
+- `markdown('path.md')` loads a Markdown file relative to the current template (stays inside configured template roots).
+- `{{ content | markdown }}` converts inline Markdown strings.
+- Markdown rendering uses Mistune by default and caches results by file mtime; you can supply a custom parser via `get_template(..., markdown_to_html=...)` if embedding Engrave programmatically.
+- Multiple template roots are supported by passing a list to `dir_src`.
+
+## 🛠️ Testing
 
 ```bash
 python -m unittest
@@ -84,4 +90,4 @@ python -m unittest
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the LICENSE file.
+MIT — see `LICENSE`.
