@@ -68,5 +68,5 @@ class ServerConfig(BuildConfig):
     """
     host: Annotated[str, "Host interface to bind the development server"] = '127.0.0.1'
     port: Annotated[int, "Port number for the development server"] = 8000
-    watch: Annotated[List[str], "Path RegEx patterns to watch for changes and emit SSE"] = field(default_factory=list)
+    watch_add: Annotated[List[str], "Additional path regex patterns to watch for changes (in addition to .html and patterns matched by --copy). Matching paths will trigger Server-Sent Events (SSE)."] = field(default_factory=list)
     sse_url: Annotated[str, "SSE URL (Server Side Event) to emite watch event"] = '__engrave/watch'

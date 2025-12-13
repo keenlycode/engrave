@@ -17,9 +17,10 @@ Use the global `markdown()` helper inside templates to load and render a Markdow
 ```
 
 Details:
+- Markdown files are rendered as Jinja templates first (using the current context), then converted to HTML, so you can use template variables in your `.md` snippets.
 - Paths must be relative to the template; absolute paths raise an error and attempts to escape outside the configured loader roots are blocked.
 - Lookups walk the loader search paths (handy when you pass multiple template roots) and fall back with a `FileNotFoundError` if the file is missing.
-- Results are cached per file using modification time, so small edits are picked up automatically without restarting the server.
+- File reads and compilation are cached per modification time, but Markdown content is re-rendered for each request so context changes are reflected.
 
 ## Inline Markdown filter
 Convert inline strings to HTML with the `markdown` filter. Results are cached with an LRU to avoid repeated parsing.

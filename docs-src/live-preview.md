@@ -5,8 +5,8 @@
 ## Starting the server
 ```bash
 engrave server site/ build/ \
-  --copy '.*\\.(css|png|svg)$' \
-  --watch 'shared-assets/.*\\.(css|js)$' \
+  --copy '.*\.(css|png|svg)$' \
+  --watch 'build/.*\.(js)$' \
   --exclude 'drafts/.*' \
   --host 127.0.0.1 --port 8000 \
   --sse-url '__engrave/watch'

@@ -47,10 +47,7 @@ import dacite
 
 # lib: local
 from .template import get_template
-from .util.dataclass import (
-    ServerConfig,
-    BuildConfig,
-)
+from .util.dataclass import ServerConfig
 from .util.log import getLogger
 from .core.watch import run as watch_run
 
@@ -68,8 +65,8 @@ async def publish_queue_put(data, set_queue_clients):
     set_queue_clients.difference_update(to_remove)
 
 
-async def watch_build(build_config: BuildConfig):
-    async for list_file_change_result in watch_run(build_config):
+async def watch_to_queue(server_config: ServerConfig):
+    async for list_file_change_result in watch_run(server_config):
         results = []
         for file_change_result in list_file_change_result:
             results.append(asdict(file_change_result))
@@ -115,14 +112,14 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
     >>> # uvicorn.run(app, host=server_config.host, port=server_config.port)
 
     """
-    build_config = dacite.from_dict(
-        data_class=BuildConfig,
+    server_config = dacite.from_dict(
+        data_class=ServerConfig,
         data=asdict(server_config)
     )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        asyncio.create_task(watch_build(build_config))
+        asyncio.create_task(watch_to_queue(server_config))
         logger.info("Started background files watcher")
         yield
 

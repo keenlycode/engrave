@@ -53,6 +53,8 @@ Example `index.html`:
 
 This site is rendered from HTML templates. Markdown is pulled in on demand with
 `{{ markdown("includes/intro.md") }}`.
+
+Markdown snippets are rendered as Jinja templates first, so you can reference page variables inside them.
 ```
 
 ## 3) Build once

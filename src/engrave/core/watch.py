@@ -34,7 +34,7 @@ from aiostream import stream
 
 # lib: local
 from ..util.dataclass import (
-    BuildConfig,
+    ServerConfig,
     FileProcessInfo,
     FileChangeResult,
 )
@@ -74,12 +74,12 @@ class WatchFilter(DefaultFilter):
             *args,
             dir_base: Path,
             list_regex: List[re.Pattern] = [],
-            exclude_globs: List[str],
+            list_exclude_regex: List[re.Pattern] = [],
             **kw,
     ):
         self.dir_base = dir_base
         self.list_regex = list_regex
-        self.exclude_globs = exclude_globs
+        self.list_exclude_regex = list_exclude_regex
         super().__init__(*args, **kw)
 
     def __call__(self, change: Change, path: str) -> bool:
@@ -87,7 +87,7 @@ class WatchFilter(DefaultFilter):
         _is_valid_path = process.is_valid_path(
             path=path_rel,
             list_regex=self.list_regex,
-            exclude_globs=self.exclude_globs,
+            list_exclude_regex=self.list_exclude_regex,
         )
 
         return (
@@ -96,7 +96,7 @@ class WatchFilter(DefaultFilter):
 
 
 async def handle_async_html_list_change(
-        build_config: BuildConfig,
+        build_config: ServerConfig,
         async_html_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle HTML/Markdown file change events and produce FileChangeResult lists.
@@ -159,7 +159,7 @@ async def handle_async_html_list_change(
         yield list_file_change_result
 
 async def handle_async_copy_list_change(
-        build_config: BuildConfig,
+        build_config: ServerConfig,
         async_copy_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle copy-asset change events and produce FileChangeResult lists.
@@ -217,7 +217,7 @@ async def handle_async_copy_list_change(
 
 
 async def handle_async_watch_list_change(
-        build_config: BuildConfig,
+        build_config: ServerConfig,
         async_watch_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle changes under the destination tree that should be forwarded to clients.
@@ -261,7 +261,7 @@ async def handle_async_watch_list_change(
             )
         yield list_file_change_result
 
-async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult]]:
+async def run(server_config: ServerConfig) -> AsyncGenerator[List[FileChangeResult]]:
     """Compose and run watchers according to the provided build configuration.
 
     This function sets up three watcher streams:
@@ -286,24 +286,25 @@ async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult
         Merged change events from all watchers for downstream consumption.
     """
     list_html_regex = [re.compile(r'.*\.html$'), re.compile(r'.*\.md$')]
-    list_copy_regex = [re.compile(copy_regex) for copy_regex in build_config.copy]
-    list_watch_regex = [re.compile(watch_regex) for watch_regex in build_config.watch]
+    list_copy_regex = [re.compile(copy_regex) for copy_regex in server_config.copy]
+    list_watch_regex = [re.compile(regex) for regex in server_config.watch_add]
+    list_exclude_regex = [re.compile(regex) for regex in server_config.exclude]
 
     async_html_list_change = awatch(
-        build_config.dir_src,
+        server_config.dir_src,
         watch_filter=WatchFilter(
-            dir_base=Path(build_config.dir_src).resolve(),
+            dir_base=Path(server_config.dir_src).resolve(),
             list_regex=list_html_regex,
-            exclude_globs=build_config.exclude,
+            list_exclude_regex=list_exclude_regex,
         )
     )
 
     async_copy_list_change = awatch(
-        build_config.dir_src,
+        server_config.dir_src,
         watch_filter=WatchFilter(
-            dir_base=Path(build_config.dir_src).resolve(),
+            dir_base=Path(server_config.dir_src).resolve(),
             list_regex=list_copy_regex,
-            exclude_globs=build_config.exclude,
+            list_exclude_regex=list_exclude_regex,
         )
     )
 
@@ -312,21 +313,21 @@ async def run(build_config: BuildConfig) -> AsyncGenerator[List[FileChangeResult
         watch_filter=WatchFilter(
             dir_base=Path.cwd().resolve(),
             list_regex=list_watch_regex,
-            exclude_globs=build_config.exclude,
+            list_exclude_regex=list_exclude_regex,
         )
     )
 
     stream_watch = stream.merge(
         handle_async_html_list_change(
-            build_config,
+            server_config,
             async_html_list_change
         ),
         handle_async_copy_list_change(
-            build_config,
+            server_config,
             async_copy_list_change
         ),
         handle_async_watch_list_change(
-            build_config,
+            server_config,
             async_watch_list_change
         ),
     )

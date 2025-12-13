@@ -55,8 +55,8 @@ class ServerConfig(_ServerConfig):
     copy: List[str] = field(default_factory=list)
     "Path RegEx copy verbatim"
 
-    watch: List[str] = field(default_factory=list)
-    "Path RegEx to watch for changes and emit SSE"
+    watch_add: List[str] = field(default_factory=list)
+    "Additional path regex patterns to watch for changes (in addition to .html and patterns matched by --copy). Matching paths will trigger Server-Sent Events (SSE)."
 
     exclude: List[str] = field(default_factory=list)
     "Path RegEx to exclude from processing"

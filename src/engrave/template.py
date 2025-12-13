@@ -75,8 +75,8 @@ def get_template(
         except Exception:
             return False
 
-    # Cache for file-based markdown rendering: path -> (mtime_ns, Markup)
-    _file_cache: dict[Path, tuple[int, Markup]] = {}
+    # Cache for file-based markdown rendering: path -> (mtime_ns, jinja2.Template)
+    _file_cache: dict[Path, tuple[int, jinja2.Template]] = {}
 
     # Cached inline markdown filter
     @lru_cache(maxsize=INLINE_MARKDOWN_CACHE_SIZE)
@@ -151,12 +151,14 @@ def get_template(
             mtime_ns = path.stat().st_mtime_ns
             cached = _file_cache.get(path)
             if cached and cached[0] == mtime_ns:
-                return cached[1]
+                md_template = cached[1]
+            else:
+                text = path.read_text(encoding="utf-8")
+                md_template = ctx.environment.from_string(text)
+                _file_cache[path] = (mtime_ns, md_template)
 
-            text = path.read_text(encoding="utf-8")
-
-            html = Markup(markdown_to_html(text))
-            _file_cache[path] = (mtime_ns, html)
+            rendered = md_template.render(**ctx.get_all())
+            html = Markup(markdown_to_html(rendered))
             return html
         except Exception as e:
             raise RuntimeError(f"Error processing markdown file {path}: {e}") from e
