@@ -1,13 +1,9 @@
 # lib: built-in
 import sys
-import os
 import logging
 
 
-def getLogger(name=None) -> logging.Logger:
-    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
-    if name:
-        log_level = 'NOTSET'
+def getLogger(name=None, *, log_level='INFO') -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(log_level)
 

@@ -7,6 +7,7 @@ from dataclasses import (
 from typing import (
     List,
 )
+import os
 
 # lib: external
 import dacite
@@ -30,38 +31,35 @@ from ..util.log import getLogger
 @dataclass
 class BuildConfig(_BuildConfig):
     dir_src: str
-    "Source directory"
+    "Source directory containing input files"
 
     dir_dest: str
     "Destination directory for build output"
 
     copy: List[str] = field(default_factory=list)
-    "RegEx patterns based on `dir_src` for files/directories to copy verbatim"
+    "Path RegEx patterns copy verbatim"
 
     exclude: List[str] = field(default_factory=list)
-    "RegEx patterns to exclude from processing and watching"
+    "Path RegEx patterns to exclude from processing"
 
 
 @Parameter(name="*")
 @dataclass
 class ServerConfig(_ServerConfig):
     dir_src: str
-    "Source directory"
+    "Source directory containing input files"
 
     dir_dest: str
     "Destination directory for build output"
 
     copy: List[str] = field(default_factory=list)
-    "RegEx patterns based on `dir_src` for files/directories to copy verbatim"
+    "Path RegEx patterns copy verbatim"
 
     watch: List[str] = field(default_factory=list)
-    """Additional paths to watch, expressed as regular expression patterns relative to the current working directory.
-These are in addition to files under `dir_src` and any paths matched by `copy`. Changes to matched paths
-will be streamed to web clients via Server-Sent Events (SSE) to enable live preview/reload.
-"""
+    "Path RegEx patterns to watch for changes and emit SSE"
 
     exclude: List[str] = field(default_factory=list)
-    "RegEx patterns to exclude from processing and watching"
+    "Path RegEx patterns to exclude from processing"
 
     host: str = '127.0.0.1'
     "Host interface to bind the development server"
@@ -69,12 +67,15 @@ will be streamed to web clients via Server-Sent Events (SSE) to enable live prev
     port: int = 8000
     "Port number for the development server"
 
-
-logger = getLogger(__name__)
+    sse_url: str = '__engrave/watch'
+    "SSE URL (Server Side Event) to emite watch event"
 
 
 app = App(
-    help="Engrave: A static site generator with live preview capability",
+    help="""
+    Engrave — Static site generator with optional live preview
+    ==========================================================
+    """,
 )
 
 
@@ -82,6 +83,11 @@ app = App(
 async def build(build_config: BuildConfig):
     """Build static HTML files from templates.
     """
+
+    log_level = os.environ.get('LOG_LEVEL', 'INFO')
+    if build_config.log_level is not None:
+        log_level = build_config.log_level
+    logger = getLogger(__name__, log_level=log_level)
 
     logger.info(f"Building site from '{build_config.dir_src}' to '{build_config.dir_dest}'")
     if build_config.exclude:
@@ -96,6 +102,11 @@ async def build(build_config: BuildConfig):
 def server(server_config: ServerConfig):
     """Start a development server with live preview.
     """
+
+    log_level = os.environ.get('LOG_LEVEL', 'INFO')
+    if server_config.log_level is not None:
+        log_level = server_config.log_level
+    logger = getLogger(__name__, log_level=log_level)
 
     build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(server_config))
     build_run(build_config)

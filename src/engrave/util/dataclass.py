@@ -40,20 +40,27 @@ class FileChangeResult:
     change: Annotated[Change, "Change event reported by watchfiles (added, modified, or deleted)"]
 
 
+@dataclass(kw_only=True)
+class GlobalConfig:
+    log_level: Annotated[
+        Literal["CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG", "NOTSET"],
+        "Logging Level"
+    ] = 'INFO'
+
+
 @dataclass
-class BuildConfig:
+class BuildConfig(GlobalConfig):
     """
     Build-time configuration describing source/destination roots and which
     files to copy, watch, or exclude, along with logging verbosity.
     """
     dir_src: Annotated[str, "Source directory containing input files"]
     dir_dest: Annotated[str, "Destination directory for build output"]
-    copy: Annotated[List[str], "RegEx patterns for files/directories to copy verbatim"] = field(default_factory=list)
-    exclude: Annotated[List[str], "Glob patterns to exclude from processing"] = field(default_factory=list)
-    log: Annotated[str, "Logging level (e.g., DEBUG, INFO, WARNING, ERROR)"] = 'INFO'
+    copy: Annotated[List[str], "Path RegEx patterns copy verbatim"] = field(default_factory=list)
+    exclude: Annotated[List[str], "Path RegEx patterns to exclude from processing"] = field(default_factory=list)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ServerConfig(BuildConfig):
     """
     Development server configuration extending BuildConfig with host/port
