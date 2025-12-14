@@ -48,16 +48,16 @@ from fastapi.responses import (
     StreamingResponse,
 )
 import dacite
+import logging
 
 # lib: local
 from .template import get_template
 from .util.dataclass import ServerConfig
-from .util.log import getLogger
 from .core.build import run as build_run
 from .core.watch import run as watch_run
 
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 set_queue_clients = set()
 
 async def publish_queue_put(data, set_queue_clients):
@@ -156,7 +156,9 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
         try:
             while True:
                 data = await queue.get()
-                yield f"event: change\ndata: {json.dumps(data)}\n\n"
+                response = f"event: change\ndata: {json.dumps(data)}\n\n"
+                yield response
+                logger.info(f'SSE => {response}')
         except asyncio.CancelledError:
             logger.debug("Client disconnected")
         finally:
@@ -167,7 +169,7 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
 
     @fast_api.get(server_config.sse_url)
     async def event_watch():
-        print(server_config.sse_url)
+        logger.info('SSE Request')
         return StreamingResponse(
             watch_event_stream(),
             media_type="text/event-stream",

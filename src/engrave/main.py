@@ -1,9 +1,11 @@
+# lib: built-in
+import logging
+
 # lib: local
 from .core.cli import app as cli
-from .util.log import getLogger
 
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def app():

@@ -13,14 +13,14 @@ import shutil
 from pathlib import Path
 from typing import List
 import re
+import logging
 
 # lib: local
 from ..template import get_template
 from .dataclass import FileProcessInfo
-from .log import getLogger
 
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def is_valid_path(
