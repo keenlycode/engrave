@@ -2,12 +2,9 @@
 from dataclasses import (
     dataclass,
     asdict,
-    field,
-)
-from typing import (
-    List,
 )
 import os
+from urllib.parse import urljoin
 
 # lib: external
 import dacite
@@ -21,6 +18,8 @@ import uvicorn
 from ..util.dataclass import (
     BuildConfig as _BuildConfig,
     ServerConfig as _ServerConfig,
+    # BuildConfig as _BuildConfig,
+    # ServerConfig as _ServerConfig,
 )
 from .build import run as build_run
 from ..server import create_fastapi
@@ -30,46 +29,13 @@ from ..util.log import getLogger
 @Parameter(name="*")
 @dataclass
 class BuildConfig(_BuildConfig):
-    dir_src: str
-    "Source directory containing input files"
-
-    dir_dest: str
-    "Destination directory for build output"
-
-    copy: List[str] = field(default_factory=list)
-    "Path RegEx copy verbatim"
-
-    exclude: List[str] = field(default_factory=list)
-    "Path RegEx to exclude from processing"
+    pass
 
 
 @Parameter(name="*")
 @dataclass
 class ServerConfig(_ServerConfig):
-    dir_src: str
-    "Source directory containing input files"
-
-    dir_dest: str
-    "Destination directory for build output"
-
-    copy: List[str] = field(default_factory=list)
-    "Path RegEx copy verbatim"
-
-    watch_add: List[str] = field(default_factory=list)
-    "Additional path regex patterns to watch for changes (in addition to .html and patterns matched by --copy). Matching paths will trigger Server-Sent Events (SSE)."
-
-    exclude: List[str] = field(default_factory=list)
-    "Path RegEx to exclude from processing"
-
-    host: str = '127.0.0.1'
-    "Host interface to bind the development server"
-
-    port: int = 8000
-    "Port number for the development server"
-
-    sse_url: str = '__engrave/watch'
-    "SSE URL (Server Side Event) to emite watch event"
-
+    pass
 
 app = App(
     help="""
@@ -111,6 +77,8 @@ def server(server_config: ServerConfig):
     build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(server_config))
     build_run(build_config)
 
+    sse_url = urljoin(f'http://{server_config.host}:{server_config.port}', server_config.sse_url)
+
     logger.info(
         f"""
 Engrave development server started
@@ -121,9 +89,9 @@ Engrave development server started
 - Live preview: Using Server-Sent Events (SSE)
 
 Live reload instructions:
-  - The browser should connect to: http://{server_config.host}:{server_config.port}/{server_config.sse_url}
+  - The browser should connect to: {sse_url}
   - Example JavaScript:
-      const source = new EventSource('/{server_config.sse_url}');
+      const source = new EventSource('{server_config.sse_url}');
       source.addEventListener('change', () => window.location.reload());
 
 Press CTRL+C to stop the server.

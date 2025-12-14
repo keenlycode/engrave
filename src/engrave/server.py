@@ -35,9 +35,13 @@ import json
 import traceback
 from contextlib import asynccontextmanager
 from typing_extensions import AsyncGenerator
+import re
 
 # lib: external
-from fastapi import FastAPI
+from fastapi import (
+    FastAPI,
+    HTTPException,
+)
 from fastapi.responses import (
     HTMLResponse,
     FileResponse,
@@ -49,6 +53,7 @@ import dacite
 from .template import get_template
 from .util.dataclass import ServerConfig
 from .util.log import getLogger
+from .core.build import run as build_run
 from .core.watch import run as watch_run
 
 
@@ -162,21 +167,26 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
 
     @fast_api.get(server_config.sse_url)
     async def event_watch():
+        print(server_config.sse_url)
         return StreamingResponse(
             watch_event_stream(),
             media_type="text/event-stream",
         )
 
     @fast_api.get("/{path:path}")
-    async def render(path: str):
-        _path = Path(path)
-        template = get_template(dir_src=server_config.dir_src)
-        if path == '' or path.endswith('/'):
-            _path = _path / 'index.html'
+    async def response(str_path: str = ''):
+        path = Path(str_path)
 
-        if _path.suffix == '.html':
+        for pattern in server_config.exclude:
+            if re.match(pattern, str_path):
+                raise HTTPException(status_code=404, detail={"Not Found"})
+
+        if str_path == '' or str_path.endswith('/'):
+            path = path / 'index.html'
+
+        if path.suffix == '.html':
             try:
-                response = template(str(_path)).render()
+                build_run(server_config)
             except Exception as error:
                 message = str(error)
                 tb = traceback.format_exc()
@@ -186,10 +196,8 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
                     message=message,
                     traceback=tb,
                 )
+                return HTMLResponse(response, status_code=500)
 
-            return HTMLResponse(response)
-
-        dir_dest = Path(server_config.dir_dest)
-        return FileResponse(dir_dest / _path)
+        return FileResponse(Path(server_config.dir_dest) / path)
 
     return fast_api
