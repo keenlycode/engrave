@@ -3,14 +3,14 @@
 Spin up a small Engrave site to see how HTML rendering, Markdown inclusion, and asset copying work together.
 
 ## 1) Install
-```bash
+```bash title="Shell"
 pip install engrave
 ```
 
 ## 2) Create a source tree
 Use any layout you like. Only `.html` files are rendered; any path segment starting with `_` is skipped for HTML output (handy for partials/includes). Markdown lives alongside templates and is pulled in from HTML.
 
-```
+```bash title="Shell"
 site/
   base.html
   index.html
@@ -20,7 +20,7 @@ site/
 ```
 
 Example `base.html`:
-```html
+```html title="HTML"
 <!doctype html>
 <html>
   <head>
@@ -38,7 +38,7 @@ Example `base.html`:
 ```
 
 Example `index.html`:
-```html
+```html title="HTML + Jinja"
 {% extends "base.html" %}
 {% set title = "Home" %}
 {% block content %}
@@ -48,27 +48,29 @@ Example `index.html`:
 ```
 
 `includes/intro.md`:
-```markdown
+```markdown title="Markdown + Jinja"
 ## Engrave
 
 This site is rendered from HTML templates. Markdown is pulled in on demand with
-`{{ markdown("includes/intro.md") }}`.
-
-Markdown snippets are rendered as Jinja templates first, so you can reference page variables inside them.
+{% raw %}`{{ markdown("includes/intro.md") }}`{% endraw %}.
 ```
+> Markdown snippets are rendered as Jinja templates first, so you can reference page variables inside them.
 
 ## 3) Build once
-```bash
-engrave build site/ build/ --copy '.*\.(css|png|svg)$' --exclude 'drafts/.*'
+```bash title="Shell"
+$ engrave build site/ build/ --copy '.*\.(css|png|svg)$' --exclude 'drafts/.*'
 ```
+
 - HTML under `site/` is rendered into `build/` (segments prefixed with `_` are skipped for HTML rendering).
 - Assets matching the regex are copied verbatim; `--exclude` uses regex matching against the path string to skip both rendering and copying.
 - Add `--log-level DEBUG` (or set `LOG_LEVEL`) if you want more verbose output.
 
-## 4) Develop with live preview
-```bash
-engrave server site/ build/ --copy '.*\.(css|png|svg)$' --watch-add 'build/.*\.(html|css|png|svg|js)$'
+## 4) Develop with Live Reload (SSE)
+```bash title="Shell"
+$ engrave server site/ build/ --copy '.*\.(css|png|svg)$' \
+--watch-add 'build/.*\.(js)$'
 ```
+
 - Engrave builds once, renders `.html` requests directly from `site/`, and copies matching assets into `build/`.
 - Watches `.html` and `.md` under `site/` plus any copy targets. Add `--watch-add REGEX` for extra paths relative to your current working directory—these emit SSE events only (no auto-copy/build).
-- Browse `http://127.0.0.1:8000/` and add the reload snippet from [Live Preview](live-preview.md) for auto-refresh via SSE (default endpoint `/__engrave/watch`).
+- Browse `http://127.0.0.1:8000/` and add the reload snippet from [Live Reload](live-reload.md) for auto-refresh via SSE (default endpoint `/__engrave/watch`).

@@ -10,7 +10,7 @@ Engrave renders Jinja2 templates discovered under your source directory. Use sta
 ## Bringing in Markdown files
 Use the global `markdown()` helper inside templates to load and render a Markdown file relative to the current template.
 
-```html
+```html title="HTML"
 <article>
   {{ markdown('includes/intro.md') }}
 </article>
@@ -25,7 +25,7 @@ Details:
 ## Inline Markdown filter
 Convert inline strings to HTML with the `markdown` filter. Results are cached with an LRU to avoid repeated parsing.
 
-```html
+```html title="HTML"
 <p>{{ "This text **is** inline markdown." | markdown }}</p>
 ```
 

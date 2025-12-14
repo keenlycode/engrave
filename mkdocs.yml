@@ -1,5 +1,5 @@
-site_name: Engrave Docs
-site_description: Guides and references for the Engrave static-site generator
+site_name: 'Engrave Guide'
+site_description: 'Guides for the Engrave, A lightweight static-site generator built on Python and Jinja.'
 docs_dir: docs-src
 site_dir: docs
 
@@ -8,10 +8,17 @@ nav:
   - Quickstart: quickstart.md
   - CLI Reference: cli.md
   - Templates & Markdown: templates.md
-  - Live Preview: live-preview.md
+  - Live Reload: live-reload.md
 
 theme:
-  name: readthedocs
+  name: material
+  font:
+    text: Fira Sans
+    code: Fira Mono
+  features:
+    - search.suggest
+    - search.highlight
+    - content.code.copy
 
 plugins:
   - search
@@ -20,3 +27,14 @@ markdown_extensions:
   - toc:
       permalink: true
   - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+extra:
+  version:
+    provider: mike
