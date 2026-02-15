@@ -59,7 +59,9 @@ Start a development server with live preview.
 │    --exclude --empty-exclude  Path RegEx to exclude from processing [default: []]                                          │
 │    --host                     Host interface to bind the development server [default: 127.0.0.1]                           │
 │    --port                     Port number for the development server [default: 8000]                                       │
-│    --watch --empty-watch      Path RegEx to watch for changes and emit SSE [default: []]                                   │
+│    --watch-add --empty-watch-add                                                                                           │
+│                               Additional path regex patterns to watch for changes (in addition to .html and patterns       │
+│                               matched by --copy). Matching paths will trigger Server-Sent Events (SSE). [default: []]      │
 │    --sse-url                  SSE URL (Server Side Event) to emite watch event [default: __engrave/watch]                  │
 │    --log-level                [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default: INFO]        │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -67,7 +69,7 @@ Start a development server with live preview.
 
 - Serves rendered `.html` directly from `DIR_SRC` and other assets from `DIR_DEST`.
 - Watches `DIR_SRC` for `.html`/`.md` changes, applies the same copy/exclude rules as `build`, and mirrors deletions.
-- `--watch` accepts additional regex patterns (relative to the current working directory) whose changes are forwarded to clients as `type='watch'`.
+- `--watch-add` accepts additional regex patterns (relative to the current working directory) whose changes are forwarded to clients as `type='watch'`.
 - Add a reload hook in your page:
 
 ```js
@@ -79,7 +81,8 @@ source.addEventListener('change', () => window.location.reload());
 
 - `markdown('path.md')` loads a Markdown file relative to the current template (stays inside configured template roots).
 - `{{ content | markdown }}` converts inline Markdown strings.
-- Markdown rendering uses Mistune by default and caches results by file mtime; you can supply a custom parser via `get_template(..., markdown_to_html=...)` if embedding Engrave programmatically.
+- Markdown files are rendered as Jinja templates with the current context before Markdown conversion, so you can use template variables inside `.md` snippets.
+- Markdown rendering uses Mistune by default and caches file reads/compilation by mtime; you can supply a custom parser via `get_template(..., markdown_to_html=...)` if embedding Engrave programmatically.
 - Multiple template roots are supported by passing a list to `dir_src`.
 
 ## 🛠️ Testing

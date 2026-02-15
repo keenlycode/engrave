@@ -35,27 +35,29 @@ import json
 import traceback
 from contextlib import asynccontextmanager
 from typing_extensions import AsyncGenerator
+import re
 
 # lib: external
-from fastapi import FastAPI
+from fastapi import (
+    FastAPI,
+    HTTPException,
+)
 from fastapi.responses import (
     HTMLResponse,
     FileResponse,
     StreamingResponse,
 )
 import dacite
+import logging
 
 # lib: local
 from .template import get_template
-from .util.dataclass import (
-    ServerConfig,
-    BuildConfig,
-)
-from .util.log import getLogger
+from .util.dataclass import ServerConfig
+from .core.build import run as build_run
 from .core.watch import run as watch_run
 
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 set_queue_clients = set()
 
 async def publish_queue_put(data, set_queue_clients):
@@ -68,8 +70,8 @@ async def publish_queue_put(data, set_queue_clients):
     set_queue_clients.difference_update(to_remove)
 
 
-async def watch_build(build_config: BuildConfig):
-    async for list_file_change_result in watch_run(build_config):
+async def watch_to_queue(server_config: ServerConfig):
+    async for list_file_change_result in watch_run(server_config):
         results = []
         for file_change_result in list_file_change_result:
             results.append(asdict(file_change_result))
@@ -115,14 +117,14 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
     >>> # uvicorn.run(app, host=server_config.host, port=server_config.port)
 
     """
-    build_config = dacite.from_dict(
-        data_class=BuildConfig,
+    server_config = dacite.from_dict(
+        data_class=ServerConfig,
         data=asdict(server_config)
     )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        asyncio.create_task(watch_build(build_config))
+        asyncio.create_task(watch_to_queue(server_config))
         logger.info("Started background files watcher")
         yield
 
@@ -154,7 +156,9 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
         try:
             while True:
                 data = await queue.get()
-                yield f"event: change\ndata: {json.dumps(data)}\n\n"
+                response = f"event: change\ndata: {json.dumps(data)}\n\n"
+                yield response
+                logger.info(f'SSE => {response}')
         except asyncio.CancelledError:
             logger.debug("Client disconnected")
         finally:
@@ -165,21 +169,26 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
 
     @fast_api.get(server_config.sse_url)
     async def event_watch():
+        logger.info('SSE Request')
         return StreamingResponse(
             watch_event_stream(),
             media_type="text/event-stream",
         )
 
     @fast_api.get("/{path:path}")
-    async def render(path: str):
-        _path = Path(path)
-        template = get_template(dir_src=server_config.dir_src)
-        if path == '' or path.endswith('/'):
-            _path = _path / 'index.html'
+    async def response(str_path: str = ''):
+        path = Path(str_path)
 
-        if _path.suffix == '.html':
+        for pattern in server_config.exclude:
+            if re.match(pattern, str_path):
+                raise HTTPException(status_code=404, detail={"Not Found"})
+
+        if str_path == '' or str_path.endswith('/'):
+            path = path / 'index.html'
+
+        if path.suffix == '.html':
             try:
-                response = template(str(_path)).render()
+                build_run(server_config)
             except Exception as error:
                 message = str(error)
                 tb = traceback.format_exc()
@@ -189,10 +198,8 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
                     message=message,
                     traceback=tb,
                 )
+                return HTMLResponse(response, status_code=500)
 
-            return HTMLResponse(response)
-
-        dir_dest = Path(server_config.dir_dest)
-        return FileResponse(dir_dest / _path)
+        return FileResponse(Path(server_config.dir_dest) / path)
 
     return fast_api

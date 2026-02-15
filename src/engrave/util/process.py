@@ -13,30 +13,30 @@ import shutil
 from pathlib import Path
 from typing import List
 import re
+import logging
 
 # lib: local
 from ..template import get_template
 from .dataclass import FileProcessInfo
-from .log import getLogger
 
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def is_valid_path(
         *,
         path: Path,
-        list_regex: List[re.Pattern] = [],
-        list_exclude_regex: List[re.Pattern]) -> bool:
+        list_regex: List[re.Pattern],
+        list_exclude_regex: List[re.Pattern] = []) -> bool:
     """Check whether a path should be processed.
 
     Parameters
     ----------
     path : pathlib.Path
         Path to evaluate, absolute or relative. It will be stringified before matching.
-    list_regex : list of re.Pattern, optional
+    list_regex : list of re.Pattern
         A list of compiled regular expressions. The path is valid only if at least one regex matches.
-    exclude_globs : list of str
+    exclude_globs : list of str, optional
         Glob patterns to exclude. If any pattern matches, the path is considered invalid.
 
     Returns
@@ -58,6 +58,7 @@ def is_valid_path(
     ...               exclude_globs=["**/drafts/**"])
     True
     """
+
     return (
         any(regex.match(str(path)) for regex in list_regex)
         and not any(regex.match(str(path)) for regex in list_exclude_regex)

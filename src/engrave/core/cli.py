@@ -2,12 +2,10 @@
 from dataclasses import (
     dataclass,
     asdict,
-    field,
-)
-from typing import (
-    List,
 )
 import os
+from urllib.parse import urljoin
+import logging
 
 # lib: external
 import dacite
@@ -21,55 +19,24 @@ import uvicorn
 from ..util.dataclass import (
     BuildConfig as _BuildConfig,
     ServerConfig as _ServerConfig,
+    # BuildConfig as _BuildConfig,
+    # ServerConfig as _ServerConfig,
 )
 from .build import run as build_run
 from ..server import create_fastapi
-from ..util.log import getLogger
+from ..util.log import setup_root_logger
 
 
 @Parameter(name="*")
 @dataclass
 class BuildConfig(_BuildConfig):
-    dir_src: str
-    "Source directory containing input files"
-
-    dir_dest: str
-    "Destination directory for build output"
-
-    copy: List[str] = field(default_factory=list)
-    "Path RegEx copy verbatim"
-
-    exclude: List[str] = field(default_factory=list)
-    "Path RegEx to exclude from processing"
+    pass
 
 
 @Parameter(name="*")
 @dataclass
 class ServerConfig(_ServerConfig):
-    dir_src: str
-    "Source directory containing input files"
-
-    dir_dest: str
-    "Destination directory for build output"
-
-    copy: List[str] = field(default_factory=list)
-    "Path RegEx copy verbatim"
-
-    watch: List[str] = field(default_factory=list)
-    "Path RegEx to watch for changes and emit SSE"
-
-    exclude: List[str] = field(default_factory=list)
-    "Path RegEx to exclude from processing"
-
-    host: str = '127.0.0.1'
-    "Host interface to bind the development server"
-
-    port: int = 8000
-    "Port number for the development server"
-
-    sse_url: str = '__engrave/watch'
-    "SSE URL (Server Side Event) to emite watch event"
-
+    pass
 
 app = App(
     help="""
@@ -87,7 +54,9 @@ async def build(build_config: BuildConfig):
     log_level = os.environ.get('LOG_LEVEL', 'INFO')
     if build_config.log_level is not None:
         log_level = build_config.log_level
-    logger = getLogger(__name__, log_level=log_level)
+    setup_root_logger(log_level=log_level)
+
+    logger = logging.getLogger(__name__)
 
     logger.info(f"Building site from '{build_config.dir_src}' to '{build_config.dir_dest}'")
     if build_config.exclude:
@@ -106,10 +75,14 @@ def server(server_config: ServerConfig):
     log_level = os.environ.get('LOG_LEVEL', 'INFO')
     if server_config.log_level is not None:
         log_level = server_config.log_level
-    logger = getLogger(__name__, log_level=log_level)
+    setup_root_logger(log_level=log_level)
+
+    logger = logging.getLogger(__name__)
 
     build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(server_config))
     build_run(build_config)
+
+    sse_url = urljoin(f'http://{server_config.host}:{server_config.port}', server_config.sse_url)
 
     logger.info(
         f"""
@@ -118,12 +91,12 @@ Engrave development server started
 - Source directory: {server_config.dir_src}
 - Output directory: {server_config.dir_dest}
 - Address: http://{server_config.host}:{server_config.port}
-- Live preview: Using Server-Sent Events (SSE)
+- Live Reload: Using Server-Sent Events (SSE)
 
-Live reload instructions:
-  - The browser should connect to: http://{server_config.host}:{server_config.port}/{server_config.sse_url}
+Live Reload instructions:
+  - The browser should connect to: {sse_url}
   - Example JavaScript:
-      const source = new EventSource('/{server_config.sse_url}');
+      const source = new EventSource('{server_config.sse_url}');
       source.addEventListener('change', () => window.location.reload());
 
 Press CTRL+C to stop the server.

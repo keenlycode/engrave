@@ -3,14 +3,14 @@ from pathlib import Path
 from glob import iglob
 import re
 from itertools import chain
+import logging
 
 # lib: local
 from ..util import process
 from ..util.dataclass import BuildConfig, FileProcessInfo
-from ..util.log import getLogger
 
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def run(build_config: BuildConfig) -> None:

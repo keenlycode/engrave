@@ -38,7 +38,7 @@ class TemplateTests(unittest.TestCase):
         # Create markdown file for inclusion
         self.md_file = os.path.join(self.temp_dir, "content.md")
         with open(self.md_file, "w") as f:
-            f.write("# Hello World\n\nThis is **markdown** content.")
+            f.write("# Hello World\n\nThis is **markdown** content.\n\nAuthor: {{ author }}")
 
         # Create a template in the second directory
         self.template_file2 = os.path.join(self.temp_dir2, "secondary.html")
@@ -85,12 +85,14 @@ class TemplateTests(unittest.TestCase):
         result = template.render(
             title="Test Title",
             content="**Inline** markdown",
-            partial_content="Partial template content"
+            partial_content="Partial template content",
+            author="Docs Team",
         )
 
         # Check if markdown file was included and rendered
         self.assertIn("<h1>Hello World</h1>", result)
         self.assertIn("<strong>markdown</strong> content", result)
+        self.assertIn("Author: Docs Team", result)
 
         # Check if markdown filter works
         self.assertIn("<strong>Inline</strong> markdown", result)
@@ -108,11 +110,12 @@ class TemplateTests(unittest.TestCase):
         result = template.render(
             title="Test Title",
             content="**Inline** markdown",
-            partial_content="Partial content"
+            partial_content="Partial content",
+            author="Docs Team",
         )
 
         # Check if our custom parser was used for both function and filter
-        self.assertIn("<custom># Hello World\n\nThis is **markdown** content.</custom>", result)
+        self.assertIn("<custom># Hello World\n\nThis is **markdown** content.\n\nAuthor: Docs Team</custom>", result)
         self.assertIn("<custom>**Inline** markdown</custom>", result)
 
     def test_multiple_template_directories(self):
@@ -139,7 +142,8 @@ class TemplateTests(unittest.TestCase):
         result = template.render(
             title="Test Title",
             content="**Path** test",
-            partial_content="Path test"
+            partial_content="Path test",
+            author="Docs Team",
         )
         self.assertIn("<h1>Test Title</h1>", result)
         self.assertIn("<strong>Path</strong> test", result)
@@ -218,6 +222,28 @@ class TemplateTests(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             template.render()
         self.assertIn("Absolute paths are not allowed", str(ctx.exception))
+
+    def test_markdown_rerenders_with_new_context(self):
+        """Markdown content should reflect updated Jinja context values."""
+        template_loader = get_template(dir_src=self.temp_dir)
+        template = template_loader("main.html")
+
+        first = template.render(
+            title="First",
+            content="**Inline** markdown",
+            partial_content="Partial template content",
+            author="Alice",
+        )
+        second = template.render(
+            title="Second",
+            content="**Inline** markdown",
+            partial_content="Partial template content",
+            author="Bob",
+        )
+
+        self.assertIn("Author: Alice", first)
+        self.assertIn("Author: Bob", second)
+        self.assertNotIn("Author: Alice", second)
 
     def test_path_traversal_is_blocked(self):
         """Attempted path traversal outside loader roots should fail."""

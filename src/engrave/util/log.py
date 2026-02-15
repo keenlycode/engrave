@@ -3,9 +3,9 @@ import sys
 import logging
 
 
-def getLogger(name=None, *, log_level='INFO') -> logging.Logger:
-    logger = logging.getLogger(name)
-    logger.setLevel(log_level)
+def setup_root_logger(log_level: str = 'INFO') -> logging.Logger:
+    logger = logging.getLogger()
+    logger.setLevel(logging._nameToLevel.get(log_level.upper(), logging.INFO))
 
     # stdout handler for INFO, DEBUG
     stdout_handler = logging.StreamHandler(sys.stdout)
