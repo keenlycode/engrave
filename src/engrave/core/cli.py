@@ -1,30 +1,31 @@
 # lib: built-in
-from dataclasses import (
-    dataclass,
-    asdict,
-)
-import os
-from urllib.parse import urljoin
 import logging
+import os
+from dataclasses import (
+    asdict,
+    dataclass,
+)
+from urllib.parse import urljoin
 
 # lib: external
 import dacite
+import uvicorn
 from cyclopts import (
     App,
     Parameter,
 )
-import uvicorn
+
+from ..server import create_fastapi
 
 # lib: local
 from ..util.dataclass import (
     BuildConfig as _BuildConfig,
-    ServerConfig as _ServerConfig,
-    # BuildConfig as _BuildConfig,
-    # ServerConfig as _ServerConfig,
 )
-from .build import run as build_run
-from ..server import create_fastapi
+from ..util.dataclass import (
+    ServerConfig as _ServerConfig,
+)
 from ..util.log import setup_root_logger
+from .build import run as build_run
 
 
 @Parameter(name="*")
@@ -38,6 +39,7 @@ class BuildConfig(_BuildConfig):
 class ServerConfig(_ServerConfig):
     pass
 
+
 app = App(
     help="""
     Engrave — Static site generator with optional live preview
@@ -48,17 +50,18 @@ app = App(
 
 @app.command()
 async def build(build_config: BuildConfig):
-    """Build static HTML files from templates.
-    """
+    """Build static HTML files from templates."""
 
-    log_level = os.environ.get('LOG_LEVEL', 'INFO')
+    log_level = os.environ.get("LOG_LEVEL", "INFO")
     if build_config.log_level is not None:
         log_level = build_config.log_level
     setup_root_logger(log_level=log_level)
 
     logger = logging.getLogger(__name__)
 
-    logger.info(f"Building site from '{build_config.dir_src}' to '{build_config.dir_dest}'")
+    logger.info(
+        f"Building site from '{build_config.dir_src}' to '{build_config.dir_dest}'"
+    )
     if build_config.exclude:
         logger.info(f"Excluding patterns: {', '.join(build_config.exclude)}")
     if build_config.copy:
@@ -69,10 +72,9 @@ async def build(build_config: BuildConfig):
 
 @app.command()
 def server(server_config: ServerConfig):
-    """Start a development server with live preview.
-    """
+    """Start a development server with live preview."""
 
-    log_level = os.environ.get('LOG_LEVEL', 'INFO')
+    log_level = os.environ.get("LOG_LEVEL", "INFO")
     if server_config.log_level is not None:
         log_level = server_config.log_level
     setup_root_logger(log_level=log_level)
@@ -82,7 +84,9 @@ def server(server_config: ServerConfig):
     build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(server_config))
     build_run(build_config)
 
-    sse_url = urljoin(f'http://{server_config.host}:{server_config.port}', server_config.sse_url)
+    sse_url = urljoin(
+        f"http://{server_config.host}:{server_config.port}", server_config.sse_url
+    )
 
     logger.info(
         f"""
