@@ -1,7 +1,7 @@
 # Engrave
 
 **A lightweight static-site generator using Python + Jinja2**  
-Version: 3.1.6dev
+Version: 3.2.0
 
 ## 🚀 What is Engrave
 
@@ -89,6 +89,36 @@ source.addEventListener('change', () => window.location.reload());
 
 ```bash
 python -m unittest
+```
+
+## 👩‍💻 Development
+
+### Build package artifacts
+
+Build source and wheel distributions into `dist/`:
+
+```bash
+uv build
+```
+
+### Build docs
+
+Install docs dependencies:
+
+```bash
+uv sync --group dev
+```
+
+Build the documentation site:
+
+```bash
+uv run mkdocs build
+```
+
+Preview docs locally with live reload:
+
+```bash
+uv run mkdocs serve
 ```
 
 ## 📄 License

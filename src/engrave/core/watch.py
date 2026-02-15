@@ -285,7 +285,7 @@ async def run(server_config: ServerConfig) -> AsyncGenerator[List[FileChangeResu
     """
     list_build_regex = [re.compile(r'.*\.html$'), re.compile(r'.*\.md$')]
     list_copy_regex = [re.compile(copy_regex) for copy_regex in server_config.copy]
-    list_watch_regex = [re.compile(regex) for regex in server_config.watch_extra]
+    list_watch_regex = [re.compile(regex) for regex in server_config.watch_add]
     list_exclude_regex = [re.compile(regex) for regex in server_config.exclude]
 
     async_list_build_change = awatch(
