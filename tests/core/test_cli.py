@@ -63,7 +63,7 @@ class CLICoreIntegrationTests(unittest.TestCase):
             dir_src=str(self.dir_src),
             dir_dest=str(self.dir_dest),
             copy=[],
-            watch=[],
+            watch_add=[],
             exclude=[],
             host="0.0.0.0",
             port=5050,
