@@ -1,32 +1,8 @@
-# Engrave
+# CLI Reference
 
-**A lightweight static-site generator using Python + Jinja2**  
-Version: 3.1.6dev
+Engrave ships two commands: `build` and `server`. They share build/copy/exclude options; `server` adds live preview controls.
 
-## 🚀 What is Engrave
-
-Engrave turns a directory of HTML templates (plus optional Markdown snippets) into a ready-to-serve static site. It is ideal for documentation, simple marketing pages, or any static content that benefits from Jinja2 templating without adding a backend.
-
-## 🌟 Highlights
-
-- Renders `.html` templates with Jinja2; path segments starting with `_` are ignored for HTML builds.
-- Built-in Markdown helpers: include Markdown files via `markdown('path.md')` and render inline strings with the `|markdown` filter.
-- Regex-driven asset copying (`--copy`) and exclusion rules (`--exclude`) applied to both renders and copies.
-- Live preview server powered by FastAPI + Uvicorn with watchfiles + SSE for instant reload hooks.
-- Simple Cyclopts-based CLI; works on Python 3.10+.
-
-## 🧰 Installation
-
-```bash
-pip install engrave
-```
-
-## 📘 CLI Usage
-
-### Build
-
-Render templates and copy assets from a source directory into an output directory.
-
+## engrave build
 ```bash
 engrave build -h
 Usage: engrave build [ARGS] [OPTIONS]
@@ -42,10 +18,12 @@ Build static HTML files from templates.
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-### Development Server (auto-rebuild + SSE)
+Behavior highlights:
+- Only `.html` files are rendered; any path segment starting with `_` is skipped for HTML output (but still available for `{% include %}`).
+- Markdown files are not auto-rendered; pull them into templates via `markdown()` or `|markdown`.
+- Files matching a copy regex are copied as-is; avoid copy rules that include `.html` so you do not process the same file twice.
 
-Run an initial build, start FastAPI/Uvicorn, and stream file-change events for live reload.
-
+## engrave server
 ```bash
 engrave server -h
 Usage: engrave server [ARGS] [OPTIONS]
@@ -67,30 +45,8 @@ Start a development server with live preview.
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-- Serves rendered `.html` directly from `DIR_SRC` and other assets from `DIR_DEST`.
-- Watches `DIR_SRC` for `.html`/`.md` changes, applies the same copy/exclude rules as `build`, and mirrors deletions.
-- `--watch-add` accepts additional regex patterns (relative to the current working directory) whose changes are forwarded to clients as `type='watch'`.
-- Add a reload hook in your page:
-
-```js
-const source = new EventSource('/__engrave/watch');
-source.addEventListener('change', () => window.location.reload());
-```
-
-## 🧱 Templates & Markdown helpers
-
-- `markdown('path.md')` loads a Markdown file relative to the current template (stays inside configured template roots).
-- `{{ content | markdown }}` converts inline Markdown strings.
-- Markdown files are rendered as Jinja templates with the current context before Markdown conversion, so you can use template variables inside `.md` snippets.
-- Markdown rendering uses Mistune by default and caches file reads/compilation by mtime; you can supply a custom parser via `get_template(..., markdown_to_html=...)` if embedding Engrave programmatically.
-- Multiple template roots are supported by passing a list to `dir_src`.
-
-## 🛠️ Testing
-
-```bash
-python -m unittest
-```
-
-## 📄 License
-
-MIT — see `LICENSE`.
+- Performs an initial build using the same pipeline as `engrave build`.
+- Serves `.html` by rendering directly from `DIR_SRC`; other requests are served from `DIR_DEST`.
+- Watches `.html` and `.md` under `DIR_SRC`, plus copy targets. Additional `--watch-add` regexes are matched against the current working directory and only emit SSE events (no build/copy).
+- Streams change events to the SSE endpoint at `--sse-url` (default `__engrave/watch`) for browser reload hooks.
+- Host/port control the FastAPI + Uvicorn development server; log level follows `--log-level` / `LOG_LEVEL`.
