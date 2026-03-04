@@ -2,11 +2,13 @@ site_name: 'Engrave Guide'
 site_description: 'Guides for the Engrave, A lightweight static-site generator built on Python and Jinja.'
 docs_dir: docs-src
 site_dir: docs
+repo_url: https://github.com/keenlycode/engrave
+repo_name: keenlycode/engrave
 
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
-  - CLI Reference: cli.md
+  - CLI Overview: cli.md
   - Templates & Markdown: templates.md
   - Live Reload: live-reload.md
 

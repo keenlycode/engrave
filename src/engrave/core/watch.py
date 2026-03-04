@@ -10,8 +10,8 @@ endpoint) can forward to clients.
 
 Notes
 -----
-- Watch filtering uses compiled regular expressions to decide which files to
-  consider, and glob-style exclude patterns to filter them out.
+- Watch filtering uses compiled regular expressions matched against normalized
+  relative path strings.
 - Processing functions are synchronous and are called from the async handlers.
 """
 # lib: built-in
@@ -19,6 +19,7 @@ from typing import (
     List,
     AsyncGenerator,
     Set,
+    Callable,
 )
 import re
 from pathlib import Path
@@ -35,6 +36,7 @@ from aiostream import stream
 # lib: local
 from ..util.dataclass import (
     ServerConfig,
+    WatchConfig,
     FileProcessInfo,
     FileChangeResult,
 )
@@ -43,60 +45,39 @@ from ..util import process
 
 
 class WatchFilter(DefaultFilter):
-    """Filter adapter for watchfiles that applies regex and glob-based rules.
-
-    This class extends `watchfiles.DefaultFilter` by additionally validating
-    candidate paths against a list of compiled regular expressions (`list_regex`)
-    and ignoring any paths that match `exclude_globs`.
+    """Filter adapter for watchfiles that validates normalized relative paths.
 
     Parameters
     ----------
     *args
-        Positional arguments forwarded to `DefaultFilter`.
+        Positional arguments forwarded to ``DefaultFilter``.
     dir_base : pathlib.Path
-        Base directory used to compute relative paths for pattern matching.
-    list_regex : list of re.Pattern, optional
-        Compiled regular expressions used to include files. A path is considered
-        for processing only if at least one regex matches.
-    list_exclude_regex : list of str
-        RegEx patterns to exclude from processing.
+        Base directory used to compute relative paths for matching.
+    path_validator : collections.abc.Callable
+        Callable that receives a relative path and returns whether it should be
+        processed.
     **kw
-        Keyword arguments forwarded to `DefaultFilter`.
-
-    Notes
-    -----
-    - The `__call__` method computes a relative path against `dir_base` before
-      delegating to `process.is_valid_path`.
-    - Avoid using a mutable default for `list_regex`; callers should pass an
-      explicit list. (Left as-is here to preserve existing call sites.)
+        Keyword arguments forwarded to ``DefaultFilter``.
     """
-    def __init__(self,
-            *args,
-            dir_base: Path,
-            list_regex: List[re.Pattern] = [],
-            list_exclude_regex: List[re.Pattern] = [],
-            **kw,
+
+    def __init__(
+        self,
+        *args,
+        dir_base: Path,
+        path_validator: Callable[[Path], bool],
+        **kw,
     ):
         self.dir_base = dir_base
-        self.list_regex = list_regex
-        self.list_exclude_regex = list_exclude_regex
+        self.path_validator = path_validator
         super().__init__(*args, **kw)
 
     def __call__(self, change: Change, path: str) -> bool:
         path_rel = Path(path).relative_to(self.dir_base)
-        _is_valid_path = process.is_valid_path(
-            path=path_rel,
-            list_regex=self.list_regex,
-            list_exclude_regex=self.list_exclude_regex,
-        )
-
-        return (
-            super().__call__(change, path) and _is_valid_path
-        )
+        return super().__call__(change, path) and self.path_validator(path_rel)
 
 
 async def handle_async_list_build_change(
-        build_config: ServerConfig,
+        build_config: WatchConfig | ServerConfig,
         async_list_build_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle HTML/Markdown file change events and produce FileChangeResult lists.
@@ -157,7 +138,7 @@ async def handle_async_list_build_change(
         yield list_file_change_result
 
 async def handle_async_list_copy_change(
-        server_config: ServerConfig,
+        server_config: WatchConfig | ServerConfig,
         async_copy_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle copy-asset change events and produce FileChangeResult lists.
@@ -203,7 +184,7 @@ async def handle_async_list_copy_change(
             path_rel = Path(path).relative_to(
                 Path(server_config.dir_src).resolve()
             )
-            path_rel = server_config.dir_src / path_rel
+            path_rel = Path(server_config.dir_src) / path_rel
             list_file_change_result.append(
                 FileChangeResult(
                     path=str(path_rel),
@@ -215,20 +196,21 @@ async def handle_async_list_copy_change(
 
 
 async def handle_async_watch_list_change(
-        build_config: ServerConfig,
+        build_config: WatchConfig | ServerConfig,
         async_watch_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle changes under the destination tree that should be forwarded to clients.
 
-    This async generator watches the `dir_dest` (or other paths configured via
-    the `watch` list) and emits `FileChangeResult` entries with type 'watch'.
+    This async generator watches extra paths matched by ``watch_add`` and emits
+    ``FileChangeResult`` entries with type ``watch``.
     These are typically consumed by a live-preview subsystem to notify clients
     about changes in the served output.
 
     Parameters
     ----------
     build_config : BuildConfig
-        Build configuration; `dir_dest` is used to compute relative paths.
+        Build configuration; the current working directory is used to compute
+        relative paths for reported watch events.
     async_watch_list_file_change : AsyncGenerator[set of FileChange]
         Async generator yielding sets of `(Change, path)` tuples from watchfiles.
 
@@ -247,9 +229,9 @@ async def handle_async_watch_list_change(
         list_file_change_result: list[FileChangeResult] = []
         for change, path in list_file_change:
             path_rel = Path(path).relative_to(
-                Path(build_config.dir_dest).resolve()
+                Path.cwd().resolve()
             )
-            path_rel = Path(build_config.dir_dest) / path_rel
+            path_rel = Path.cwd() / path_rel
             list_file_change_result.append(
                 FileChangeResult(
                     path=str(path_rel),
@@ -259,14 +241,14 @@ async def handle_async_watch_list_change(
             )
         yield list_file_change_result
 
-async def run(server_config: ServerConfig) -> AsyncGenerator[List[FileChangeResult]]:
+async def run(server_config: WatchConfig | ServerConfig) -> AsyncGenerator[List[FileChangeResult]]:
     """Compose and run watchers according to the provided build configuration.
 
     This function sets up three watcher streams:
-    - HTML/Markdown watcher over `dir_src`, matching `.html` and `.md` files.
-    - Copy watcher over `dir_src`, matching patterns in `build_config.copy`.
-    - Watcher over the current working directory (or other targets) matching
-      patterns in `build_config.watch`.
+    - HTML/Markdown watcher over ``dir_src``, matching ``.html`` and ``.md``.
+    - Copy watcher over ``dir_src``, matching non-HTML paths selected by
+      ``build_config.copy``.
+    - Watcher over the current working directory matching ``watch_add``.
 
     Each watch stream is filtered with `WatchFilter` so that only relevant
     files are seen by the handler coroutines. The handlers perform the
@@ -292,8 +274,11 @@ async def run(server_config: ServerConfig) -> AsyncGenerator[List[FileChangeResu
         server_config.dir_src,
         watch_filter=WatchFilter(
             dir_base=Path(server_config.dir_src).resolve(),
-            list_regex=list_build_regex,
-            list_exclude_regex=list_exclude_regex,
+            path_validator=lambda path: process.is_valid_path(
+                path=path,
+                list_regex=list_build_regex,
+                list_exclude_regex=list_exclude_regex,
+            ),
         )
     )
 
@@ -301,8 +286,11 @@ async def run(server_config: ServerConfig) -> AsyncGenerator[List[FileChangeResu
         server_config.dir_src,
         watch_filter=WatchFilter(
             dir_base=Path(server_config.dir_src).resolve(),
-            list_regex=list_copy_regex,
-            list_exclude_regex=list_exclude_regex,
+            path_validator=lambda path: process.should_copy_path(
+                path=path,
+                list_copy_regex=list_copy_regex,
+                list_exclude_regex=list_exclude_regex,
+            ),
         )
     )
 
@@ -310,7 +298,10 @@ async def run(server_config: ServerConfig) -> AsyncGenerator[List[FileChangeResu
         Path.cwd(),
         watch_filter=WatchFilter(
             dir_base=Path.cwd().resolve(),
-            list_regex=list_watch_regex,
+            path_validator=lambda path: process.matches_any(
+                path=path,
+                list_regex=list_watch_regex,
+            ),
         )
     )
 
