@@ -5,6 +5,7 @@ from dataclasses import (
     asdict,
     dataclass,
 )
+from typing_extensions import Text
 from urllib.parse import urljoin
 
 # lib: external
