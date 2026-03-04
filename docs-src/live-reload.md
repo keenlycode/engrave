@@ -9,7 +9,7 @@ $ engrave server site/ build/ \
   --watch-add 'build/.*\.(js)$' \
   --exclude 'drafts/.*' \
   --host 127.0.0.1 --port 8000 \
-  --sse-url '__engrave/watch'
+  --sse-url '/__engrave/watch'
 ```
 
 - Performs an initial build, then watches `.html`/`.md` plus any `--copy` targets. `--watch-add` adds extra regexes matched against your current working directory; these emit SSE events only (they do not trigger builds or copies).
@@ -32,7 +32,6 @@ The server exposes an SSE endpoint (default `/__engrave/watch`) that streams JSO
 ```
 
 ## What triggers events
-- HTML templates: rendered on added/modified; deleted files remove their counterpart in `DIR_DEST` and emit `{type: "html"}`.
-- Markdown files: reported as `{type: "markdown"}` so you can reload clients; they are not auto-rendered unless a template pulls them in.
+- HTML and Markdown source changes: processed by the build pipeline and emitted as `{type: "build"}` events.
 - Copy targets: copied on added/modified and removed on delete with `{type: "copy"}`.
 - Extra watch targets: anything matching `--watch-add` regex patterns relative to the current working directory, emitted as `{type: "watch"}` events for your own handling.
