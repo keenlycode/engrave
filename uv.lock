@@ -215,18 +215,19 @@ wheels = [
 
 [[package]]
 name = "cyclopts"
-version = "3.11.2"
+version = "4.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
-    { name = "docstring-parser", marker = "python_full_version < '4'" },
+    { name = "docstring-parser" },
     { name = "rich" },
     { name = "rich-rst" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6c/9d/0bd69065ecd56e0d367fd5ba1a43ab63ef3cd18a91128d1de9d016ea50b8/cyclopts-3.11.2.tar.gz", hash = "sha256:9aa85743a70247e0e862bb0e0e92794f53beea0ec632d1a37d561276547f4012", size = 69275, upload-time = "2025-03-31T13:34:50.306Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/49/5c/88a4068c660a096bbe87efc5b7c190080c9e86919c36ec5f092cb08d852f/cyclopts-4.6.0.tar.gz", hash = "sha256:483c4704b953ea6da742e8de15972f405d2e748d19a848a4d61595e8e5360ee5", size = 162724, upload-time = "2026-02-23T15:44:49.286Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/39/37f1f613a906ebd2d24fc073d3d0bd025bcc796140cbf247face1e46b663/cyclopts-3.11.2-py3-none-any.whl", hash = "sha256:5ad22d84617944388e6f95bb01e8100ebc7f3355da064c62471a3fbf3fc8688c", size = 78977, upload-time = "2025-03-31T13:34:48.971Z" },
+    { url = "https://files.pythonhosted.org/packages/8f/eb/1e8337755a70dc7d7ff10a73dc8f20e9352c9ad6c2256ed863ac95cd3539/cyclopts-4.6.0-py3-none-any.whl", hash = "sha256:0a891cb55bfd79a3cdce024db8987b33316aba11071e5258c21ac12a640ba9f2", size = 200518, upload-time = "2026-02-23T15:44:47.854Z" },
 ]
 
 [[package]]
@@ -314,7 +315,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiostream", specifier = ">=0.6.4,<1" },
-    { name = "cyclopts", specifier = ">=3.11.2,<4" },
+    { name = "cyclopts", specifier = ">=4,<5" },
     { name = "dacite", specifier = ">=1.9.2,<2" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.135.1,<1" },
     { name = "ipython", specifier = ">=8.37.0,<9" },

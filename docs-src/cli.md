@@ -1,106 +1,47 @@
-# CLI Reference
+# CLI Overview
 
-Engrave provides three commands:
+Engrave keeps the command line small on purpose. Most people only need three
+commands:
 
-- `engrave build` builds the site once
-- `engrave watch` rebuilds on change without serving HTTP
-- `engrave server` rebuilds on change and starts a local preview server
+- `engrave build` for one-off builds
+- `engrave watch` for rebuild-on-save workflows
+- `engrave server` for local preview during development
 
-Use `engrave --help` or `engrave <command> --help` to inspect the exact CLI for your installed version.
+## Choose the right command
 
-## Parameter rules
+### `engrave build`
 
-Engrave uses named options:
-
-```bash
-engrave build --dir-src src-site --dir-dest dist
-```
-
-General rules:
-
-- `--dir-src` and `--dir-dest` are required for every command.
-- `--copy`, `--exclude`, and `--watch-add` are repeatable regex options.
-- `--copy` and `--exclude` are matched against normalized source-relative paths such as `assets/app.js` or `drafts/post.html`.
-- `--exclude` is applied before build or copy rules.
-- `.html` files are rendered instead of copied, even if a `--copy` regex matches them.
-- `--watch-add` is matched against paths relative to the current working directory.
-
-Example:
+Use this when you want static output written to a destination directory.
 
 ```bash
-engrave build \
-  --dir-src src-site \
-  --dir-dest dist \
-  --copy 'assets/.*\.(css|js|png)$' \
-  --exclude 'drafts/.*'
+engrave build --dir-src site --dir-dest build
 ```
 
-## engrave build
+### `engrave watch`
 
-Build the site once.
-
-Behavior:
-
-- renders `.html` files that do not have any path segment starting with `_`
-- copies non-HTML files selected by `--copy`
-- skips any path matched by `--exclude`
-
-Examples:
+Use this when you want Engrave to keep rebuilding in the background without
+starting a local web server.
 
 ```bash
-engrave build --dir-src src-site --dir-dest dist
+engrave watch --dir-src site --dir-dest build
 ```
+
+### `engrave server`
+
+Use this when you want a local preview server alongside automatic rebuilds.
 
 ```bash
-engrave build \
-  --dir-src src-site \
-  --dir-dest dist \
-  --copy 'assets/.*\.(css|js|png|svg|ttf)$'
+engrave server --dir-src site --dir-dest build
 ```
 
-## engrave watch
+## Need the full CLI?
 
-Build once, then rebuild when files change.
-
-This command does not start an HTTP server.
-
-Examples:
+The docs stay intentionally short. For the exact options available in your
+installed version, use:
 
 ```bash
-engrave watch --dir-src src-site --dir-dest dist
-```
-
-```bash
-engrave watch \
-  --dir-src src-site \
-  --dir-dest dist \
-  --copy 'assets/.*\.(css|js)$' \
-  --watch-add 'config/.*\.yaml$'
-```
-
-## engrave server
-
-Build once, start a local preview server, then rebuild and emit live reload events when files change.
-
-Examples:
-
-```bash
-engrave server --dir-src src-site --dir-dest dist
-```
-
-```bash
-engrave server \
-  --dir-src src-site \
-  --dir-dest dist \
-  --copy 'assets/.*\.(css|js|png)$' \
-  --host 127.0.0.1 \
-  --port 8000 \
-  --sse-url /__engrave/watch
-```
-
-Live reload example:
-
-```js
-const source = new EventSource('/__engrave/watch');
-source.addEventListener('change', () => window.location.reload());
+engrave --help
+engrave build --help
+engrave watch --help
+engrave server --help
 ```

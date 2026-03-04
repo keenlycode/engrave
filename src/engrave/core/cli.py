@@ -52,6 +52,7 @@ class ServerConfig(_ServerConfig):
 
 
 app = App(
+    help_format="rst",
     help="""
     Build static sites from a source directory
     ==========================================
