@@ -1,19 +1,10 @@
-"""Processing helpers for Engrave build pipeline.
+"""Processing helpers for Engrave build and watch pipelines."""
 
-This module provides utilities to decide if a path should be processed, and helpers to build HTML, copy assets, and delete outputs.
-
-Notes
------
-- Paths are resolved relative to dir_src/dir_dest carried by FileProcessInfo.
-- Logging is performed via engrave.log.
-"""
-
-# lib: built-in
+import logging
+import re
 import shutil
 from pathlib import Path
 from typing import List
-import re
-import logging
 
 # lib: local
 from ..template import get_template
@@ -23,45 +14,151 @@ from .dataclass import FileProcessInfo
 logger = logging.getLogger(__name__)
 
 
-def is_valid_path(
-        *,
-        path: Path,
-        list_regex: List[re.Pattern],
-        list_exclude_regex: List[re.Pattern] = []) -> bool:
-    """Check whether a path should be processed.
+def normalize_match_path(path: Path) -> str:
+    """
+    Convert a path to the normalized string used for regex matching.
 
     Parameters
     ----------
     path : pathlib.Path
-        Path to evaluate, absolute or relative. It will be stringified before matching.
+        Relative path to normalize.
+
+    Returns
+    -------
+    str
+        POSIX-style path string such as ``assets/app.js``.
+    """
+    return path.as_posix()
+
+
+def matches_any(*, path: Path, list_regex: List[re.Pattern]) -> bool:
+    """
+    Check whether a normalized path matches at least one regex.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Relative path to evaluate.
     list_regex : list of re.Pattern
-        A list of compiled regular expressions. The path is valid only if at least one regex matches.
-    exclude_globs : list of str, optional
-        Glob patterns to exclude. If any pattern matches, the path is considered invalid.
+        Compiled regular expressions to test against the normalized path.
 
     Returns
     -------
     bool
-        True if the path matches any regex in `list_regex` and does not match any exclude glob; False otherwise.
-
-    Notes
-    -----
-    - `list_regex` has a mutable default; callers should explicitly pass a list if mutating.
-    - Matching against `exclude_globs` uses `Path.match`.
-
-    Examples
-    --------
-    >>> import re
-    >>> from pathlib import Path
-    >>> is_valid_path(path=Path("posts/hello.md"),
-    ...               list_regex=[re.compile(r".*\\.md$")],
-    ...               exclude_globs=["**/drafts/**"])
-    True
+        True when at least one regex matches.
     """
+    path_str = normalize_match_path(path)
+    return any(regex.match(path_str) for regex in list_regex)
+
+
+def is_excluded_path(*, path: Path, list_exclude_regex: List[re.Pattern]) -> bool:
+    """
+    Check whether a normalized path matches any exclude regex.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Relative path to evaluate.
+    list_exclude_regex : list of re.Pattern
+        Compiled regular expressions that exclude a path from processing.
+
+    Returns
+    -------
+    bool
+        True when at least one exclude regex matches.
+    """
+    path_str = normalize_match_path(path)
+    return any(regex.match(path_str) for regex in list_exclude_regex)
+
+
+def is_valid_path(
+    *,
+    path: Path,
+    list_regex: List[re.Pattern],
+    list_exclude_regex: List[re.Pattern] | None = None,
+) -> bool:
+    """
+    Check whether a relative path should be processed.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Relative path to evaluate.
+    list_regex : list of re.Pattern
+        Compiled regular expressions used as inclusion rules.
+    list_exclude_regex : list of re.Pattern, optional
+        Compiled regular expressions used as exclusion rules.
+
+    Returns
+    -------
+    bool
+        True when the path matches an inclusion regex and does not match any
+        exclusion regex.
+    """
+    if list_exclude_regex is None:
+        list_exclude_regex = []
 
     return (
-        any(regex.match(str(path)) for regex in list_regex)
-        and not any(regex.match(str(path)) for regex in list_exclude_regex)
+        matches_any(path=path, list_regex=list_regex)
+        and not is_excluded_path(path=path, list_exclude_regex=list_exclude_regex)
+    )
+
+
+def should_build_html(*, path: Path, list_exclude_regex: List[re.Pattern]) -> bool:
+    """
+    Check whether a relative path should be rendered as HTML.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Relative path to evaluate.
+    list_exclude_regex : list of re.Pattern
+        Compiled regular expressions used as exclusion rules.
+
+    Returns
+    -------
+    bool
+        True when the path is an HTML file, is not excluded, and no path
+        segment starts with ``_``.
+    """
+    return (
+        path.suffix == ".html"
+        and not any(part.startswith("_") for part in path.parts)
+        and not is_excluded_path(path=path, list_exclude_regex=list_exclude_regex)
+    )
+
+
+def should_copy_path(
+    *,
+    path: Path,
+    list_copy_regex: List[re.Pattern],
+    list_exclude_regex: List[re.Pattern],
+) -> bool:
+    """
+    Check whether a relative path should be copied as an asset.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Relative path to evaluate.
+    list_copy_regex : list of re.Pattern
+        Compiled regular expressions used as inclusion rules for copied files.
+    list_exclude_regex : list of re.Pattern
+        Compiled regular expressions used as exclusion rules.
+
+    Returns
+    -------
+    bool
+        True when the path matches a copy regex, is not excluded, and is not an
+        HTML template.
+    """
+    return (
+        path.suffix != ".html"
+        and is_valid_path(
+            path=path,
+            list_regex=list_copy_regex,
+            list_exclude_regex=list_exclude_regex,
+        )
     )
 
 

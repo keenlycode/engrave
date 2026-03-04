@@ -24,75 +24,72 @@ pip install engrave
 
 ## 📘 CLI Usage
 
+Engrave provides three commands:
+
+- `engrave build` builds the site once.
+- `engrave watch` rebuilds on change without starting an HTTP server.
+- `engrave server` rebuilds on change and starts a local preview server.
+
+Use `engrave --help` or `engrave <command> --help` for the installed CLI output.
+
+### Parameter rules
+
+- `--dir-src` and `--dir-dest` are required for all commands.
+- `--copy`, `--exclude`, and `--watch-add` are repeatable regex options.
+- `--copy` and `--exclude` are matched against normalized source-relative paths such as `assets/app.js` or `drafts/post.html`.
+- `--exclude` is applied before build or copy rules.
+- `.html` files are rendered, not copied, even if a `--copy` regex also matches them.
+- `--watch-add` is matched against paths relative to the current working directory.
+
+Example:
+
+```bash
+engrave build \
+  --dir-src src-site \
+  --dir-dest dist \
+  --copy 'assets/.*\.(css|js|png)$' \
+  --exclude 'drafts/.*'
+```
+
 ### Build
 
-Render templates and copy assets from a source directory into an output directory.
+Build the site once.
 
 ```bash
-engrave build -h
-Usage: engrave build [ARGS] [OPTIONS]
-
-Build static HTML files from templates.
-
-╭─ Parameters ───────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --dir-src                  Source directory containing input files [required]                                           │
-│ *  --dir-dest                 Destination directory for build output [required]                                            │
-│    --copy --empty-copy        Path RegEx copy verbatim [default: []]                                                       │
-│    --exclude --empty-exclude  Path RegEx to exclude from processing [default: []]                                          │
-│    --log-level                [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default: INFO]        │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+engrave build --dir-src src-site --dir-dest dist
 ```
 
-### Development Server (auto-rebuild + SSE)
+### Watch
 
-Run an initial build, start FastAPI/Uvicorn, and stream file-change events for live reload.
+Build once, then rebuild when files change without starting FastAPI or Uvicorn.
 
 ```bash
-engrave server -h
-Usage: engrave server [ARGS] [OPTIONS]
-
-Start a development server with live preview.
-
-╭─ Parameters ───────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --dir-src                  Source directory containing input files [required]                                           │
-│ *  --dir-dest                 Destination directory for build output [required]                                            │
-│    --copy --empty-copy        Path RegEx copy verbatim [default: []]                                                       │
-│    --exclude --empty-exclude  Path RegEx to exclude from processing [default: []]                                          │
-│    --host                     Host interface to bind the development server [default: 127.0.0.1]                           │
-│    --port                     Port number for the development server [default: 8000]                                       │
-│    --watch-add --empty-watch-add                                                                                           │
-│                               Additional path regex patterns to watch for changes (in addition to .html and patterns       │
-│                               matched by --copy). Matching paths will trigger Server-Sent Events (SSE). [default: []]      │
-│    --sse-url                  SSE URL (Server Side Event) to emite watch event [default: __engrave/watch]                  │
-│    --log-level                [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default: INFO]        │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+engrave watch \
+  --dir-src src-site \
+  --dir-dest dist \
+  --copy 'assets/.*\.(css|js)$' \
+  --watch-add 'config/.*\.yaml$'
 ```
 
-- Serves rendered `.html` directly from `DIR_SRC` and other assets from `DIR_DEST`.
-- Watches `DIR_SRC` for `.html`/`.md` changes, applies the same copy/exclude rules as `build`, and mirrors deletions.
-- `--watch-add` accepts additional regex patterns (relative to the current working directory) whose changes are forwarded to clients as `type='watch'`.
-- Add a reload hook in your page:
+### Server
+
+Build once, then start a local preview server and publish live reload events.
+
+```bash
+engrave server \
+  --dir-src src-site \
+  --dir-dest dist \
+  --copy 'assets/.*\.(css|js|png)$' \
+  --host 127.0.0.1 \
+  --port 8000
+```
+
+Live reload hook:
 
 ```js
 const source = new EventSource('/__engrave/watch');
 source.addEventListener('change', () => window.location.reload());
 ```
-
-### Watch Mode (auto-rebuild, no HTTP server)
-
-Run an initial build and keep watching for source changes without starting FastAPI/Uvicorn.
-
-```bash
-engrave watch -h
-Usage: engrave watch [ARGS] [OPTIONS]
-
-Watch source files and rebuild/copy without starting an HTTP server.
-```
-
-- Accepts the same build-related options as `engrave build`, plus `--watch-add`.
-- Runs the same initial build as `engrave build`.
-- Watches `DIR_SRC` for `.html` and `.md` changes and applies copy/exclude rules just like `engrave server`.
-- Prints detected changes to the terminal instead of serving files or streaming SSE events.
 
 ## 🧱 Templates & Markdown helpers
 

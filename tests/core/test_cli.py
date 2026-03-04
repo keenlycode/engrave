@@ -40,7 +40,7 @@ class CLICoreIntegrationTests(unittest.TestCase):
             dir_src=str(self.dir_src),
             dir_dest=str(self.dir_dest),
             copy=[r".*\.css$"],
-            exclude=[r".*/drafts/.*"],
+            exclude=[r"drafts/.*"],
         )
 
         # Run the build coroutine so we exercise the real build pipeline.

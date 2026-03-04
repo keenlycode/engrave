@@ -66,11 +66,21 @@ class BuildConfig():
     ]
     copy: Annotated[
         List[str],
-        Parameter(help="Repeatable regex for files to copy as-is."),
+        Parameter(
+            help=(
+                "Repeatable regex for source-relative paths to copy as-is, "
+                "such as `assets/app.js`. HTML files are never copied."
+            )
+        ),
     ] = field(default_factory=list, kw_only=True)
     exclude: Annotated[
         List[str],
-        Parameter(help="Repeatable regex for files or directories to skip."),
+        Parameter(
+            help=(
+                "Repeatable regex for source-relative paths to skip before "
+                "build or copy rules are applied."
+            )
+        ),
     ] = field(default_factory=list, kw_only=True)
     log_level: Annotated[
         LOG_LEVEL_TYPE,
@@ -86,7 +96,12 @@ class WatchConfig(BuildConfig):
     """
     watch_add: Annotated[
         List[str],
-        Parameter(help="Repeatable regex for extra paths to watch and report."),
+        Parameter(
+            help=(
+                "Repeatable regex for extra paths, matched relative to the "
+                "current working directory, to watch and report."
+            )
+        ),
     ] = field(default_factory=list)
 
 
@@ -106,7 +121,12 @@ class ServerConfig(BuildConfig):
     ] = 8000
     watch_add: Annotated[
         List[str],
-        Parameter(help="Repeatable regex for extra paths that should emit watch events."),
+        Parameter(
+            help=(
+                "Repeatable regex for extra paths, matched relative to the "
+                "current working directory, that should emit watch events."
+            )
+        ),
     ] = field(default_factory=list)
     sse_url: Annotated[
         str,
