@@ -3,6 +3,8 @@
 Build static sites with plain Jinja2 templates, simple Markdown helpers, and a
 fast local preview loop.
 
+Browse the source on [GitHub](https://github.com/keenlycode/engrave).
+
 Engrave is a good fit when you want:
 
 - a lightweight generator instead of a full web framework
