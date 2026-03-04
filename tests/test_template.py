@@ -9,46 +9,18 @@ from engrave.template import get_template
 
 class TemplateTests(unittest.TestCase):
     def setUp(self):
-        # Create primary temporary directory for test templates
+        fixtures_root = Path(__file__).parent / "fixtures" / "template"
         self.temp_dir = tempfile.mkdtemp()
-
-        # Create a second directory to test multiple template paths
         self.temp_dir2 = tempfile.mkdtemp()
 
-        # Create test template files
+        shutil.copytree(fixtures_root / "primary", self.temp_dir, dirs_exist_ok=True)
+        shutil.copytree(fixtures_root / "secondary", self.temp_dir2, dirs_exist_ok=True)
+
         self.template_file = os.path.join(self.temp_dir, "main.html")
-        with open(self.template_file, "w") as f:
-            f.write("""
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <h1>{{ title }}</h1>
-                <div class="included">{{ markdown('content.md') }}</div>
-                <div class="filter">{{ content|markdown }}</div>
-                {% include 'partial.html' %}
-            </body>
-            </html>
-            """)
-
-        # Create partial template for inclusion
         self.partial_file = os.path.join(self.temp_dir, "partial.html")
-        with open(self.partial_file, "w") as f:
-            f.write('<div class="partial">{{ partial_content }}</div>')
-
-        # Create markdown file for inclusion
         self.md_file = os.path.join(self.temp_dir, "content.md")
-        with open(self.md_file, "w") as f:
-            f.write("# Hello World\n\nThis is **markdown** content.\n\nAuthor: {{ author }}")
-
-        # Create a template in the second directory
         self.template_file2 = os.path.join(self.temp_dir2, "secondary.html")
-        with open(self.template_file2, "w") as f:
-            f.write('<p>{{ markdown("secondary.md") }}</p>')
-
-        # Create markdown file in the second directory
         self.md_file2 = os.path.join(self.temp_dir2, "secondary.md")
-        with open(self.md_file2, "w") as f:
-            f.write("## Secondary content\n\nFrom *second* directory.")
 
     def tearDown(self):
         # Clean up the temporary directories

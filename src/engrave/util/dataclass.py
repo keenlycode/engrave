@@ -15,6 +15,7 @@ from typing import (
 from typing import Annotated
 
 # lib: external
+from cyclopts import Parameter
 from watchfiles import Change
 
 
@@ -43,7 +44,10 @@ LOG_LEVEL_TYPE = Literal["CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO"
 
 @dataclass(kw_only=True, slots=True,)
 class GlobalConfig:
-    log_level: Annotated[LOG_LEVEL_TYPE, "Logging Level"] = 'INFO'
+    log_level: Annotated[
+        LOG_LEVEL_TYPE,
+        Parameter(help="Logging verbosity for CLI output."),
+    ] = 'INFO'
 
 
 @dataclass(slots=True,)
@@ -52,11 +56,53 @@ class BuildConfig():
     Build-time configuration describing source/destination roots and which
     files to copy, watch, or exclude, along with logging verbosity.
     """
-    dir_src: Annotated[str, "Source directory containing input files"]
-    dir_dest: Annotated[str, "Destination directory for build output"]
-    copy: Annotated[List[str], "Path RegEx copy verbatim"] = field(default_factory=list, kw_only=True)
-    exclude: Annotated[List[str], "Path RegEx to exclude from processing"] = field(default_factory=list, kw_only=True)
-    log_level: Annotated[LOG_LEVEL_TYPE, "Log Level"] = field(default='INFO', kw_only=True)
+    dir_src: Annotated[
+        str,
+        Parameter(help="Source directory containing templates and source assets."),
+    ]
+    dir_dest: Annotated[
+        str,
+        Parameter(help="Destination directory for generated output."),
+    ]
+    copy: Annotated[
+        List[str],
+        Parameter(
+            help=(
+                "Repeatable regex for source-relative paths to copy as-is, "
+                "such as `assets/app.js`. HTML files are never copied."
+            )
+        ),
+    ] = field(default_factory=list, kw_only=True)
+    exclude: Annotated[
+        List[str],
+        Parameter(
+            help=(
+                "Repeatable regex for source-relative paths to skip before "
+                "build or copy rules are applied."
+            )
+        ),
+    ] = field(default_factory=list, kw_only=True)
+    log_level: Annotated[
+        LOG_LEVEL_TYPE,
+        Parameter(help="Logging verbosity for CLI output."),
+    ] = field(default='INFO', kw_only=True)
+
+
+@dataclass(kw_only=True, slots=True,)
+class WatchConfig(BuildConfig):
+    """
+    Watch-mode configuration extending BuildConfig with additional path patterns
+    that should be observed and reported without starting an HTTP server.
+    """
+    watch_add: Annotated[
+        List[str],
+        Parameter(
+            help=(
+                "Repeatable regex for extra paths, matched relative to the "
+                "current working directory, to watch and report."
+            )
+        ),
+    ] = field(default_factory=list)
 
 
 @dataclass(kw_only=True, slots=True,)
@@ -65,7 +111,24 @@ class ServerConfig(BuildConfig):
     Development server configuration extending BuildConfig with host/port
     settings for the local HTTP server.
     """
-    host: Annotated[str, "Host interface to bind the development server"] = '127.0.0.1'
-    port: Annotated[int, "Port number for the development server"] = 8000
-    watch_add: Annotated[List[str], "Additional path regex patterns to watch for changes (in addition to .html and patterns matched by --copy). Matching paths will trigger Server-Sent Events (SSE)."] = field(default_factory=list)
-    sse_url: Annotated[str, "SSE URL (Server Side Event) to emite watch event"] = '/__engrave/watch'
+    host: Annotated[
+        str,
+        Parameter(help="Bind address for the development server."),
+    ] = '127.0.0.1'
+    port: Annotated[
+        int,
+        Parameter(help="Port number for the development server."),
+    ] = 8000
+    watch_add: Annotated[
+        List[str],
+        Parameter(
+            help=(
+                "Repeatable regex for extra paths, matched relative to the "
+                "current working directory, that should emit watch events."
+            )
+        ),
+    ] = field(default_factory=list)
+    sse_url: Annotated[
+        str,
+        Parameter(help="URL path for the live reload event stream."),
+    ] = '/__engrave/watch'

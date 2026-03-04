@@ -7,8 +7,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 from fastapi import FastAPI
+from watchfiles import Change
 
 from engrave.core import cli
+from engrave.util.dataclass import FileChangeResult
 
 
 class CLICoreIntegrationTests(unittest.TestCase):
@@ -38,7 +40,7 @@ class CLICoreIntegrationTests(unittest.TestCase):
             dir_src=str(self.dir_src),
             dir_dest=str(self.dir_dest),
             copy=[r".*\.css$"],
-            exclude=[r".*/drafts/.*"],
+            exclude=[r"drafts/.*"],
         )
 
         # Run the build coroutine so we exercise the real build pipeline.
@@ -80,6 +82,35 @@ class CLICoreIntegrationTests(unittest.TestCase):
         self.assertIsInstance(args[0], FastAPI)
         self.assertEqual(kwargs["host"], "0.0.0.0")
         self.assertEqual(kwargs["port"], 5050)
+
+    def test_watch_builds_and_consumes_watch_stream_without_uvicorn(self):
+        self._write("home.html", "<h1>Watch Page</h1>")
+
+        watch_config = cli.WatchConfig(
+            dir_src=str(self.dir_src),
+            dir_dest=str(self.dir_dest),
+            copy=[],
+            watch_add=[],
+            exclude=[],
+        )
+
+        async def fake_watch_run(_server_config):
+            yield [
+                FileChangeResult(
+                    path=str(self.dir_src / "home.html"),
+                    type="build",
+                    change=Change.modified,
+                )
+            ]
+
+        with patch("engrave.core.cli.watch_run", side_effect=fake_watch_run), patch(
+            "engrave.core.cli.uvicorn.run"
+        ) as mock_uvicorn_run:
+            asyncio.run(cli.watch(watch_config))
+
+        html_out = self.dir_dest / "home.html"
+        self.assertTrue(html_out.exists(), "Watch should trigger an initial build")
+        self.assertFalse(mock_uvicorn_run.called, "Watch mode should not start Uvicorn")
 
 
 if __name__ == "__main__":

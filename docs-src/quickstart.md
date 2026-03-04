@@ -1,26 +1,29 @@
 # Quickstart
 
-Spin up a small Engrave site to see how HTML rendering, Markdown inclusion, and asset copying work together.
+This guide walks through the smallest useful Engrave setup: a template, a
+Markdown snippet, and a local build.
 
-## 1) Install
-```bash title="Shell"
+## Install
+
+```bash
 pip install engrave
 ```
 
-## 2) Create a source tree
-Use any layout you like. Only `.html` files are rendered; any path segment starting with `_` is skipped for HTML output (handy for partials/includes). Markdown lives alongside templates and is pulled in from HTML.
+## Create a simple site
 
-```bash title="Shell"
+One possible layout:
+
+```text
 site/
   base.html
   index.html
-  about/index.html
   includes/intro.md
   assets/site.css
 ```
 
 Example `base.html`:
-```html title="HTML"
+
+```html
 <!doctype html>
 <html>
   <head>
@@ -30,7 +33,7 @@ Example `base.html`:
   </head>
   <body>
     <main>
-      {{ markdown('includes/intro.md') }}
+      {{ markdown("includes/intro.md") }}
       {% block content %}{% endblock %}
     </main>
   </body>
@@ -38,39 +41,38 @@ Example `base.html`:
 ```
 
 Example `index.html`:
-```html title="HTML + Jinja"
+
+```html
 {% extends "base.html" %}
 {% set title = "Home" %}
 {% block content %}
   <h1>Welcome</h1>
-  <p>Edit this file and rebuild to see Engrave render it.</p>
+  <p>This page is rendered by Engrave.</p>
 {% endblock %}
 ```
 
-`includes/intro.md`:
-```markdown title="Markdown + Jinja"
+Example `includes/intro.md`:
+
+```markdown
 ## Engrave
 
-This site is rendered from HTML templates. Markdown is pulled in on demand with
-{% raw %}`{{ markdown("includes/intro.md") }}`{% endraw %}.
-```
-> Markdown snippets are rendered as Jinja templates first, so you can reference page variables inside them.
-
-## 3) Build once
-```bash title="Shell"
-$ engrave build site/ build/ --copy '.*\.(css|png|svg)$' --exclude 'drafts/.*'
+This text comes from a Markdown file included inside a template.
 ```
 
-- HTML under `site/` is rendered into `build/` (segments prefixed with `_` are skipped for HTML rendering).
-- Assets matching the regex are copied verbatim; `--exclude` uses regex matching against the path string to skip both rendering and copying.
-- Add `--log-level DEBUG` (or set `LOG_LEVEL`) if you want more verbose output.
+## Build the site
 
-## 4) Develop with Live Reload (SSE)
-```bash title="Shell"
-$ engrave server site/ build/ --copy '.*\.(css|png|svg)$' \
---watch-add 'build/.*\.(js)$'
+```bash
+engrave build --dir-src site --dir-dest build
 ```
 
-- Engrave builds once, renders `.html` requests directly from `site/`, and copies matching assets into `build/`.
-- Watches `.html` and `.md` under `site/` plus any copy targets. Add `--watch-add REGEX` for extra paths relative to your current working directory—these emit SSE events only (no auto-copy/build).
-- Browse `http://127.0.0.1:8000/` and add the reload snippet from [Live Reload](live-reload.md) for auto-refresh via SSE (default endpoint `/__engrave/watch`).
+This renders your templates into `build/`. For more advanced options, check the
+CLI help with `engrave build --help`.
+
+## Preview while you work
+
+```bash
+engrave server --dir-src site --dir-dest build
+```
+
+This gives you a local preview server while you edit templates and content.
+When you only want rebuilds without serving HTTP, use `engrave watch` instead.

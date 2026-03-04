@@ -175,10 +175,9 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
             media_type="text/event-stream",
         )
 
-    @fast_api.get("/{path:path}")
+    @fast_api.get("/{str_path:path}")
     async def response(str_path: str = ''):
         path = Path(str_path)
-
         for pattern in server_config.exclude:
             if re.match(pattern, str_path):
                 raise HTTPException(status_code=404, detail={"Not Found"})
