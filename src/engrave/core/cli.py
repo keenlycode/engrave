@@ -52,15 +52,19 @@ class ServerConfig(_ServerConfig):
 
 app = App(
     help="""
-    Engrave — Static site generator with optional live preview
-    ==========================================================
-    """,
+    Build static sites from a source directory
+    ==========================================
+
+    Run `engrave <command> --help` for command-specific usage and parameters.
+    """
 )
 
 
 @app.command()
 async def build(build_config: BuildConfig):
-    """Build static HTML files from templates."""
+    """
+    Build the site once.
+    """
 
     log_level = os.environ.get("LOG_LEVEL", "INFO")
     if build_config.log_level is not None:
@@ -82,7 +86,9 @@ async def build(build_config: BuildConfig):
 
 @app.command()
 async def watch(watch_config: WatchConfig):
-    """Watch source files and rebuild/copy without starting an HTTP server."""
+    """
+    Build once, then rebuild when files change.
+    """
 
     log_level = os.environ.get("LOG_LEVEL", "INFO")
     if watch_config.log_level is not None:
@@ -119,7 +125,9 @@ Press CTRL+C to stop watching.
 
 @app.command()
 def server(server_config: ServerConfig):
-    """Start a development server with live preview."""
+    """
+    Build once, then start a local preview server with watch events.
+    """
 
     log_level = os.environ.get("LOG_LEVEL", "INFO")
     if server_config.log_level is not None:
