@@ -15,42 +15,17 @@ logger = logging.getLogger(__name__)
 
 def run(build_config: BuildConfig) -> None:
     """
-    Build the static site from a source tree into a destination directory.
+    Build files from the source directory into the destination directory.
 
-    Behavior:
-    - Recursively scans build_config.dir_src.
-    - Renders .html files via Jinja2, skipping any path whose component starts with "_" (HTML-only).
-    - Copies files whose path string matches any regex in build_config.copy.
-    - Excludes any paths that match a glob in build_config.exclude (applies to both HTML and copy).
+    Parameters
+    ----------
+    build_config : BuildConfig
+        Build configuration containing the source directory, destination
+        directory, copy patterns, and exclude patterns.
 
-    Template rendering:
-    - Uses engrave.core.template.get_template(dir_src=build_config.dir_src) as the Jinja2 loader root.
-    - Preserves the relative path under dir_dest when writing rendered output.
-
-    Filesystem effects:
-    - Ensures build_config.dir_dest exists (creates directories as needed).
-    - Writes/overwrites rendered .html files under dir_dest.
-    - Copies matched assets preserving directory structure.
-
-    Logging:
-    - Emits progress messages and a final success message using loguru.
-
-    Parameters:
-    - build_config (BuildConfig):
-        - dir_src: source directory containing templates and assets.
-        - dir_dest: destination directory for the built site.
-        - copy: list of regex patterns used to select files to copy.
-        - exclude: list of glob patterns used to exclude files/dirs.
-        - watch: list of regex patterns used by the dev server (not used here).
-        - log: desired log level (logging configuration happens at the CLI).
-
-    Returns:
-    - None
-
-    Notes:
-    - If a file matches both the HTML rule and a copy regex, it may be processed twice; avoid copy rules that include .html files.
-    - Hidden files are included unless excluded; segments prefixed with "_" are ignored only for HTML generation.
-    - This function is synchronous and performs file I/O; exceptions from I/O or rendering will propagate to the caller.
+    Returns
+    -------
+    None
     """
 
     dir_src = Path(build_config.dir_src)

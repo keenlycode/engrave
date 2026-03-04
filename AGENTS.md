@@ -1,0 +1,2 @@
+- Write Python docstrings in NumPy format.
+- Write CLI help for Cyclopts using short command docstrings and parameter help on parameters.
