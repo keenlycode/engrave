@@ -35,6 +35,7 @@ from aiostream import stream
 # lib: local
 from ..util.dataclass import (
     ServerConfig,
+    WatchConfig,
     FileProcessInfo,
     FileChangeResult,
 )
@@ -96,7 +97,7 @@ class WatchFilter(DefaultFilter):
 
 
 async def handle_async_list_build_change(
-        build_config: ServerConfig,
+        build_config: WatchConfig | ServerConfig,
         async_list_build_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle HTML/Markdown file change events and produce FileChangeResult lists.
@@ -157,7 +158,7 @@ async def handle_async_list_build_change(
         yield list_file_change_result
 
 async def handle_async_list_copy_change(
-        server_config: ServerConfig,
+        server_config: WatchConfig | ServerConfig,
         async_copy_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle copy-asset change events and produce FileChangeResult lists.
@@ -215,7 +216,7 @@ async def handle_async_list_copy_change(
 
 
 async def handle_async_watch_list_change(
-        build_config: ServerConfig,
+        build_config: WatchConfig | ServerConfig,
         async_watch_list_file_change: AsyncGenerator[Set[FileChange]]
 ) -> AsyncGenerator[List[FileChangeResult]]:
     """Handle changes under the destination tree that should be forwarded to clients.
@@ -259,7 +260,7 @@ async def handle_async_watch_list_change(
             )
         yield list_file_change_result
 
-async def run(server_config: ServerConfig) -> AsyncGenerator[List[FileChangeResult]]:
+async def run(server_config: WatchConfig | ServerConfig) -> AsyncGenerator[List[FileChangeResult]]:
     """Compose and run watchers according to the provided build configuration.
 
     This function sets up three watcher streams:

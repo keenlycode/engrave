@@ -1,6 +1,6 @@
 # CLI Reference
 
-Engrave ships two commands: `build` and `server`. They share build/copy/exclude options; `server` adds live preview controls.
+Engrave ships three commands: `build`, `watch`, and `server`. They share build/copy/exclude options; `watch` and `server` add live-update controls.
 
 ## engrave build
 ```bash
@@ -38,10 +38,7 @@ Start a development server with live preview.
 │    --exclude --empty-exclude      [default: []]                                                                    │
 │    --log-level                    [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default:  │
 │                                   INFO]                                                                            │
-│    --host                         [default: 127.0.0.1]                                                             │
-│    --port                         [default: 8000]                                                                  │
 │    --watch-add --empty-watch-add  [default: []]                                                                    │
-│    --sse-url                      [default: /__engrave/watch]                                                      │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -50,3 +47,29 @@ Start a development server with live preview.
 - Watches `.html` and `.md` under `DIR_SRC`, plus copy targets. Additional `--watch-add` regexes are matched against the current working directory and only emit SSE events (no build/copy).
 - Streams change events to the SSE endpoint at `--sse-url` (default `/__engrave/watch`) for browser reload hooks.
 - Host/port control the FastAPI + Uvicorn development server; log level follows `--log-level` / `LOG_LEVEL`.
+
+## engrave watch
+```bash
+$ engrave watch -h
+Usage: engrave watch [ARGS] [OPTIONS]
+
+Watch source files and rebuild/copy without starting an HTTP server.
+
+╭─ Parameters ───────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  DIR-SRC --dir-src              [required]                                                                       │
+│ *  DIR-DEST --dir-dest            [required]                                                                       │
+│    --copy --empty-copy            [default: []]                                                                    │
+│    --exclude --empty-exclude      [default: []]                                                                    │
+│    --log-level                    [choices: CRITICAL, FATAL, ERROR, WARNING, WARN, INFO, DEBUG, NOTSET] [default:  │
+│                                   INFO]                                                                            │
+│    --host                         [default: 127.0.0.1]                                                             │
+│    --port                         [default: 8000]                                                                  │
+│    --watch-add --empty-watch-add  [default: []]                                                                    │
+│    --sse-url                      [default: /__engrave/watch]                                                      │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+- Performs an initial build using the same pipeline as `engrave build`.
+- Watches `.html` and `.md` under `DIR_SRC`, plus copy targets.
+- Additional `--watch-add` regexes are matched against the current working directory and are logged as `type='watch'`.
+- Does not start FastAPI, Uvicorn, or the SSE endpoint.

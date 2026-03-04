@@ -60,6 +60,15 @@ class BuildConfig():
 
 
 @dataclass(kw_only=True, slots=True,)
+class WatchConfig(BuildConfig):
+    """
+    Watch-mode configuration extending BuildConfig with additional path patterns
+    that should be observed and reported without starting an HTTP server.
+    """
+    watch_add: Annotated[List[str], "Additional path regex patterns to watch for changes (in addition to .html and patterns matched by --copy). Matching paths are reported as watch events."] = field(default_factory=list)
+
+
+@dataclass(kw_only=True, slots=True,)
 class ServerConfig(BuildConfig):
     """
     Development server configuration extending BuildConfig with host/port

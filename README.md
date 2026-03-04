@@ -12,6 +12,7 @@ Engrave turns a directory of HTML templates (plus optional Markdown snippets) in
 - Renders `.html` templates with Jinja2; path segments starting with `_` are ignored for HTML builds.
 - Built-in Markdown helpers: include Markdown files via `markdown('path.md')` and render inline strings with the `|markdown` filter.
 - Regex-driven asset copying (`--copy`) and exclusion rules (`--exclude`) applied to both renders and copies.
+- Watch mode that rebuilds on change without starting an HTTP server.
 - Live preview server powered by FastAPI + Uvicorn with watchfiles + SSE for instant reload hooks.
 - Simple Cyclopts-based CLI; works on Python 3.10+.
 
@@ -76,6 +77,22 @@ Start a development server with live preview.
 const source = new EventSource('/__engrave/watch');
 source.addEventListener('change', () => window.location.reload());
 ```
+
+### Watch Mode (auto-rebuild, no HTTP server)
+
+Run an initial build and keep watching for source changes without starting FastAPI/Uvicorn.
+
+```bash
+engrave watch -h
+Usage: engrave watch [ARGS] [OPTIONS]
+
+Watch source files and rebuild/copy without starting an HTTP server.
+```
+
+- Accepts the same build-related options as `engrave build`, plus `--watch-add`.
+- Runs the same initial build as `engrave build`.
+- Watches `DIR_SRC` for `.html` and `.md` changes and applies copy/exclude rules just like `engrave server`.
+- Prints detected changes to the terminal instead of serving files or streaming SSE events.
 
 ## 🧱 Templates & Markdown helpers
 

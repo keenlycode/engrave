@@ -22,15 +22,25 @@ from ..util.dataclass import (
     BuildConfig as _BuildConfig,
 )
 from ..util.dataclass import (
+    WatchConfig as _WatchConfig,
+)
+from ..util.dataclass import (
     ServerConfig as _ServerConfig,
 )
 from ..util.log import setup_root_logger
 from .build import run as build_run
+from .watch import run as watch_run
 
 
 @Parameter(name="*")
 @dataclass
 class BuildConfig(_BuildConfig):
+    pass
+
+
+@Parameter(name="*")
+@dataclass
+class WatchConfig(_WatchConfig):
     pass
 
 
@@ -68,6 +78,43 @@ async def build(build_config: BuildConfig):
         logger.info(f"Copy pattern: {build_config.copy}")
 
     build_run(build_config)
+
+
+@app.command()
+async def watch(watch_config: WatchConfig):
+    """Watch source files and rebuild/copy without starting an HTTP server."""
+
+    log_level = os.environ.get("LOG_LEVEL", "INFO")
+    if watch_config.log_level is not None:
+        log_level = watch_config.log_level
+    setup_root_logger(log_level=log_level)
+
+    logger = logging.getLogger(__name__)
+
+    build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(watch_config))
+    build_run(build_config)
+
+    logger.info(
+        f"""
+Engrave watch mode started
+
+- Source directory: {watch_config.dir_src}
+- Output directory: {watch_config.dir_dest}
+- HTTP server: disabled
+
+Press CTRL+C to stop watching.
+""".strip()
+    )
+
+    async for batch in watch_run(watch_config):
+        logger.info("Detected %d file change(s)", len(batch))
+        for change in batch:
+            logger.info(
+                "[%s] %s: %s",
+                change.type,
+                change.change.name,
+                change.path,
+            )
 
 
 @app.command()
