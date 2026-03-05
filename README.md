@@ -52,20 +52,21 @@ Build package artifacts:
 uv build
 ```
 
-Build docs:
+Install docs tooling:
 
 ```bash
 uv sync --group dev
-uv run mkdocs build
 ```
 
-Preview docs locally:
+`mike` depends on `mkdocs` under the hood, so keep both installed.
+
+Preview versioned docs locally:
 
 ```bash
-uv run mkdocs serve
+uv run mike serve -b docs
 ```
 
-Deploy versioned docs to the `docs` branch under `docs/`:
+Deploy versioned docs to the `docs` branch:
 
 ```bash
 ./scripts/mike-release.sh
@@ -76,6 +77,9 @@ Deploy a specific version and alias:
 ```bash
 ./scripts/mike-release.sh 3.2.2 latest
 ```
+
+For versioned docs deployment, use Mike commands above instead of running
+`mkdocs build` or `mkdocs serve` directly.
 
 ## License
 
