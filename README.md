@@ -65,6 +65,10 @@ Preview docs locally:
 uv run mkdocs serve
 ```
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
 ## License
 
 MIT. See `LICENSE`.
