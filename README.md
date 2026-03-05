@@ -65,6 +65,18 @@ Preview docs locally:
 uv run mkdocs serve
 ```
 
+Deploy versioned docs to the `docs` branch under `docs/`:
+
+```bash
+./scripts/mike-release.sh
+```
+
+Deploy a specific version and alias:
+
+```bash
+./scripts/mike-release.sh 3.2.2 latest
+```
+
 ## License
 
 MIT. See `LICENSE`.
