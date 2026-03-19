@@ -28,9 +28,7 @@ class ServerRoutingTests(unittest.TestCase):
             exclude=[],
         )
 
-        self.build_patch = patch("engrave.server.build_run")
         self.watch_patch = patch("engrave.server.watch_to_queue", new=AsyncMock())
-        self.mock_build_run = self.build_patch.start()
         self.watch_patch.start()
 
         self.app = create_fastapi(self.server_config)
@@ -40,22 +38,21 @@ class ServerRoutingTests(unittest.TestCase):
     def tearDown(self):
         self.client.__exit__(None, None, None)
         self.watch_patch.stop()
-        self.build_patch.stop()
         shutil.rmtree(self.temp_root, ignore_errors=True)
 
-    def test_root_path_returns_root_index_file(self):
+    def test_root_path_renders_root_index_from_source(self):
         response = self.client.get("/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Home From Dest", response.text)
-        self.mock_build_run.assert_called_once()
+        self.assertIn("Home From Source", response.text)
+        self.assertNotIn("Home From Dest", response.text)
 
-    def test_nested_directory_path_returns_nested_index_file(self):
+    def test_nested_directory_path_renders_nested_index_from_source(self):
         response = self.client.get("/nested/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Nested From Dest", response.text)
-        self.mock_build_run.assert_called_once()
+        self.assertIn("Nested From Source", response.text)
+        self.assertNotIn("Nested From Dest", response.text)
 
     def test_javascript_file_returns_expected_content_type(self):
         response = self.client.get("/assets/app.js")
@@ -63,7 +60,6 @@ class ServerRoutingTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, (self.dir_dest / "assets" / "app.js").read_bytes())
         self.assertEqual(response.headers["content-type"], "text/javascript; charset=utf-8")
-        self.mock_build_run.assert_not_called()
 
     def test_png_file_returns_expected_content_type(self):
         response = self.client.get("/assets/logo.png")
@@ -71,7 +67,6 @@ class ServerRoutingTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, (self.dir_dest / "assets" / "logo.png").read_bytes())
         self.assertEqual(response.headers["content-type"], "image/png")
-        self.mock_build_run.assert_not_called()
 
     def test_ttf_file_returns_expected_content_type(self):
         response = self.client.get("/assets/font.ttf")
@@ -79,7 +74,22 @@ class ServerRoutingTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, (self.dir_dest / "assets" / "font.ttf").read_bytes())
         self.assertEqual(response.headers["content-type"], "font/ttf")
-        self.mock_build_run.assert_not_called()
+
+    def test_html_request_uses_source_even_when_dest_differs(self):
+        (self.dir_src / "index.html").write_text(
+            "<!DOCTYPE html><html><body><h1>Fresh Source</h1></body></html>",
+            encoding="utf-8",
+        )
+        (self.dir_dest / "index.html").write_text(
+            "<!DOCTYPE html><html><body><h1>Stale Dest</h1></body></html>",
+            encoding="utf-8",
+        )
+
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Fresh Source", response.text)
+        self.assertNotIn("Stale Dest", response.text)
 
 
 if __name__ == "__main__":
