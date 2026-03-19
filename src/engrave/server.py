@@ -53,7 +53,6 @@ import logging
 # lib: local
 from .template import get_template
 from .util.dataclass import ServerConfig
-from .core.build import run as build_run
 from .core.watch import run as watch_run
 
 
@@ -185,20 +184,21 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
         if str_path == '' or str_path.endswith('/'):
             path = path / 'index.html'
 
-        if path.suffix == '.html':
-            try:
-                build_run(server_config)
-            except Exception as error:
-                message = str(error)
-                tb = traceback.format_exc()
-                response = get_template(
-                    dir_src=Path(__file__).parent
-                )('error.html').render(
-                    message=message,
-                    traceback=tb,
-                )
-                return HTMLResponse(response, status_code=500)
+        if path.suffix != '.html':
+            return FileResponse(Path(server_config.dir_dest) / path)
+        try:
+            template = get_template(dir_src=Path(server_config.dir_src))
+            return HTMLResponse(template(str(path)).render())
+        except Exception as error:
+            message = str(error)
+            tb = traceback.format_exc()
+            response = get_template(
+                dir_src=Path(__file__).parent
+            )('error.html').render(
+                message=message,
+                traceback=tb,
+            )
+            return HTMLResponse(response, status_code=500)
 
-        return FileResponse(Path(server_config.dir_dest) / path)
 
     return fast_api

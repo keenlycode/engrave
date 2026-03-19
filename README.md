@@ -10,32 +10,38 @@ content-driven sites that benefit from templating without adding a backend.
 pip install engrave
 ```
 
-## Simple CLI usage
+## CLI overview
 
-Engrave has three core commands:
+Top-level usage:
 
-- `engrave build` renders a site once
-- `engrave watch` rebuilds on change
-- `engrave server` rebuilds on change and starts a local preview server
+```bash
+engrave <command>
+```
+
+Core commands:
+
+- `engrave build` builds the site once
+- `engrave watch` builds once, then rebuilds when files change
+- `engrave server` builds once, then starts a local preview server with watch events
 
 Use `engrave --help` or `engrave <command> --help` for full command details.
 
 Build once:
 
 ```bash
-engrave build --dir-src site --dir-dest build
+engrave build site build
 ```
 
 Watch and rebuild:
 
 ```bash
-engrave watch --dir-src site --dir-dest build
+engrave watch site build
 ```
 
 Run the preview server:
 
 ```bash
-engrave server --dir-src site --dir-dest build
+engrave server site build
 ```
 
 ## Testing

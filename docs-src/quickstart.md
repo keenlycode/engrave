@@ -62,7 +62,7 @@ This text comes from a Markdown file included inside a template.
 ## Build the site
 
 ```bash
-engrave build --dir-src site --dir-dest build
+engrave build site build
 ```
 
 This renders your templates into `build/`. For more advanced options, check the
@@ -71,7 +71,7 @@ CLI help with `engrave build --help`.
 ## Preview while you work
 
 ```bash
-engrave server --dir-src site --dir-dest build
+engrave server site build
 ```
 
 This gives you a local preview server while you edit templates and content.

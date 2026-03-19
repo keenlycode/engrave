@@ -7,7 +7,7 @@ refresh.
 ## Start the preview server
 
 ```bash
-engrave server --dir-src site --dir-dest build
+engrave server site build
 ```
 
 This is enough for most local development.

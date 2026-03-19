@@ -13,14 +13,7 @@ nav:
   - Live Reload: live-reload.md
 
 theme:
-  name: material
-  font:
-    text: Fira Sans
-    code: Fira Mono
-  features:
-    - search.suggest
-    - search.highlight
-    - content.code.copy
+  name: shadcn
 
 plugins:
   - search
@@ -29,13 +22,10 @@ markdown_extensions:
   - toc:
       permalink: true
   - admonition
-  - pymdownx.highlight:
-      anchor_linenums: true
-      line_spans: __span
-      pygments_lang_class: true
+  - codehilite
+  - fenced_code
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
 
 extra:
   version:

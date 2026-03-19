@@ -14,7 +14,7 @@ commands:
 Use this when you want static output written to a destination directory.
 
 ```bash
-engrave build --dir-src site --dir-dest build
+engrave build site build
 ```
 
 ### `engrave watch`
@@ -23,7 +23,7 @@ Use this when you want Engrave to keep rebuilding in the background without
 starting a local web server.
 
 ```bash
-engrave watch --dir-src site --dir-dest build
+engrave watch site build
 ```
 
 ### `engrave server`
@@ -31,7 +31,7 @@ engrave watch --dir-src site --dir-dest build
 Use this when you want a local preview server alongside automatic rebuilds.
 
 ```bash
-engrave server --dir-src site --dir-dest build
+engrave server site build
 ```
 
 ## Need the full CLI?

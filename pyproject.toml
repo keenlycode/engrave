@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "engrave"
-version = "3.2.3"
+version = "3.2.4"
 description = "A lightweight static-site generator built on Python and Jinja2"
 authors = [
   {name = "Nitipit Nontasuwan", email = "nitipit@gmail.com"}
@@ -40,5 +40,5 @@ engrave = "engrave.main:app"
 dev = [
     "mike>=2.1.3",
     "mkdocs>=1.6.1",
-    "mkdocs-material>=9.7.0",
+    "mkdocs-shadcn>=0.10.1",
 ]
