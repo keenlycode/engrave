@@ -72,7 +72,7 @@ class WatchIntegrationTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(len(batch), 1)
         self.assertEqual(batch[0].type, "build")
-        self.assertEqual(batch[0].path, str(source_file))
+        self.assertEqual(batch[0].path, "index.html")
         self.assertIn("Updated", (self.dir_dest / "index.html").read_text(encoding="utf-8"))
 
     async def test_watch_add_emits_watch_event_without_copying_or_building(self):
@@ -105,7 +105,7 @@ class WatchIntegrationTests(unittest.IsolatedAsyncioTestCase):
             await watcher.aclose()
 
         self.assertEqual([result.type for result in batch], ["watch"])
-        self.assertEqual(batch[0].path, str(watched_file))
+        self.assertEqual(batch[0].path, "config/settings.yaml")
         self.assertFalse((self.dir_dest / "config/settings.yaml").exists())
 
     async def test_watch_run_deletes_copied_file_on_source_delete(self):
@@ -139,7 +139,7 @@ class WatchIntegrationTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual([result.type for result in batch], ["copy"])
         self.assertEqual(batch[0].change.name, "deleted")
-        self.assertEqual(batch[0].path, str(self.dir_src / "data/info.json"))
+        self.assertEqual(batch[0].path, "data/info.json")
         self.assertFalse((self.dir_dest / "data/info.json").exists())
 
 

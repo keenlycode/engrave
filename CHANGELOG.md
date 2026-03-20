@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.2.5] - 2026-03-20
+
+### Changed
+
+- Changed watch events to emit relative paths instead of absolute paths.
+- Bumped package version to `3.2.5`.
+
 ## [3.2.4] - 2026-03-20
 
 ### Changed

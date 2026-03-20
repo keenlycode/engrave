@@ -127,7 +127,6 @@ async def handle_async_list_build_change(
             path_rel = Path(path).relative_to(
                 Path(build_config.dir_src).resolve()
             )
-            path_rel = Path(build_config.dir_src) / path_rel
             list_file_change_result.append(
                 FileChangeResult(
                     path=str(path_rel),
@@ -184,7 +183,6 @@ async def handle_async_list_copy_change(
             path_rel = Path(path).relative_to(
                 Path(server_config.dir_src).resolve()
             )
-            path_rel = Path(server_config.dir_src) / path_rel
             list_file_change_result.append(
                 FileChangeResult(
                     path=str(path_rel),
@@ -231,7 +229,6 @@ async def handle_async_watch_list_change(
             path_rel = Path(path).relative_to(
                 Path.cwd().resolve()
             )
-            path_rel = Path.cwd() / path_rel
             list_file_change_result.append(
                 FileChangeResult(
                     path=str(path_rel),
