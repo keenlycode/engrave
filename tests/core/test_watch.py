@@ -73,7 +73,9 @@ class WatchIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(batch), 1)
         self.assertEqual(batch[0].type, "build")
         self.assertEqual(batch[0].path, "index.html")
-        self.assertIn("Updated", (self.dir_dest / "index.html").read_text(encoding="utf-8"))
+        self.assertIn(
+            "Updated", (self.dir_dest / "index.html").read_text(encoding="utf-8")
+        )
 
     async def test_watch_add_emits_watch_event_without_copying_or_building(self):
         build_run(
@@ -141,6 +143,109 @@ class WatchIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(batch[0].change.name, "deleted")
         self.assertEqual(batch[0].path, "data/info.json")
         self.assertFalse((self.dir_dest / "data/info.json").exists())
+
+    async def test_watch_run_rebuilds_only_dependent_html_on_markdown_change(self):
+        source_file = self.dir_src / "index.html"
+        other_file = self.dir_src / "section" / "index.html"
+        markdown_file = self.dir_src / "content.md"
+
+        source_file.write_text(
+            '<html><body>{{ markdown("content.md") }}</body></html>',
+            encoding="utf-8",
+        )
+        other_file.write_text(
+            "<html><body><p>Static section</p></body></html>", encoding="utf-8"
+        )
+        markdown_file.write_text("# Initial\n\nHello", encoding="utf-8")
+
+        dependency_index = build_run(
+            BuildConfig(
+                dir_src=str(self.dir_src),
+                dir_dest=str(self.dir_dest),
+                copy=[],
+                exclude=[],
+            ),
+        )
+
+        watcher = watch_run(
+            WatchConfig(
+                dir_src=str(self.dir_src),
+                dir_dest=str(self.dir_dest),
+                copy=[],
+                exclude=[],
+                watch_add=[],
+            ),
+            dependency_index=dependency_index,
+        )
+
+        try:
+            batch = await self._next_batch_after(
+                watcher,
+                lambda: markdown_file.write_text(
+                    "# Updated\n\nChanged", encoding="utf-8"
+                ),
+            )
+        finally:
+            await watcher.aclose()
+
+        self.assertEqual([result.path for result in batch], ["index.html"])
+        self.assertTrue((self.dir_dest / "index.html").exists())
+        self.assertIn(
+            "Updated", (self.dir_dest / "index.html").read_text(encoding="utf-8")
+        )
+        self.assertIn(
+            "Static section",
+            (self.dir_dest / "section/index.html").read_text(encoding="utf-8"),
+        )
+
+    async def test_watch_run_rebuilds_dependents_for_partial_html_change(self):
+        source_file = self.dir_src / "index.html"
+        partial_file = self.dir_src / "_partials" / "ignored.html"
+
+        source_file.write_text(
+            '<html><body>{% include "_partials/ignored.html" %}</body></html>',
+            encoding="utf-8",
+        )
+        partial_file.write_text("<p>Initial partial</p>", encoding="utf-8")
+
+        dependency_index = build_run(
+            BuildConfig(
+                dir_src=str(self.dir_src),
+                dir_dest=str(self.dir_dest),
+                copy=[],
+                exclude=[],
+            ),
+        )
+
+        self.assertFalse((self.dir_dest / "_partials/ignored.html").exists())
+
+        watcher = watch_run(
+            WatchConfig(
+                dir_src=str(self.dir_src),
+                dir_dest=str(self.dir_dest),
+                copy=[],
+                exclude=[],
+                watch_add=[],
+            ),
+            dependency_index=dependency_index,
+        )
+
+        try:
+            batch = await self._next_batch_after(
+                watcher,
+                lambda: partial_file.write_text(
+                    "<p>Updated partial</p>", encoding="utf-8"
+                ),
+            )
+        finally:
+            await watcher.aclose()
+
+        self.assertEqual([result.path for result in batch], ["index.html"])
+        self.assertIn(
+            "Updated partial",
+            (self.dir_dest / "index.html").read_text(encoding="utf-8"),
+        )
+        self.assertFalse((self.dir_dest / "_partials/ignored.html").exists())
 
 
 if __name__ == "__main__":

@@ -7,12 +7,16 @@ import logging
 # lib: local
 from ..util import process
 from ..util.dataclass import BuildConfig, FileProcessInfo
+from .deps import DependencyIndex
 
 
 logger = logging.getLogger(__name__)
 
 
-def run(build_config: BuildConfig) -> None:
+def run(
+    build_config: BuildConfig,
+    dependency_index: DependencyIndex | None = None,
+) -> DependencyIndex:
     """
     Build files from the source directory into the destination directory.
 
@@ -21,11 +25,17 @@ def run(build_config: BuildConfig) -> None:
     build_config : BuildConfig
         Build configuration containing the source directory, destination
         directory, copy patterns, and exclude patterns.
+    dependency_index : DependencyIndex, optional
+        In-memory HTML/Markdown dependency graph to update while rendering HTML
+        files. When omitted, a fresh dependency index is created.
 
     Returns
     -------
-    None
+    DependencyIndex
+        The dependency index updated while rendering HTML files.
     """
+    if dependency_index is None:
+        dependency_index = DependencyIndex()
 
     dir_src = Path(build_config.dir_src)
     dir_dest = Path(build_config.dir_dest)
@@ -45,14 +55,17 @@ def run(build_config: BuildConfig) -> None:
             continue
 
         path_rel = path.relative_to(dir_src)
-        file_process_info = FileProcessInfo(path=path, dir_src=dir_src, dir_dest=dir_dest)
+        file_process_info = FileProcessInfo(
+            path=path, dir_src=dir_src, dir_dest=dir_dest
+        )
 
         if process.should_build_html(
             path=path_rel,
             list_exclude_regex=list_exclude_regex,
         ):
             logger.info(f"Processing HTML file: {file_process_info.path}")
-            process.build_html(file_process_info)
+            dependencies = process.build_html(file_process_info)
+            dependency_index.update_html(path_rel, dependencies)
             continue
 
         if process.should_copy_path(
@@ -64,3 +77,4 @@ def run(build_config: BuildConfig) -> None:
             process.copy_file(file_process_info)
 
     logger.info("Build complete")
+    return dependency_index

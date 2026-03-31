@@ -5,7 +5,6 @@ from dataclasses import (
     asdict,
     dataclass,
 )
-from typing_extensions import Text
 from urllib.parse import urljoin
 
 # lib: external
@@ -58,7 +57,7 @@ app = App(
     ==========================================
 
     Run `engrave <command> --help` for command-specific usage and parameters.
-    """
+    """,
 )
 
 
@@ -100,7 +99,7 @@ async def watch(watch_config: WatchConfig):
     logger = logging.getLogger(__name__)
 
     build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(watch_config))
-    build_run(build_config)
+    dependency_index = build_run(build_config)
 
     logger.info(
         f"""
@@ -114,7 +113,7 @@ Press CTRL+C to stop watching.
 """.strip()
     )
 
-    async for batch in watch_run(watch_config):
+    async for batch in watch_run(watch_config, dependency_index=dependency_index):
         logger.info("Detected %d file change(s)", len(batch))
         for change in batch:
             logger.info(
@@ -139,7 +138,7 @@ def server(server_config: ServerConfig):
     logger = logging.getLogger(__name__)
 
     build_config = dacite.from_dict(data_class=BuildConfig, data=asdict(server_config))
-    build_run(build_config)
+    dependency_index = build_run(build_config)
 
     sse_url = urljoin(
         f"http://{server_config.host}:{server_config.port}", server_config.sse_url
@@ -165,7 +164,7 @@ Press CTRL+C to stop the server.
     )
 
     # Create FastAPI application
-    fastapi_app = create_fastapi(server_config)
+    fastapi_app = create_fastapi(server_config, dependency_index=dependency_index)
 
     # Start Uvicorn server
     uvicorn.run(

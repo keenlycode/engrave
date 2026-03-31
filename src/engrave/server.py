@@ -27,6 +27,7 @@ Create and mount the application in an ASGI server:
     app = create_fastapi(my_server_config)
 
 """
+
 # lib: Built-in
 from pathlib import Path
 from dataclasses import asdict
@@ -53,11 +54,13 @@ import logging
 # lib: local
 from .template import get_template
 from .util.dataclass import ServerConfig
+from .core.deps import DependencyIndex
 from .core.watch import run as watch_run
 
 
 logger = logging.getLogger(__name__)
 set_queue_clients = set()
+
 
 async def publish_queue_put(data, set_queue_clients):
     to_remove = set()
@@ -69,15 +72,24 @@ async def publish_queue_put(data, set_queue_clients):
     set_queue_clients.difference_update(to_remove)
 
 
-async def watch_to_queue(server_config: ServerConfig):
-    async for list_file_change_result in watch_run(server_config):
+async def watch_to_queue(
+    server_config: ServerConfig,
+    dependency_index: DependencyIndex | None = None,
+):
+    async for list_file_change_result in watch_run(
+        server_config,
+        dependency_index=dependency_index,
+    ):
         results = []
         for file_change_result in list_file_change_result:
             results.append(asdict(file_change_result))
             await publish_queue_put(results, set_queue_clients)
 
 
-def create_fastapi(server_config: ServerConfig) -> FastAPI:
+def create_fastapi(
+    server_config: ServerConfig,
+    dependency_index: DependencyIndex | None = None,
+) -> FastAPI:
     """Create a FastAPI application that serves the site and provides live preview.
 
     The returned FastAPI application includes:
@@ -117,13 +129,12 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
 
     """
     server_config = dacite.from_dict(
-        data_class=ServerConfig,
-        data=asdict(server_config)
+        data_class=ServerConfig, data=asdict(server_config)
     )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        asyncio.create_task(watch_to_queue(server_config))
+        asyncio.create_task(watch_to_queue(server_config, dependency_index))
         logger.info("Started background files watcher")
         yield
 
@@ -157,34 +168,33 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
                 data = await queue.get()
                 response = f"event: change\ndata: {json.dumps(data)}\n\n"
                 yield response
-                logger.info(f'SSE => {response}')
+                logger.info(f"SSE => {response}")
         except asyncio.CancelledError:
             logger.debug("Client disconnected")
         finally:
             set_queue_clients.remove(queue)
 
-
     fast_api = FastAPI(lifespan=lifespan)
 
     @fast_api.get(server_config.sse_url)
     async def event_watch():
-        logger.info('SSE Request')
+        logger.info("SSE Request")
         return StreamingResponse(
             watch_event_stream(),
             media_type="text/event-stream",
         )
 
     @fast_api.get("/{str_path:path}")
-    async def response(str_path: str = ''):
+    async def response(str_path: str = ""):
         path = Path(str_path)
         for pattern in server_config.exclude:
             if re.match(pattern, str_path):
                 raise HTTPException(status_code=404, detail={"Not Found"})
 
-        if str_path == '' or str_path.endswith('/'):
-            path = path / 'index.html'
+        if str_path == "" or str_path.endswith("/"):
+            path = path / "index.html"
 
-        if path.suffix != '.html':
+        if path.suffix != ".html":
             return FileResponse(Path(server_config.dir_dest) / path)
         try:
             template = get_template(dir_src=Path(server_config.dir_src))
@@ -192,13 +202,10 @@ def create_fastapi(server_config: ServerConfig) -> FastAPI:
         except Exception as error:
             message = str(error)
             tb = traceback.format_exc()
-            response = get_template(
-                dir_src=Path(__file__).parent
-            )('error.html').render(
+            response = get_template(dir_src=Path(__file__).parent)("error.html").render(
                 message=message,
                 traceback=tb,
             )
             return HTMLResponse(response, status_code=500)
-
 
     return fast_api

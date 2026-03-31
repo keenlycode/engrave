@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List
 
 # lib: local
-from ..template import get_template
+from ..template import RenderDependencies, get_template
 from .dataclass import FileProcessInfo
 
 
@@ -98,9 +98,8 @@ def is_valid_path(
     if list_exclude_regex is None:
         list_exclude_regex = []
 
-    return (
-        matches_any(path=path, list_regex=list_regex)
-        and not is_excluded_path(path=path, list_exclude_regex=list_exclude_regex)
+    return matches_any(path=path, list_regex=list_regex) and not is_excluded_path(
+        path=path, list_exclude_regex=list_exclude_regex
     )
 
 
@@ -152,23 +151,26 @@ def should_copy_path(
         True when the path matches a copy regex, is not excluded, and is not an
         HTML template.
     """
-    return (
-        path.suffix != ".html"
-        and is_valid_path(
-            path=path,
-            list_regex=list_copy_regex,
-            list_exclude_regex=list_exclude_regex,
-        )
+    return path.suffix != ".html" and is_valid_path(
+        path=path,
+        list_regex=list_copy_regex,
+        list_exclude_regex=list_exclude_regex,
     )
 
 
-def build_html(file_process_info: FileProcessInfo) -> None:
+def build_html(file_process_info: FileProcessInfo) -> RenderDependencies:
     """Render a template file to HTML in the destination tree.
 
     Parameters
     ----------
     file_process_info : FileProcessInfo
         Context containing the source file path, source root (`dir_src`), and destination root (`dir_dest`).
+
+    Returns
+    -------
+    RenderDependencies
+        Source-relative Markdown and template files used while rendering the
+        HTML file.
 
     Side Effects
     ------------
@@ -179,21 +181,35 @@ def build_html(file_process_info: FileProcessInfo) -> None:
     -----
     The relative path from `dir_src` is used to locate and render the template via `get_template(dir_src=...)`.
     """
-    # Get template loader
-    template = get_template(dir_src=file_process_info.dir_src)
-
     # Get relative path from source directory
-    path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
+    path_rel = file_process_info.path.resolve().relative_to(
+        file_process_info.dir_src.resolve()
+    )
     path_src = file_process_info.dir_src / path_rel
+    markdown_dependencies: set[Path] = set()
+    template_dependencies: set[Path] = set()
+
+    # Get template loader
+    template = get_template(
+        dir_src=file_process_info.dir_src,
+        markdown_dependency_collector=markdown_dependencies.add,
+        template_dependency_collector=template_dependencies.add,
+    )
+
     # Create output directory if needed
     path_dest = file_process_info.dir_dest / path_rel
     path_dest.parent.mkdir(parents=True, exist_ok=True)
 
     # Write rendered content to output file
-    with open(path_dest, 'w', encoding='utf-8') as file:
+    with open(path_dest, "w", encoding="utf-8") as file:
         file.write(template(str(path_rel)).render())
 
     logger.info(f"Built HTML: {path_src} → {path_dest}")
+    template_dependencies.discard(path_rel)
+    return RenderDependencies(
+        markdown_paths=markdown_dependencies,
+        template_paths=template_dependencies,
+    )
 
 
 def copy_file(file_process_info: FileProcessInfo) -> None:
@@ -210,7 +226,9 @@ def copy_file(file_process_info: FileProcessInfo) -> None:
     - Copies the file using `shutil.copy2`, preserving metadata when possible.
     """
     # Get relative path from source directory
-    path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
+    path_rel = file_process_info.path.resolve().relative_to(
+        file_process_info.dir_src.resolve()
+    )
     path_src = file_process_info.dir_src / path_rel
     # Create output directory if needed
     path_dest = file_process_info.dir_dest / path_rel
@@ -239,7 +257,9 @@ def delete_file(file_process_info: FileProcessInfo) -> None:
     - Removes the file at the computed destination path.
     """
     # Get relative path from source directory
-    path_rel = file_process_info.path.resolve().relative_to(file_process_info.dir_src.resolve())
+    path_rel = file_process_info.path.resolve().relative_to(
+        file_process_info.dir_src.resolve()
+    )
     path_src = file_process_info.dir_src / path_rel
     path_dest = file_process_info.dir_dest / path_rel
     path_dest.unlink()
