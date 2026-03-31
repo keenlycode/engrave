@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [3.2.6] - 2026-03-31
+
+### Changed
+
+- Fixed watch-mode dependency tracking so Markdown and template changes rebuild only affected pages.
+- Fixed preview server SSE publishing to emit one event per change batch.
+- Made watch/server delete handling safe when output files are already missing.
+- Updated README and docs to clarify `--copy` requirements for non-HTML assets.
+- Bumped package version to `3.2.6`.
+
 ## [3.2.5] - 2026-03-20
 
 ### Changed
