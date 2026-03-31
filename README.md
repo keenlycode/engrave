@@ -29,20 +29,24 @@ Use `engrave --help` or `engrave <command> --help` for full command details.
 Build once:
 
 ```bash
-engrave build site build
+engrave build site build --copy 'assets/.*'
 ```
 
 Watch and rebuild:
 
 ```bash
-engrave watch site build
+engrave watch site build --copy 'assets/.*'
 ```
 
 Run the preview server:
 
 ```bash
-engrave server site build
+engrave server site build --copy 'assets/.*'
 ```
+
+HTML files are rendered automatically. Non-HTML assets such as CSS, JS, images,
+and fonts are only copied when their source-relative paths match one or more
+`--copy` regex patterns.
 
 ## Testing
 

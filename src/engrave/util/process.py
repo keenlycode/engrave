@@ -247,14 +247,9 @@ def delete_file(file_process_info: FileProcessInfo) -> None:
     file_process_info : FileProcessInfo
         Context containing the source file path, source root (`dir_src`), and destination root (`dir_dest`).
 
-    Raises
-    ------
-    FileNotFoundError
-        If the destination file does not exist.
-
     Side Effects
     ------------
-    - Removes the file at the computed destination path.
+    - Removes the file at the computed destination path when it exists.
     """
     # Get relative path from source directory
     path_rel = file_process_info.path.resolve().relative_to(
@@ -262,5 +257,9 @@ def delete_file(file_process_info: FileProcessInfo) -> None:
     )
     path_src = file_process_info.dir_src / path_rel
     path_dest = file_process_info.dir_dest / path_rel
-    path_dest.unlink()
+    try:
+        path_dest.unlink()
+    except FileNotFoundError:
+        logger.info(f"Delete skipped for missing output: {path_src} → {path_dest}")
+        return
     logger.info(f"Deleted file: {path_src} → {path_dest}")

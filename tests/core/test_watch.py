@@ -144,6 +144,40 @@ class WatchIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(batch[0].path, "data/info.json")
         self.assertFalse((self.dir_dest / "data/info.json").exists())
 
+    async def test_watch_run_delete_is_idempotent_when_output_is_missing(self):
+        asset_path = self.dir_src / "data" / "info.json"
+
+        build_run(
+            BuildConfig(
+                dir_src=str(self.dir_src),
+                dir_dest=str(self.dir_dest),
+                copy=[r"data/.*\.json$"],
+                exclude=[],
+            )
+        )
+
+        (self.dir_dest / "data/info.json").unlink()
+
+        watcher = watch_run(
+            WatchConfig(
+                dir_src=str(self.dir_src),
+                dir_dest=str(self.dir_dest),
+                copy=[r"data/.*\.json$"],
+                exclude=[],
+                watch_add=[],
+            )
+        )
+
+        try:
+            batch = await self._next_batch_after(watcher, asset_path.unlink)
+        finally:
+            await watcher.aclose()
+
+        self.assertEqual([result.type for result in batch], ["copy"])
+        self.assertEqual(batch[0].change.name, "deleted")
+        self.assertEqual(batch[0].path, "data/info.json")
+        self.assertFalse((self.dir_dest / "data/info.json").exists())
+
     async def test_watch_run_rebuilds_only_dependent_html_on_markdown_change(self):
         source_file = self.dir_src / "index.html"
         other_file = self.dir_src / "section" / "index.html"

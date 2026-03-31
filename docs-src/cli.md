@@ -14,7 +14,7 @@ commands:
 Use this when you want static output written to a destination directory.
 
 ```bash
-engrave build site build
+engrave build site build --copy 'assets/.*'
 ```
 
 ### `engrave watch`
@@ -23,7 +23,7 @@ Use this when you want Engrave to keep rebuilding in the background without
 starting a local web server.
 
 ```bash
-engrave watch site build
+engrave watch site build --copy 'assets/.*'
 ```
 
 ### `engrave server`
@@ -31,8 +31,11 @@ engrave watch site build
 Use this when you want a local preview server alongside automatic rebuilds.
 
 ```bash
-engrave server site build
+engrave server site build --copy 'assets/.*'
 ```
+
+HTML files are rendered automatically. Add `--copy` rules for CSS, JavaScript,
+images, fonts, and other non-HTML assets you want in the destination tree.
 
 ## Need the full CLI?
 

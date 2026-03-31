@@ -80,10 +80,10 @@ async def watch_to_queue(
         server_config,
         dependency_index=dependency_index,
     ):
-        results = []
-        for file_change_result in list_file_change_result:
-            results.append(asdict(file_change_result))
-            await publish_queue_put(results, set_queue_clients)
+        results = [
+            asdict(file_change_result) for file_change_result in list_file_change_result
+        ]
+        await publish_queue_put(results, set_queue_clients)
 
 
 def create_fastapi(

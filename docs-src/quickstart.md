@@ -62,16 +62,20 @@ This text comes from a Markdown file included inside a template.
 ## Build the site
 
 ```bash
-engrave build site build
+engrave build site build --copy 'assets/.*'
 ```
 
 This renders your templates into `build/`. For more advanced options, check the
 CLI help with `engrave build --help`.
 
+`assets/site.css` is copied because it matches the `--copy 'assets/.*'` rule.
+Engrave always renders HTML templates, but non-HTML assets are only copied when
+they match at least one `--copy` regex.
+
 ## Preview while you work
 
 ```bash
-engrave server site build
+engrave server site build --copy 'assets/.*'
 ```
 
 This gives you a local preview server while you edit templates and content.
