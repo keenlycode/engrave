@@ -63,6 +63,20 @@ set_queue_clients = set()
 
 
 async def publish_queue_put(data, set_queue_clients):
+    """Publish one payload to all connected SSE client queues.
+
+    Parameters
+    ----------
+    data : object
+        Serialized change payload to enqueue for each connected client.
+    set_queue_clients : set
+        Active asyncio queues used by connected SSE clients.
+
+    Side Effects
+    ------------
+    - Enqueues ``data`` into each client queue.
+    - Removes queues that raise ``asyncio.QueueFull``.
+    """
     to_remove = set()
     for queue in set_queue_clients:
         try:
@@ -76,6 +90,20 @@ async def watch_to_queue(
     server_config: ServerConfig,
     dependency_index: DependencyIndex | None = None,
 ):
+    """Forward watch batches to connected SSE client queues.
+
+    Parameters
+    ----------
+    server_config : ServerConfig
+        Development server configuration used to start ``watch_run``.
+    dependency_index : DependencyIndex, optional
+        Existing dependency graph reused by watch mode for targeted rebuilds.
+
+    Notes
+    -----
+    Each batch yielded by ``watch_run`` is serialized once and published as a
+    single SSE payload to all connected clients.
+    """
     async for list_file_change_result in watch_run(
         server_config,
         dependency_index=dependency_index,
