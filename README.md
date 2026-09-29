@@ -62,18 +62,34 @@ Build package artifacts:
 uv build
 ```
 
-Build docs:
+Build docs with Zensical (using the compatible `mkdocs.yml` configuration):
 
 ```bash
 uv sync --group dev
-uv run mkdocs build
+uv run zensical build
 ```
 
 Preview docs locally:
 
 ```bash
-uv run mkdocs serve
+uv run zensical serve
 ```
+
+### Publish versioned docs
+
+Documentation is hosted at <https://keenlycode.github.io/engrave/> from the
+`docs` branch. Versioning uses the Zensical-compatible Mike fork, pinned to a
+Git commit in `pyproject.toml`; installing development dependencies requires Git.
+
+To publish the current release and update the `latest` alias:
+
+```bash
+uv run mike deploy --branch docs --update-aliases --push 3.2.6 latest
+uv run mike set-default --branch docs --push latest
+```
+
+Use the release version being documented in place of `3.2.6`. These commands
+preserve other published versions and require push access to the repository.
 
 ## Changelog
 

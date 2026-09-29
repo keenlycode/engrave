@@ -1,5 +1,6 @@
 site_name: 'Engrave Guide'
-site_description: 'Guides for the Engrave, A lightweight static-site generator built on Python and Jinja.'
+site_description: 'Guides for Engrave, a lightweight static-site generator built on Python and Jinja.'
+site_url: https://keenlycode.github.io/engrave/
 docs_dir: docs-src
 site_dir: docs
 repo_url: https://github.com/keenlycode/engrave
@@ -13,7 +14,7 @@ nav:
   - Live Reload: live-reload.md
 
 theme:
-  name: shadcn
+  variant: modern
 
 plugins:
   - search
@@ -22,8 +23,8 @@ markdown_extensions:
   - toc:
       permalink: true
   - admonition
-  - codehilite
-  - fenced_code
+  - pymdownx.highlight
+  - pymdownx.superfences
   - pymdownx.inlinehilite
   - pymdownx.snippets
 
