@@ -1,3 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>https://keenlycode.github.io/engrave/3.2.6/</loc>
+      </url>
+      <url>
+        <loc>https://keenlycode.github.io/engrave/3.2.6/cli/</loc>
+      </url>
+      <url>
+        <loc>https://keenlycode.github.io/engrave/3.2.6/live-reload/</loc>
+      </url>
+      <url>
+        <loc>https://keenlycode.github.io/engrave/3.2.6/quickstart/</loc>
+      </url>
+      <url>
+        <loc>https://keenlycode.github.io/engrave/3.2.6/templates/</loc>
+      </url>
 </urlset>
